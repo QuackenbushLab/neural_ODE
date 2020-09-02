@@ -93,13 +93,13 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
 
     return loss
 
-def _clean_file_path(fp):
+#def _clean_file_path(fp):
     """Removed folder path and file extension from fp, to be used for saving the model with data name"""
     # Check formatting if on Windows
-    if os.name == 'nt':
-        return fp.replace(".\\data\\", '').replace("data/", '').replace(".csv", '')
-    else:
-        return fp.replace("data/", '').replace(".csv", '')
+ #   if os.name == 'nt':
+  #      return fp.replace(".\\data\\", '').replace("data/", '').replace(".csv", '')
+  #  else:
+  #      return fp.replace("data/", '').replace(".csv", '')
 
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -110,7 +110,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-parser.add_argument('--data', type=str, default='.\data\simulated_expression_chalmers_30genes_8samples.csv')
+clean_name = "simulated_expression_chalmers_30genes_8samples.csv"
+parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}'.format(clean_name))
 args = parser.parse_args()
 
 # Main function
@@ -119,8 +120,7 @@ if __name__ == "__main__":
     sys.setrecursionlimit(3000)
     print('Loading settings from file {}'.format(args.settings))
     settings = read_arguments_from_file(args.settings)
-
-    cleaned_file_name = _clean_file_path(args.data)
+    cleaned_file_name = clean_name
     save_file_name = _build_save_file_name(cleaned_file_name, settings['epochs'])
 
     if settings['debug']:
