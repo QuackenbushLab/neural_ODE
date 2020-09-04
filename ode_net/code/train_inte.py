@@ -32,6 +32,9 @@ def validation(trajectories, data_handler):
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
+    #print(data)
+    #print(data.shape)
+    #print(n_val)
     with torch.no_grad():
         if explicit_time:
             if data_handler.batch_type == 'batch_time':
