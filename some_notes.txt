@@ -46,4 +46,8 @@ August 21 2020:
     b) will RB talk to JQ or should I (preference for RB)? 
 
 
-
+9/4/2020 notes: 
+1)  Speed-tests:
+    a) 150 genes, 6 samples (5T+1V), 25 epochs, local = 54 mins
+    b) 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = 10 mins
+    c) 150 genes, 6 samples (5T+1V), 25 epochs, AWS gpu = 49 mins
