@@ -51,3 +51,4 @@ August 21 2020:
     a) 150 genes, 6 samples (5T+1V), 25 epochs, local = 54 mins
     b) 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = 10 mins
     c) 150 genes, 6 samples (5T+1V), 25 epochs, AWS gpu = 49 mins
+seems like CPU on AWS is best option so far.
