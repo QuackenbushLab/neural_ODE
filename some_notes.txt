@@ -57,5 +57,5 @@ seems like CPU on AWS is best option so far..
 1) chaning neural network #percetrons
     a) will try 2 hidden layers of 300 perceptrons each 
         - (input = 150 genes, output = 150 genes)
-        - 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = X mins
-        - MSE = 
+        - 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = TOO SLOW
+        - 150 genes, 6 samples (5T+1V), 25 epochs, AWS gpu = 2.3 hrs, MSE = 0.06
