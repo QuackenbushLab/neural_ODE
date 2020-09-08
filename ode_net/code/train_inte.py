@@ -51,8 +51,8 @@ def validation(odenet, data_handler, method, explicit_time):
         # For now we have to loop through manually, their implementation of odenet can only take fixed time lists.
         for index, (time, batch_point) in enumerate(zip(t, data)):
             # Do prediction
-            # predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] IH comment
-            predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+            #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
         loss = torch.mean((torch.abs(predictions - target) ** 2))
