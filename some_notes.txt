@@ -52,3 +52,10 @@ August 21 2020:
     b) 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = 10 mins
     c) 150 genes, 6 samples (5T+1V), 25 epochs, AWS gpu = 49 mins
 seems like CPU on AWS is best option so far..
+
+9/8/2020 notes: 
+1) chaning neural network #percetrons
+    a) will try 2 hidden layers of 300 perceptrons each 
+        - (input = 150 genes, output = 150 genes)
+        - 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = X mins
+        - MSE = 
