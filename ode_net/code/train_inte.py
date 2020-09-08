@@ -83,8 +83,8 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     # For now we have to loop through manually, their implementation of odenet can only take fixed time lists.
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         # Do prediction and update weights
-        # predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
-        predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
+        predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+        #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
     if relative_error:
         loss = torch.mean((torch.abs((predictions - target)/target) ** 2))

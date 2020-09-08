@@ -59,6 +59,7 @@ seems like CPU on AWS is best option so far..
         - (input = 150 genes, output = 150 genes)
         - 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = 1.7 hrs, MSE = 0.068
         - 150 genes, 6 samples (5T+1V), 25 epochs, AWS gpu = 2.3 hrs, MSE = 0.064
+        - 150 genes, 6 samples (5TAll+1VFrom0), 25 epochs, AWS cpu = 1.7 hrs, MSE = 0.1
     b) JQ feedback (lab meeting): 
         - maybe move forward with actual YEAST time-series data (e.g. cell-cycle) first
         - what are these 150 genes in the Yeast GRN (from Bhuva 2019)?
