@@ -65,3 +65,12 @@ seems like CPU on AWS is best option so far..
     b) JQ feedback (lab meeting): 
         - maybe move forward with actual YEAST time-series data (e.g. cell-cycle) first
         - what are these 150 genes in the Yeast GRN (from Bhuva 2019)?
+
+9/9/2020 notes: 
+1) Email to Chalmers team
+    - Undestand explicit time functionality
+    - Understand various batching methods 
+    - Understand train/predict based on time = 0 vs all times
+2) Check Bhuva 2019 (temporal data)
+3) Run experiment with 150 genes but more samples (8TAll+1VAll)
+4) Take good model(s) and make trajectory comparison plots
