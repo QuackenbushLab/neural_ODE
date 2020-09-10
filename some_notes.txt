@@ -70,11 +70,19 @@ seems like CPU on AWS is best option so far..
 1) Email to Chalmers team
     - Undestand explicit time functionality
         - works with type = single
+        - ran on AWS gpu, 30 genes, 6 samples, 3 epochs, runtime = 
     - Understand various batching methods 
     - Understand train/predict based on time = 0 vs all times
 2) Check Bhuva 2019 (temporal data)
     - no mention of time-series data (mention found in repository; WE made the changes)
     - they developed the DIFFERENTIAL CO-EXP method using a yeast network, and then applied to TCGA
         - i.e. organism agnostic
+    - Marbach D, Schaffter T, Mattiussi C, Floreano D. Generating realistic in silico
+gene networks for performance assessment of reverse engineering
+methods. J Comput Biol. 2009;16:229–39.
+    - http://genome-www.stanford.edu/cellcycle/
+
+
+
 3) Run experiment with 150 genes but more samples (8TAll+1VAll)
 4) Take good model(s) and make trajectory comparison plots
