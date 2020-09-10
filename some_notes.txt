@@ -69,6 +69,7 @@ seems like CPU on AWS is best option so far..
 9/9/2020 notes: 
 1) Email to Chalmers team
     - Undestand explicit time functionality
+        - works with type = single
     - Understand various batching methods 
     - Understand train/predict based on time = 0 vs all times
 2) Check Bhuva 2019 (temporal data)
