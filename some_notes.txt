@@ -70,7 +70,7 @@ seems like CPU on AWS is best option so far..
 1) Email to Chalmers team
     - Undestand explicit time functionality
         - works with type = single
-        - ran on AWS gpu, 30 genes, 6 samples, 3 epochs, runtime = 
+        - ran on AWS gpu, 30 genes, 6 samples, 3 epochs
     - Understand various batching methods 
     - Understand train/predict based on time = 0 vs all times
 2) Check Bhuva 2019 (temporal data)
@@ -83,6 +83,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - http://genome-www.stanford.edu/cellcycle/
 
 
-
-3) Run experiment with 150 genes but more samples (8TAll+1VAll)
-4) Take good model(s) and make trajectory comparison plots
+9/10/2020 notes:
+1) Experimenting with explicit time = T and batch_type = single
+    - seems to give overall better MSE values when using 30 genes and 8 samples
+    - only runs on CPU not GPU (why?)
+    - scaling up, let's see what happens:
+        - 150 genes, 6 samples (explct = T, batch = single), 15 epochs, AWS cpu = X hrs, MSE = X
