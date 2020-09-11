@@ -93,4 +93,4 @@ methods. J Comput Biol. 2009;16:229–39.
             AWS cpu = 2.08 hrs, MSE = 0.007
         - 150 genes, 8 samples (explct = T, batch = single), 
             15 epochs, 300 perceptron-layers, 
-            AWS cpu = x hrs, MSE = x
+            AWS cpu = 1.89 hrs, MSE = 0.01
