@@ -1,0 +1,11 @@
+ODENet(
+  (net): Sequential(
+    (0): Linear(in_features=151, out_features=300, bias=True)
+    (1): LeakyReLU(negative_slope=0.01)
+    (2): Linear(in_features=300, out_features=300, bias=True)
+    (3): LeakyReLU(negative_slope=0.01)
+    (4): Linear(in_features=300, out_features=300, bias=True)
+    (5): LeakyReLU(negative_slope=0.01)
+    (6): Linear(in_features=300, out_features=150, bias=True)
+  )
+)
