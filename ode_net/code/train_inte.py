@@ -304,10 +304,10 @@ if __name__ == "__main__":
     np.savetxt('{}batch_times.csv'.format(output_root_dir), batch_times, delimiter=',')
     np.savetxt('{}epoch_times.csv'.format(output_root_dir), epoch_times, delimiter=',')
 
-       if settings['solve_A']:
+    if settings['solve_A']:
         np.savetxt('{}final_A.csv'.format(output_root_dir), A, delimiter=',')
         np.save('{}A_at_epochs.npy'.format(output_root_dir), A_list)
-    np.save('{}val_loss_at_epochs.npy'.format(output_root_dir), validation_loss)
+        np.save('{}val_loss_at_epochs.npy'.format(output_root_dir), validation_loss)
 
     plt.figure()
     plt.plot(range(1, settings['epochs'] + 1), validation_loss)
@@ -318,5 +318,5 @@ if __name__ == "__main__":
     #if settings['viz']:
     #    plt.show()#block=False if don't want it to pause here
     print("Overall time = ", total_time/3600, "hrs")
-    print("Best model's performance (MSE) = ", min_loss)
+    print("Best model's performance (MSE) = ", min_loss[0])
  
