@@ -48,9 +48,9 @@ August 21 2020:
 
 9/4/2020 notes: 
 1)  Speed-tests:
-    a) 150 genes, 6 samples (5T+1V), 25 epochs, local = 54 mins
-    b) 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = 10 mins
-    c) 150 genes, 6 samples (5T+1V), 25 epochs, AWS gpu = 49 mins
+    a) 150 genes, 6 samples (5T+1V), 25 epochs, local = 54 mins, MSE = 0.15
+    b) 150 genes, 6 samples (5T+1V), 25 epochs, AWS cpu = 10 mins, MSE = 0.15
+    c) 150 genes, 6 samples (5T+1V), 25 epochs, AWS gpu = 49 mins, MSE = 0.15
 seems like CPU on AWS is best option so far..
 
 9/8/2020 notes: 
