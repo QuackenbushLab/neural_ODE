@@ -12,4 +12,4 @@ date,genes,samples,epochs,batch_type,explicit_time,val_split,perceptrons,train_o
 9/11/2020,150,8,15,single,TRUE,0.2,300,all,all,t2.2xlarge,cpu,NA,NA
 9/11/2020,150,8,15,single,TRUE,0.2,300,all,all,c5d.4xlarge,cpu,1.47 hrs,0.007
 9/11/2020,150,6,15,single,TRUE,0.2,300,all,all,c5d.4xlarge,cpu,1.5 hrs,0.005
-9/13/2020,150,8,15,single,TRUE,0.15,300,all,all,c5d.4xlarge,cpu,,
+9/13/2020,150,8,15,single,TRUE,0.15,300,all,all,c5d.4xlarge,cpu,x hrs, x
