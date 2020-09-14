@@ -318,5 +318,5 @@ if __name__ == "__main__":
     #if settings['viz']:
     #    plt.show()#block=False if don't want it to pause here
     print("Overall time = ", total_time/3600, "hrs")
-    print("Best model's performance (MSE) = ", min_loss[0])
+    print("Best model's performance (MSE) = ", min_loss.item())
  

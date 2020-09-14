@@ -114,7 +114,9 @@ methods. J Comput Biol. 2009;16:229–39.
 
 9/13/2020 notes:
 1) Experimenting with explicit time = T and batch_type = single on c5d.4xlarge AWS (CPU only)
-    - 150 genes, 8 samples (explct = T, batch = single, val_split = 0.15)
-2) Have emailed Chalmers team for time to talk about code
+    - 150 genes, 8 samples (explct = T, batch = single, val_split = 0.15), batch_size = 2
+    - 150 genes, 8 samples (explct = T, batch = single, val_split = 0.15), batch_size = 4
+2) Have emailed Chalmers team for time to talk about code; waiting...
 3) Check for real yeast data
+4) Investigate explicit time, vis, and batch methods on own
         

@@ -1,15 +1,16 @@
-date,genes,samples,epochs,batch_type,explicit_time,val_split,perceptrons,train_on,test_based_on,instance,server_type,runtime,mse
-9/4/2020,150,6,25,trajectory,FALSE,0.2,50,first,first,local,cpu,54 mins,0.15
-9/4/2020,150,6,25,trajectory,FALSE,0.2,50,first,first,p2.xlarge,cpu,10 mins,0.15
-9/4/2020,150,6,25,trajectory,FALSE,0.2,50,first,first,p2.xlarge,gpu,49 mins,0.15
-9/8/2020,150,6,25,trajectory,FALSE,0.2,300,first,first,p2.xlarge,cpu,1.7 hrs,0.068
-9/8/2020,150,6,25,trajectory,FALSE,0.2,300,first,first,p2.xlarge,gpu,2.3 hrs,0.064
-9/8/2020,150,6,25,trajectory,FALSE,0.2,300,all,first,p2.xlarge,cpu,1.7 hrs,0.1
-9/8/2020,150,6,25,trajectory,FALSE,0.2,300,all,all,p2.xlarge,cpu,3.6 hrs,0.008
-9/8/2020,150,6,25,trajectory,FALSE,0.2,300,all,all,p2.xlarge,gpu,2.3 hrs,0.008
-9/10/2020,150,6,15,single,TRUE,0.2,300,all,all,p2.xlarge,cpu,2.08 hrs,0.007
-9/10/2020,150,8,15,single,TRUE,0.2,300,all,all,p2.xlarge,cpu,1.89 hrs,0.01
-9/11/2020,150,8,15,single,TRUE,0.2,300,all,all,t2.2xlarge,cpu,NA,NA
-9/11/2020,150,8,15,single,TRUE,0.2,300,all,all,c5d.4xlarge,cpu,1.47 hrs,0.007
-9/11/2020,150,6,15,single,TRUE,0.2,300,all,all,c5d.4xlarge,cpu,1.5 hrs,0.005
-9/13/2020,150,8,15,single,TRUE,0.15,300,all,all,c5d.4xlarge,cpu,2.1 hrs, 0.01
+date,genes,samples,epochs,batch_type,batch_size, explicit_time,val_split,perceptrons,train_on,test_based_on,instance,server_type,runtime,mse
+9/4/2020,150,6,25,trajectory,NA,FALSE,0.2,50,first,first,local,cpu,54 mins,0.15
+9/4/2020,150,6,25,trajectory,NA,FALSE,0.2,50,first,first,p2.xlarge,cpu,10 mins,0.15
+9/4/2020,150,6,25,trajectory,NA,FALSE,0.2,50,first,first,p2.xlarge,gpu,49 mins,0.15
+9/8/2020,150,6,25,trajectory,NA,FALSE,0.2,300,first,first,p2.xlarge,cpu,1.7 hrs,0.068
+9/8/2020,150,6,25,trajectory,NA,FALSE,0.2,300,first,first,p2.xlarge,gpu,2.3 hrs,0.064
+9/8/2020,150,6,25,trajectory,NA,FALSE,0.2,300,all,first,p2.xlarge,cpu,1.7 hrs,0.1
+9/8/2020,150,6,25,trajectory,NA,FALSE,0.2,300,all,all,p2.xlarge,cpu,3.6 hrs,0.008
+9/8/2020,150,6,25,trajectory,NA,FALSE,0.2,300,all,all,p2.xlarge,gpu,2.3 hrs,0.008
+9/10/2020,150,6,15,single,2,TRUE,0.2,300,all,all,p2.xlarge,cpu,2.08 hrs,0.007
+9/10/2020,150,8,15,single,2,TRUE,0.2,300,all,all,p2.xlarge,cpu,1.89 hrs,0.01
+9/11/2020,150,8,15,single,2,TRUE,0.2,300,all,all,t2.2xlarge,cpu,NA,NA
+9/11/2020,150,8,15,single,2,TRUE,0.2,300,all,all,c5d.4xlarge,cpu,1.47 hrs,0.007
+9/11/2020,150,6,15,single,2,TRUE,0.2,300,all,all,c5d.4xlarge,cpu,1.5 hrs,0.005
+9/13/2020,150,8,15,single,2,TRUE,0.15,300,all,all,c5d.4xlarge,cpu,2.1 hrs, 0.01
+9/13/2020,150,8,15,single,4,TRUE,0.15,300,all,all,c5d.4xlarge,cpu,2.27 hrs, 0.01
