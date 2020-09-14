@@ -129,6 +129,8 @@ methods. J Comput Biol. 2009;16:229–39.
     - Now running few experiments to see if effect of explicit time is substantial
     - MSE still around 0.012, but runtime is very fast (<30 mins). 
     - GOOD to keep batch_size = 2 and explicit = False!
+    - Let's increase epochs to 25
+        - we see that...
     - Now let's test again on GPU (explicit = F, batch = single)
         - seems like explicit = F, batch = single and batch_size = 2 is optimal 
 3) Scope to optimize:
