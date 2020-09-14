@@ -122,4 +122,6 @@ methods. J Comput Biol. 2009;16:229–39.
 3) Have emailed Chalmers team for time to talk about code; waiting...
 4) Check for real yeast data
 5) Investigate explicit time, vis, and batch methods on own
+    - batch methods = got a good understanding now; we should probably stick to pairwise train-test (i.e "single")
+    - explicit time = from the looks of it, doesn't seem like it affects predictions much (need to confirm)!
         
