@@ -14,3 +14,4 @@ date,genes,samples,epochs,batch_type,batch_size, explicit_time,val_split,percept
 9/11/2020,150,6,15,single,2,TRUE,0.2,300,all,all,c5d.4xlarge,cpu,1.5 hrs,0.005
 9/13/2020,150,8,15,single,2,TRUE,0.15,300,all,all,c5d.4xlarge,cpu,2.1 hrs, 0.01
 9/13/2020,150,8,15,single,4,TRUE,0.15,300,all,all,c5d.4xlarge,cpu,2.27 hrs, 0.01
+9/13/2020,150,8,15,single,4,TRUE,0.2,300,all,all,c5.9xlarge,cpu,x hrs,x
