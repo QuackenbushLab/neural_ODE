@@ -122,20 +122,21 @@ methods. J Comput Biol. 2009;16:229–39.
 3) Have emailed Chalmers team for time to talk about code; waiting...
 
 9/14/202 notes:
-1) Check for real yeast data
-2) Investigate explicit time, vis, and batch methods on own
+1) Investigate explicit time, vis, and batch methods on own
     - batch methods = got a good understanding now; we should probably stick to pairwise train-test (i.e "single")
     - explicit time = from the looks of it, doesn't seem like it affects predictions much (need to confirm)!
     - Now running few experiments to see if effect of explicit time is substantial
     - MSE still around 0.012, but runtime is very fast (<30 mins). 
     - GOOD to keep batch_size = 2 and explicit = False!
     - Let's increase epochs to 25
-        - we see that...
+        - MSE goes down to 0.007
+        - So should stick to 25 epochs!
     - Now let's test again on GPU (explicit = F, batch = single)
         - seems like explicit = F, batch = single and batch_size = 2 is optimal 
-3) Scope to optimize:
+2) Scope to optimize:
     - good initialization (RB to send)
     - domain knowledge into NN (ask Anuraag about this)
     - graph neural network (GNN)
-4) Start plotting predicted dynamics
+3) Start plotting predicted dynamics
+4) Check for real yeast data
         
