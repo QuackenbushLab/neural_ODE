@@ -129,6 +129,7 @@ methods. J Comput Biol. 2009;16:229–39.
     - Now running few experiments to see if effect of explicit time is substantial
     - MSE still around 0.012, but runtime is very fast (<30 mins). 
     - GOOD to keep batch_size = 2 and explicit = False!
+    - Now let's test again on GPU (explicit = F, batch = single)
 3) Scope to optimize:
     - good initialization (RB to send)
     - domain knowledge into NN (ask Anuraag about this)
