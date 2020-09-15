@@ -44,7 +44,8 @@ class Visualizator1D(Visualizator):
         
         self._set_ax_limits()
 
-        plt.show(block=True)
+        #plt.show()
+        #plt.savefig('initial_plot.png')
         
     def plot(self):
         #plt.figure(1)
@@ -99,7 +100,7 @@ class Visualizator1D(Visualizator):
         self.trajectories = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'])
         self._visualize_trajectories_all()
         self._visualize_trajectories_split()
-        self._visualize_dynamics()
+        #self._visualize_dynamics()
         self._set_ax_limits()
 
     def _visualize_trajectories_all(self):

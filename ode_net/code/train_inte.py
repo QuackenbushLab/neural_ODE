@@ -20,7 +20,7 @@ from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
 from solve_eq import solve_eq
-from visualization2baby import *
+from visualization_inte import *
 
 ''' OLD VALIDATION FUNCTION
 def validation(trajectories, data_handler):
@@ -114,8 +114,8 @@ def save_model(odenet, folder, filename):
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
 clean_name = "simulated_expression_chalmers_150genes_8samples"
-#parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+#parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 args = parser.parse_args()
 
 # Main function
@@ -182,30 +182,12 @@ if __name__ == "__main__":
 
     # Init plot
     if settings['viz']:
-        if cleaned_file_name.startswith('1d_parabolic'):
-            if settings['explicit_time']:
-                visualizer = Visualizator1DTimeDependent(data_handler, odenet, settings)
-            else:
-                visualizer = Visualizator1D(data_handler, odenet, settings)
-        elif cleaned_file_name.startswith('2d_parabolic_drag') or cleaned_file_name.startswith('2d_parabolic'):
-            visualizer = Visualizator2D(data_handler, odenet, settings)
-        elif cleaned_file_name.startswith('simple_harmonic') or cleaned_file_name.startswith('damped_harmonic'):
-            if settings['explicit_time']:
-                visualizer = Visualizator1DTimeDependent(data_handler, odenet, settings)
-            else:
-                visualizer = Visualizator1D(data_handler, odenet, settings)
-        elif cleaned_file_name.startswith('lotka_volterra'):
-            if settings['explicit_time']:
-                visualizer = Visualizator1DTimeDependent(data_handler, odenet, settings)
-            else:
-                visualizer = Visualizator1D(data_handler, odenet, settings)
-        elif cleaned_file_name.startswith('mystery_function') or cleaned_file_name.startswith('mystery_function'):
-            visualizer = Visualizator2DTimeDependent(data_handler, odenet, settings)
-        elif cleaned_file_name.startswith('simulated_expression_chalmers'):
-            visualizer = Visualizator1D(data_handler, odenet, settings)
-        else:
-            raise ValueError     
-
+        #if cleaned_file_name.startswith('1d_parabolic'):
+        #    if settings['explicit_time']:
+        #        visualizer = Visualizator1DTimeDependent(data_handler, odenet, settings)
+        #    else:
+        #        visualizer = Visualizator1D(data_handler, odenet, settings)
+        visualizer = Visualizator1D(data_handler, odenet, settings)
 
     # Training loop
     batch_times = []
@@ -222,20 +204,22 @@ if __name__ == "__main__":
     else:
         iterations_in_epoch = ceil(data_handler.train_data_length / settings['batch_size'])
 
-    if settings['viz'] and not settings['viz_every_iteration']:
+    if settings['viz']:
         with torch.no_grad():
             visualizer.visualize()
             visualizer.plot()
-    
+            visualizer.save(img_save_dir, 0)
     start_time = perf_counter()
 
     #data_handler._create_validation_set_traj() #remove IH
     #val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time']) #remove IH
-   
-    for epoch in range(1, settings['epochs'] + 1):
+    tot_epochs = settings['epochs']
+    viz_epochs = [round(tot_epochs/4), round(tot_epochs/2), round(floor(tot_epochs *(3/4))), tot_epochs]
+    for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1
         data_handler.reset_epoch()
+        #visualizer.save(img_save_dir, epoch) #IH added to test
         if settings['verbose']:
             print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss: ")
@@ -245,11 +229,6 @@ if __name__ == "__main__":
             batch_times.append(perf_counter() - start_batch_time)
 
             # Print and update plots
-            with torch.no_grad():
-                if settings['viz'] and settings['viz_every_iteration']:
-                    visualizer.visualize()
-                    visualizer.plot()
-                    
             iteration_counter += 1
             if settings['verbose']:
                 pbar.update(1)
@@ -277,16 +256,13 @@ if __name__ == "__main__":
                     save_model(odenet, output_root_dir, 'best_model')
             print("Validation loss {:.5E}".format(val_loss))
 
-        if settings['viz'] and not settings['viz_every_iteration']:
+        if settings['viz'] and epoch in viz_epochs:
+            print("Saving plot")
             with torch.no_grad():
                 visualizer.visualize()
                 visualizer.plot()
+                visualizer.save(img_save_dir, epoch)
         
-        if settings['viz']:
-            print("Saving plots")
-            visualizer.save(img_save_dir, epoch)
-        
-
         print("Saving intermediate model")
         save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
 
@@ -313,10 +289,7 @@ if __name__ == "__main__":
     plt.plot(range(1, settings['epochs'] + 1), validation_loss)
     plt.xlabel("Epoch")
     plt.ylabel("Validation error (MSE)")
-    plt.savefig("{}/loss.eps".format(img_save_dir))
     plt.savefig("{}/loss.png".format(img_save_dir))
-    #if settings['viz']:
-    #    plt.show()#block=False if don't want it to pause here
     print("Overall time = ", total_time/3600, "hrs")
     print("Best model's performance (MSE) = ", min_loss.item())
  
