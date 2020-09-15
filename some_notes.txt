@@ -137,11 +137,12 @@ methods. J Comput Biol. 2009;16:229–39.
     - good initialization (RB to send)
     - domain knowledge into NN (ask Anuraag about this)
     - graph neural network (GNN)
-3) Start plotting predicted dynamics
-    - made progress in terms of this. got plotting function to work.
-    - testing, works fine and plots make sense!
 4) Check for real yeast data
     - yeast/human gene-communities
     - how does it scale? (base how much to scale on the structure of the real yeast data)
     - should we stick to yeast??
-        
+
+9/15/202 notes:
+1) Start plotting predicted dynamics
+    - made progress in terms of this. got plotting function to work.
+    - testing, works fine and plots make sense!
