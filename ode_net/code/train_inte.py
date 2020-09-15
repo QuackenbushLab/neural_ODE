@@ -114,8 +114,8 @@ def save_model(odenet, folder, filename):
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
 clean_name = "simulated_expression_chalmers_30genes_6samples"
-parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-#parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+#parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 args = parser.parse_args()
 
 # Main function
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     #data_handler._create_validation_set_traj() #remove IH
     #val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time']) #remove IH
     tot_epochs = settings['epochs']
-    viz_epochs = [round(tot_epochs/4), round(tot_epochs/2), round(floor(tot_epochs *(3/4))), tot_epochs]
+    viz_epochs = [round(tot_epochs/4), round(tot_epochs/2), round(tot_epochs*(3/4)), tot_epochs]
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1
