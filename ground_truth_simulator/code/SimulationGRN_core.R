@@ -248,10 +248,10 @@ simDataset <- function(simulation, numsamples, cor.strength, externalInputs,time
   
   
   #add experimental noise
-  all_genes <- setdiff(names(res),c("sample","time"))
-  res[,(all_genes) := lapply(.SD, addNormNoise, 
-                             noise = simulation@expnoise),
-      .SDcols = all_genes]
+  #all_genes <- setdiff(names(res),c("sample","time"))
+  #res[,(all_genes) := lapply(.SD, addNormNoise, 
+  #                           noise = simulation@expnoise),
+  #    .SDcols = all_genes]
   
   
   return(list(emat = res))
