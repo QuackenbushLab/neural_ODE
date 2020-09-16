@@ -34,7 +34,7 @@ class Visualizator1D(Visualizator):
         
         self.fig_traj_split = plt.figure(figsize=(15,6))
         self.fig_traj_split.canvas.set_window_title("Trajectories in each dimension")
-        self.axes_traj_split = self.fig_traj_split.subplots(nrows=1, ncols=6, sharex=False, subplot_kw={'frameon':True})
+        self.axes_traj_split = self.fig_traj_split.subplots(nrows=1, ncols=7, sharex=False, subplot_kw={'frameon':True})
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='--', label='NN approximation'),
                 Line2D([0], [0], marker='o', color='red', label='Data', markerfacecolor='red', markersize=5)]
 
