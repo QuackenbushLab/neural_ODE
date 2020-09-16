@@ -32,9 +32,9 @@ class Visualizator1D(Visualizator):
         #self.fig_dyn.canvas.set_window_title("Dynamics")
         #self.ax_dyn = self.fig_dyn.add_subplot(111, frameon=False)
         
-        self.fig_traj_split = plt.figure(figsize=(12,6))
+        self.fig_traj_split = plt.figure(figsize=(15,6))
         self.fig_traj_split.canvas.set_window_title("Trajectories in each dimension")
-        self.axes_traj_split = self.fig_traj_split.subplots(nrows=1, ncols=4, sharex=False, subplot_kw={'frameon':True})
+        self.axes_traj_split = self.fig_traj_split.subplots(nrows=1, ncols=6, sharex=False, subplot_kw={'frameon':True})
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='--', label='NN approximation'),
                 Line2D([0], [0], marker='o', color='red', label='Data', markerfacecolor='red', markersize=5)]
 
@@ -96,10 +96,10 @@ class Visualizator1D(Visualizator):
         for gene, ax in enumerate(self.axes_traj_split):
             ax.cla()
             for sample_num, (approx_traj, traj) in enumerate(zip(self.trajectories, self.data_handler.data_np)):
-                ax.plot(times[sample_num].flatten(), traj[:,:,gene].flatten(), 'r-o', alpha=0.3)
-                ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k--', lw=2)
+                ax.plot(times[sample_num].flatten(), traj[:,:,gene+2].flatten(), 'r-o', alpha=0.3)
+                ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene+2].numpy().flatten(),'k--', lw=2)
             ax.set_xlabel(r'$t$')
-            ax.set_title(r'$gene_{}$'.format(gene+1))
+            ax.set_title(r'$gene_{}$'.format(gene+2+1))
         
         
             
