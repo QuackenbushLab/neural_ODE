@@ -194,6 +194,7 @@ if __name__ == "__main__":
     epoch_times = []
     total_time = 0
     validation_loss = []
+    training_loss = []
     A_list = []
 
     min_loss = 0
@@ -233,7 +234,10 @@ if __name__ == "__main__":
             if settings['verbose']:
                 pbar.update(1)
                 pbar.set_description("Training loss: {:.5E}".format(loss.item()))
+        
+        training_loss.append(loss.item())
         epoch_times.append(perf_counter() - start_epoch_time)
+        
         if settings['verbose']:
             pbar.close()
 
@@ -286,10 +290,20 @@ if __name__ == "__main__":
         np.save('{}val_loss_at_epochs.npy'.format(output_root_dir), validation_loss)
 
     plt.figure()
-    plt.plot(range(1, settings['epochs'] + 1), validation_loss)
+    plt.plot(range(1, settings['epochs'] + 1), training_loss)
+    plt.yscale('log')
     plt.xlabel("Epoch")
-    plt.ylabel("Validation error (MSE)")
-    plt.savefig("{}/loss.png".format(img_save_dir))
+    plt.ylabel("Training error (MSE)")
+    plt.savefig("{}/training_loss.png".format(img_save_dir))
+    
     print("Overall time = ", total_time/3600, "hrs")
-    print("Best model's performance (MSE) = ", min_loss.item())
+
+    if len(validation_loss) > 0:
+        plt.figure()
+        plt.plot(range(1, settings['epochs'] + 1), validation_loss)
+        plt.xlabel("Epoch")
+        plt.ylabel("Validation error (MSE)")
+        plt.savefig("{}/validation_loss.png".format(img_save_dir))
+        print("Best model's performance (MSE) = ", min_loss.item())
+
  
