@@ -133,15 +133,15 @@ if __name__ == "__main__":
     output_root_dir = '{}/{}/'.format(settings['output_dir'], save_file_name)
 
     img_save_dir = '{}img/'.format(output_root_dir)
-    intermediate_models_dir = '{}intermediate_models/'.format(output_root_dir)
+    #intermediate_models_dir = '{}intermediate_models/'.format(output_root_dir)
 
     # Create image and model save directory
     if not os.path.exists(output_root_dir):
         os.makedirs(output_root_dir, exist_ok=True)
     if not os.path.exists(img_save_dir):
         os.mkdir(img_save_dir)
-    if not os.path.exists(intermediate_models_dir):
-        os.mkdir(intermediate_models_dir)
+    #if not os.path.exists(intermediate_models_dir):
+    #    os.mkdir(intermediate_models_dir)
 
     # Save the settings for future reference
     with open('{}/settings.csv'.format(output_root_dir), 'w') as f:
@@ -263,8 +263,8 @@ if __name__ == "__main__":
                 visualizer.plot()
                 visualizer.save(img_save_dir, epoch)
         
-        print("Saving intermediate model")
-        save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
+        #print("Saving intermediate model")
+        #save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
 
         # Decrease learning rate if specified
         if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
