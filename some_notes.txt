@@ -156,5 +156,6 @@ methods. J Comput Biol. 2009;16:229–39.
             - why does training_loss fluctuate, and not monotonically decrease? 
             - think about best_training_model vs best_validation_model **
         - changed code so that we also plot training loss over epochs
-    - running on 0 noise dataset but with n_val = 0, i.e. val_split = 0 **
+    - running on 0 noise dataset but with n_val = 0, i.e. val_split = 0
+        - we see that ...
     - can use c5.18xlarge as next step ($3.06 per hour), i.e. when scaling up to more genes with 0 noise. 
