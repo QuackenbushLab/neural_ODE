@@ -158,4 +158,11 @@ methods. J Comput Biol. 2009;16:229–39.
         - changed code so that we also plot training loss over epochs
     - running on 0 noise dataset but with n_val = 0, i.e. val_split = 0
         - we see that we have near-perfect training fit!
-    - can use c5.18xlarge as next step ($3.06 per hour), i.e. when scaling up to more genes with 0 noise. 
+    - can use c5.18xlarge as next step ($3.06 per hour), i.e. when scaling up to more genes with 0noise. 
+
+9/17/202 notes:
+1) Meeting with RB. Potential things to try: 
+	- larger batch size
+	- smaller learning rate decay
+	- start with best model already
+	- next step scale up to more than 30 genes
