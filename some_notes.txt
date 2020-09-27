@@ -160,9 +160,17 @@ methods. J Comput Biol. 2009;16:229–39.
         - we see that we have near-perfect training fit!
     - can use c5.18xlarge as next step ($3.06 per hour), i.e. when scaling up to more genes with 0noise. 
 
-9/17/202 notes:
+9/17/2020 notes:
 1) Meeting with RB. Potential things to try: 
 	- larger batch size
 	- smaller learning rate decay
 	- start with best model already
 	- next step scale up to more than 30 genes
+
+9/27/2020 notes:
+1) When batch_size = full (no stochastic GD):
+    - performance is poor
+    - runtime is a lot!
+    - so better to keep smaller batch_size, and experiment with learning rates
+2) Changed plotting function to plot all 30 genes
+
