@@ -25,8 +25,8 @@ date,genes,samples,noise,epochs,dec_lr, batch_type,batch_size,explicit_time,val_
 9/16/2020,30,6,0,40,0.95, single,2,FALSE,0.2,300,all,all,c5.9xlarge,cpu,1.04 hrs,0.003
 9/16/2020,30,6,0,80,0.95, single,2,FALSE,0.2,350,all,all,c5.9xlarge,cpu,2.5 hrs,0.003
 9/16/2020,30,6,0,80,0.95, single,2,FALSE,0,350,all,all,c5.9xlarge,cpu,2.89 hrs,8E-06(train)
-9/18/2020,30,6,0,50,0.95, single,10000,FALSE,0,350,all,all,c5.9xlarge,cpu,4.86 hrs,1E-03(train)
+9/18/2020,30,6,0,50,0.95, single,54,FALSE,0,350,all,all,c5.9xlarge,cpu,4.86 hrs,1E-03(train)
 9/18/2020,30,6,0,50,0.99, single,9,FALSE,0,350,all,all,c5.9xlarge,cpu,2.33 hrs,1E-05(train)
 9/27/2020,30,6,0,40,0.99, single,18,FALSE,0,350,all,all,c5.9xlarge,cpu,2.53 hrs, 6E-05(train)
-9/27/2020,30,6,0,40,0.99, single,27,FALSE,0,350,all,all,c5.9xlarge,cpu,x hrs, x(train)
+9/27/2020,30,6,0,40,0.99, single,27,FALSE,0,350,all,all,c5.9xlarge,cpu,3.63 hrs, 4E-04(train)
 ,,,,,,,,,,,,,,,

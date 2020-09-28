@@ -297,7 +297,7 @@ if __name__ == "__main__":
     plt.savefig("{}/training_loss.png".format(img_save_dir))
     
     print("Overall time = ", total_time/3600, "hrs")
-    print("Best training model's performance (MSE) = ", min(training_loss).item())
+    print("Best training model's performance (MSE) = ", min(training_loss))
 
     if len(validation_loss) > 0:
         plt.figure()

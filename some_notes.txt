@@ -153,8 +153,8 @@ methods. J Comput Biol. 2009;16:229–39.
 1) Trying to increase epochs so that training error is essentially 0 on 0 noise dataset.
     - will run on 30 genes, 6 sample, 0 noise dataset for 40 epochs
         - predictions not near-perfect yet. Scaling up epochs and perceptrons  
-            - why does training_loss fluctuate, and not monotonically decrease? 
-            - think about best_training_model vs best_validation_model **
+            - why does training_loss fluctuate, and not monotonically decrease? (Stochastic GD!)
+            - think about best_training_model vs best_validation_model
         - changed code so that we also plot training loss over epochs
     - running on 0 noise dataset but with n_val = 0, i.e. val_split = 0
         - we see that we have near-perfect training fit!
@@ -168,9 +168,15 @@ methods. J Comput Biol. 2009;16:229–39.
 	- next step scale up to more than 30 genes
 
 9/27/2020 notes:
-1) When batch_size = full (no stochastic GD):
-    - performance is poor
-    - runtime is a lot!
-    - so better to keep smaller batch_size, and experiment with learning rates
-2) Changed plotting function to plot all 30 genes
+0) Changed plotting function to plot all 30 genes
+1) Batch_size experiments:
+    - When batch_size = 100% full (no stochastic GD), runtime = 4.86 hrs
+    - When batch_size = 50%, runtime ~ 3.75
+    - When batch_size = 33%, runtime ~ 2.75 hrs
+    - When batch_size = 16% , runtime = 2.33 hrs
+    - In general, also saw better performance with smaller batches
+    - Will not experiment with learning rate to see how that affects
+2) NeuralODE authors: "Avoid non-smooth non-linearities such as ReLU and LeakyReLU.
+Prefer non-linearities with a theoretically unique adjoint/gradient such as Softplus."
+
 
