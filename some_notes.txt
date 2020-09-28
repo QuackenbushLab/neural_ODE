@@ -168,15 +168,24 @@ methods. J Comput Biol. 2009;16:229–39.
 	- next step scale up to more than 30 genes
 
 9/27/2020 notes:
-0) Changed plotting function to plot all 30 genes
+0) Changed plotting function to plot all 30 genes; also keeping track of training error now
 1) Batch_size experiments:
     - When batch_size = 100% full (no stochastic GD), runtime = 4.86 hrs
     - When batch_size = 50%, runtime ~ 3.75
     - When batch_size = 33%, runtime ~ 2.75 hrs
     - When batch_size = 16% , runtime = 2.33 hrs
-    - In general, also saw better performance with smaller batches
-    - Will not experiment with learning rate to see how that affects
-2) NeuralODE authors: "Avoid non-smooth non-linearities such as ReLU and LeakyReLU.
-Prefer non-linearities with a theoretically unique adjoint/gradient such as Softplus."
+    - When batch_size = 3% (2) , runtime = 2.24 hrs
+    - When batch_size = 1.5% (1; fully stochastic) , runtime = 2.31 hrs
+    - In *general*, also saw better performance with smaller batches
+2) Things to explore:
+    - Performance-wise: different initial learning rates, different network structure, etc:
+        -  NeuralODE authors: "Avoid non-smooth non-linearities such as ReLU and LeakyReLU.
+            Prefer non-linearities with a theoretically unique adjoint/gradient such as Softplus."
+    - Runtime-wise: GPU capacity: 
+        - Chalmers authors: "Due to the way the ODE solver was implemented we were only able
+         to parallelize computations on the GPU if they were for time steps of the same length.
+          Further research should be conducted on the topic of extending the ODE solvers to also
+           be able to run different time steps in parallel to speed up training."
+
 
 
