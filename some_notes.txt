@@ -186,11 +186,15 @@ methods. J Comput Biol. 2009;16:229–39.
          to parallelize computations on the GPU if they were for time steps of the same length.
           Further research should be conducted on the topic of extending the ODE solvers to also
            be able to run different time steps in parallel to speed up training."
+        - Need to look more closely into code about how "cude", "cuda:0" are used, and if available
+            devices are being used efficiently. 
 
 9/28/2020 notes: 
 0) Booted a new AWS instance (c5.9xlarge)
 1) Question for RB:
     - what is weight-decay? should we use it now? 
+2) Experiments with init_lr = 0.001, dec_lr = False:
+    - should try out different batch sizes here as well. 
 
 
 

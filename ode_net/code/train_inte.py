@@ -190,7 +190,7 @@ if __name__ == "__main__":
         visualizer = Visualizator1D(data_handler, odenet, settings)
 
     # Training loop
-    batch_times = []
+    #batch_times = []
     epoch_times = []
     total_time = 0
     validation_loss = []
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
             loss = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'])
-            batch_times.append(perf_counter() - start_batch_time)
+            #batch_times.append(perf_counter() - start_batch_time)
 
             # Print and update plots
             iteration_counter += 1
@@ -281,7 +281,7 @@ if __name__ == "__main__":
 
     print("Saving times")
     np.savetxt('{}total_time.csv'.format(output_root_dir), [total_time], delimiter=',')
-    np.savetxt('{}batch_times.csv'.format(output_root_dir), batch_times, delimiter=',')
+    #np.savetxt('{}batch_times.csv'.format(output_root_dir), batch_times, delimiter=',')
     np.savetxt('{}epoch_times.csv'.format(output_root_dir), epoch_times, delimiter=',')
 
     if settings['solve_A']:
