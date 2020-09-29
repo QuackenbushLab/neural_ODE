@@ -154,6 +154,7 @@ if __name__ == "__main__":
         os.environ["CUDA_VISIBLE_DEVICES"]="0"
         print("Trying to run on GPU -- cuda available: " + str(torch.cuda.is_available()))
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else:
         print("Running on CPU")
         device = 'cpu'
