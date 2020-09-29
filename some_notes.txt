@@ -188,6 +188,9 @@ methods. J Comput Biol. 2009;16:229–39.
            be able to run different time steps in parallel to speed up training."
         - Need to look more closely into code about how "cude", "cuda:0" are used, and if available
             devices are being used efficiently. 
+        - running experiment on AWS p3.2xlarge ($3.02 per hour!):
+            - init_lr = 0.001, dec_lr = False, batch size = 54 (for parallelization)
+            - MSE = NA, runtime = way too long (40 mins for first epoch!)  
 
 9/28/2020 notes: 
 0) Booted a new AWS instance (c5.9xlarge)
