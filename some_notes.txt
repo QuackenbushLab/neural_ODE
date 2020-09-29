@@ -187,5 +187,10 @@ methods. J Comput Biol. 2009;16:229–39.
           Further research should be conducted on the topic of extending the ODE solvers to also
            be able to run different time steps in parallel to speed up training."
 
+9/28/2020 notes: 
+0) Booted a new AWS instance (c5.9xlarge)
+1) Question for RB:
+    - what is weight-decay? should we use it now? 
+
 
 
