@@ -202,7 +202,8 @@ methods. J Comput Biol. 2009;16:229–39.
 10/04/2020 notes:
 0) Booted a new AWS instance (c5.18xlarge)
     - now reporting time and MSE at epochs of interest (25, 40, 50, 80)
-1) Trying the non-stochastic (batch_size = 27) upto 120 epochs
+1) Trying the non-stochastic (batch_size = 27) upto 160 epochs
+    - trying upto 160 epochs with init_lr = 0.005 and 0.001
 2) Try other things
 
 

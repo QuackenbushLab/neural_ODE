@@ -217,7 +217,7 @@ if __name__ == "__main__":
     #val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time']) #remove IH
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [25, 40, 50, 80, tot_epoch]
+    rep_epochs = [25, 40, 50, 80, 120, tot_epochs]
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1
