@@ -217,6 +217,7 @@ if __name__ == "__main__":
     #val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time']) #remove IH
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
+    rep_epochs = [25, 40, 50, 80, tot_epoch]
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1
@@ -274,6 +275,12 @@ if __name__ == "__main__":
         # Decrease learning rate if specified
         if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
             decrease_lr(opt, settings['verbose'])
+        
+        if epoch in rep_epochs:
+            print()
+            print("Epoch=",epoch,"; Time so far= ", (perf_counter() - start_time)/3600, "hrs")
+            print("Epoch=",epoch,"; Best training (MSE) so far= ", min(training_loss))
+            print()
     
     total_time = perf_counter() - start_time
 
@@ -297,8 +304,8 @@ if __name__ == "__main__":
     plt.ylabel("Training error (MSE)")
     plt.savefig("{}/training_loss.png".format(img_save_dir))
     
-    print("Overall time = ", total_time/3600, "hrs")
-    print("Best training model's performance (MSE) = ", min(training_loss))
+    #print("Overall time = ", total_time/3600, "hrs")
+    #print("Best training model's performance (MSE) = ", min(training_loss))
 
     if len(validation_loss) > 0:
         plt.figure()
