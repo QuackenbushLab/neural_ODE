@@ -208,7 +208,7 @@ methods. J Comput Biol. 2009;16:229–39.
 2) Try other things
     - Increased to 500 perceptrons for bs = 27 (non-stochastic)
     - Trying both xavier_uniform and orthogonal initialization schemes
-        -orthogonal much better to start with
+        -orthogonal much better to start with 
 
 
 
