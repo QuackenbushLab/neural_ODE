@@ -36,7 +36,7 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('leaky_relu'))
+                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('leaky_relu')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
         self.net.to(device)
