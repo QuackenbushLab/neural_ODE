@@ -14,23 +14,23 @@ class ODENet(nn.Module):
         # Create a new sequential model with ndim inputs and outputs
         if explicit_time:
             self.net = nn.Sequential(
-                nn.Linear(ndim + 1, 350),
+                nn.Linear(ndim + 1, 500),
                 nn.LeakyReLU(),
-                nn.Linear(350, 350),
+                nn.Linear(500, 500),
                 nn.LeakyReLU(),
-                nn.Linear(350, 350),
+                nn.Linear(500, 500),
                 nn.LeakyReLU(),
-                nn.Linear(350, ndim)
+                nn.Linear(500, ndim)
             )
         else:
             self.net = nn.Sequential(
-                nn.Linear(ndim, 350),
+                nn.Linear(ndim, 500),
                 nn.LeakyReLU(),
-                nn.Linear(350, 350),
+                nn.Linear(500, 500),
                 nn.LeakyReLU(),
-                nn.Linear(350, 350),
+                nn.Linear(500, 500),
                 nn.LeakyReLU(),
-                nn.Linear(350, ndim)
+                nn.Linear(500, ndim)
             )
 
         # Initialize the layers of the model
