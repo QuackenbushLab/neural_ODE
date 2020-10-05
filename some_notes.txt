@@ -204,7 +204,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - now reporting time and MSE at epochs of interest (25, 40, 50, 80)
 1) Trying the non-stochastic (batch_size = 27) upto 160 epochs
     - trying upto 160 epochs with init_lr = 0.005 and 0.001
+        - 0.005 better constant lr, but we see that we keep maxing out around ~10^-6
 2) Try other things
+    - Increased to 500 perceptrons for bs = 27 and 54 (non-stochastic)
 
 
 
