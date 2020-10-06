@@ -168,7 +168,7 @@ if __name__ == "__main__":
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'])
     odenet.float()
     if settings['pretrained_model']:
-        pretrained_model_file = '{}/_pretrained_best_model/final_model.pt'.format(settings['output_dir'])
+        pretrained_model_file = '{}/_pretrained_best_model/best_train_model.pt'.format(settings['output_dir'])
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
