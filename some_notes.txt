@@ -215,6 +215,7 @@ methods. J Comput Biol. 2009;16:229–39.
 1) changed training code:
     - now saving the best performing model instead of final model
     - can load in pre-trained model from .pt file
+2) Will now load in best-performing model from before (3E-06), and try to improve using slow lr and decay
 
 
 

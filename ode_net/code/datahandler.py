@@ -1,4 +1,4 @@
-from datagenerator import DataGenerator
+#from datagenerator import DataGenerator
 from csvreader import readcsv, writecsv
 import numpy as np
 import torch

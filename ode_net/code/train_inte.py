@@ -169,6 +169,7 @@ if __name__ == "__main__":
     if settings['pretrained_model']:
         pretrained_model_file = '{}/pretrained_best_model/final_model.pt'.format(settings['output_dir'])
         odenet.load(pretrained_model_file)
+        print("Loaded in pre-trained model!")
     else:
         odenet.float()
 
@@ -299,7 +300,6 @@ if __name__ == "__main__":
     
     total_time = perf_counter() - start_time
 
-    print("Best performing model has been saved")
     #print("Saving final model")
     #save_model(odenet, output_root_dir, 'final_model')
 
