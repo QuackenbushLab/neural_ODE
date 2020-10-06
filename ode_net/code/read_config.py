@@ -41,4 +41,7 @@ def _convert_arguments(settings):
     converted_settings['normalize_data'] = settings.getboolean('normalize_data')  
     converted_settings['explicit_time'] = settings.getboolean('explicit_time')
     converted_settings['relative_error'] = settings.getboolean('relative_error') 
+
+    converted_settings['pretrained_model'] = settings.getboolean('pretrained_model') 
+    
     return converted_settings

@@ -206,7 +206,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - trying upto 160 epochs with init_lr = 0.005 and 0.001
         - 0.005 better constant lr, but we see that we keep maxing out around ~10^-6
 2) Try other things
-    - Increased to 500 perceptrons for bs = 27 and 54 (non-stochastic)
+    - Increased to 500 perceptrons for bs = 27 (non-stochastic)
+    - Trying both xavier_uniform and orthogonal initialization schemes
+        -orthogonal much better to start with 
 
 10/05/2020 notes:
 0) changed file structure to reduce cluttering

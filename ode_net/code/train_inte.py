@@ -15,7 +15,7 @@ try:
 except ImportError:
     from torchdiffeq import odeint_adjoint as odeint
 
-from datagenerator import DataGenerator
+#from datagenerator import DataGenerator
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
@@ -163,9 +163,14 @@ if __name__ == "__main__":
                                         batch_type=settings['batch_type'], batch_time=settings['batch_time'], 
                                         batch_time_frac=settings['batch_time_frac'])
 
+    
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'])
-    odenet.float()
+    if settings['pretrained_model']:
+        pretrained_model_file = '{}/pretrained_best_model/final_model.pt'.format(settings['output_dir'])
+        odenet.load(pretrained_model_file)
+    else:
+        odenet.float()
 
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
         net_file.write(odenet.__str__())
@@ -237,9 +242,19 @@ if __name__ == "__main__":
                 pbar.update(1)
                 pbar.set_description("Training loss: {:.5E}".format(loss.item()))
         
-        training_loss.append(loss.item())
+        #Epoch done, now handle training loss
+        train_loss = loss.item()
+        training_loss.append(train_loss)
+        if epoch == 1:
+                min_train_loss = train_loss
+        else:
+            if train_loss < min_train_loss:
+                min_train_loss = train_loss
+                save_model(odenet, output_root_dir, 'best_train_model')
+        
         epoch_times.append(perf_counter() - start_epoch_time)
         
+
         if settings['verbose']:
             pbar.close()
 
@@ -254,7 +269,7 @@ if __name__ == "__main__":
             if epoch == 1:
                 min_loss = val_loss
                 print('Model improved, saving current model')
-                save_model(odenet, output_root_dir, 'best_model')
+                save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_loss:
                     min_loss = val_loss
@@ -279,13 +294,14 @@ if __name__ == "__main__":
         if epoch in rep_epochs:
             print()
             print("Epoch=",epoch,"; Time so far= ", (perf_counter() - start_time)/3600, "hrs")
-            print("Epoch=",epoch,"; Best training (MSE) so far= ", min(training_loss))
+            print("Epoch=",epoch,"; Best training (MSE) so far= ", min_train_loss)
             print()
     
     total_time = perf_counter() - start_time
 
-    print("Saving final model")
-    save_model(odenet, output_root_dir, 'final_model')
+    print("Best performing model has been saved")
+    #print("Saving final model")
+    #save_model(odenet, output_root_dir, 'final_model')
 
     print("Saving times")
     np.savetxt('{}total_time.csv'.format(output_root_dir), [total_time], delimiter=',')
