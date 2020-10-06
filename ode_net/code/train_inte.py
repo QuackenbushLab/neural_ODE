@@ -166,13 +166,12 @@ if __name__ == "__main__":
     
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'])
+    odenet.float()
     if settings['pretrained_model']:
         pretrained_model_file = '{}/_pretrained_best_model/final_model.pt'.format(settings['output_dir'])
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
-    else:
-        odenet.float()
-
+        
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
         net_file.write(odenet.__str__())
 

@@ -77,7 +77,7 @@ class ODENet(nn.Module):
     def load(self, fp):
         ''' General loading from a file '''
         try:
-            print('Trying to load model from file...')
+            print('Trying to load model from file= {}'.format(fp))
             self.load_model(fp)
             print('Done')
         except:
