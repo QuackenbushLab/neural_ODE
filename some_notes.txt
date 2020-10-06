@@ -208,5 +208,11 @@ methods. J Comput Biol. 2009;16:229–39.
 2) Try other things
     - Increased to 500 perceptrons for bs = 27 and 54 (non-stochastic)
 
+10/05/2020 notes:
+0) changed file structure to reduce cluttering
+1) changed training code:
+    - now saving the best performing model instead of final model
+    - can load in pre-trained model from .pt file
+
 
 
