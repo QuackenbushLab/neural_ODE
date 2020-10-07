@@ -58,9 +58,12 @@ def validation(odenet, data_handler, method, explicit_time):
         loss = torch.mean((torch.abs(predictions - target) ** 2))
     return loss
 
-def decrease_lr(opt, verbose):
+def decrease_lr(opt, verbose, one_time_drop = 0):
     for param_group in opt.param_groups:
-        param_group['lr'] = param_group['lr']*settings['dec_lr_factor']
+        if one_time_drop == 0:
+            param_group['lr'] = param_group['lr']*settings['dec_lr_factor']
+        else:
+            param_group['lr'] = one_time_drop
     if verbose:
         print("Decreasing learning rate to: %f" % opt.param_groups[0]['lr'])
 
@@ -291,6 +294,10 @@ if __name__ == "__main__":
         if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
             decrease_lr(opt, settings['verbose'])
         
+        # Decrease learning rate as a one-time thing:
+        if train_loss < 5*10**(-5):
+            decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
+
         if epoch in rep_epochs:
             print()
             print("Epoch=",epoch,"; Time so far= ", (perf_counter() - start_time)/3600, "hrs")
