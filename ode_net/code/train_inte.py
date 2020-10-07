@@ -226,6 +226,8 @@ if __name__ == "__main__":
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
     rep_epochs = [25, 40, 50, 80, 120, tot_epochs]
+    one_time_drop_done = False
+
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1
@@ -295,8 +297,9 @@ if __name__ == "__main__":
             decrease_lr(opt, settings['verbose'])
         
         # Decrease learning rate as a one-time thing:
-        if train_loss < 5*10**(-5):
+        if train_loss < 5*10**(-5) and one_time_drop_done == False:
             decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
+            one_time_drop_done = True
 
         if epoch in rep_epochs:
             print()
