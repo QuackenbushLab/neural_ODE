@@ -227,7 +227,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - number of perceptrons (50,100, 500)
 3) 100 perceptron is feasible, but should go upto 160-200 epochs to ensure ~10^-6 training error
 4) Testing 50 perceptron with a one-time lr drop for upto 300 epochs, let's see
+    - plateuas off at greater than 10^-5 error rate. 
 5) Next thing to do would be to pick an NN size (100 vs 50) and increase the number of genes (still no noise)
+    - should probably go with 100 NN and now expanding to genes
 
 
 
