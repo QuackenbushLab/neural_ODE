@@ -297,9 +297,9 @@ if __name__ == "__main__":
             decrease_lr(opt, settings['verbose'])
         
         # Decrease learning rate as a one-time thing:
-        #if train_loss < 5*10**(-5) and one_time_drop_done == False:
-        #    decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
-        #    one_time_drop_done = True
+        if train_loss < 5*10**(-5) and one_time_drop_done == False:
+            decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
+            one_time_drop_done = True
 
         if epoch in rep_epochs:
             print()
