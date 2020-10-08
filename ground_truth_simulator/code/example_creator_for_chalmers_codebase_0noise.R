@@ -40,10 +40,10 @@ simseeds = sample.int(1E7, 1000)
 #----simulation parameters----
 #simulation parameters
 nsamp = 6 #number of samples
-netSize = 30 #network size of sampled networks
-minTFs = 3 #minimum number of TFs enforced on sampled networks
-expnoise = 0.05 #experimental noise standard deviation (normal)
-bionoise = 0.05 #biological noise standard deviation (superimposed log-normal)
+netSize = 100 #network size of sampled networks
+minTFs = 10 #minimum number of TFs enforced on sampled networks
+expnoise = 0 #experimental noise standard deviation (normal)
+bionoise = 0 #biological noise standard deviation (superimposed log-normal)
 propbimodal = 0.25 #proportion of bimodal genes (may be << prop*netSize)
 
 #use seed number 102 to perform one simulation
@@ -97,7 +97,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/simulated_expression_chalmers_30genes_6samples_0noise.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/simulated_expression_chalmers_100genes_6samples_0noise.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
