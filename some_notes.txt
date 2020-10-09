@@ -234,6 +234,11 @@ methods. J Comput Biol. 2009;16:229–39.
 10/09/2020 notes:
 1) RB suggested doing noise experiment first before expanding to more genes. 
     - check if learner is robust is robust to noise (see MSE w.r.t predicted curve and TRUE mean curve)
+    - updated code so that we can introduce noise to no noise data within the program
+    - updated plotting code to plot true dynamics (mean function) as well
+    - running small experiment:
+        - 100 neurons, noise 0.001, fixed lr = 0.005, epochs = 200, c5.9xlarge
+        - we see that... 
 
 
 
