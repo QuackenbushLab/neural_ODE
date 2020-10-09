@@ -231,6 +231,9 @@ methods. J Comput Biol. 2009;16:229–39.
 5) Next thing to do would be to pick an NN size (100 vs 50) and increase the number of genes (still no noise)
     - should probably go with 100 NN and now expanding to genes
 
+10/09/2020 notes:
+1) RB suggested doing noise experiment first before expanding to more genes. 
+    - check if learner is robust is robust to noise (see MSE w.r.t predicted curve and TRUE mean curve)
 
 
 

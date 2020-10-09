@@ -25,6 +25,7 @@ class DataHandler:
         self.device = device
         self.val_split = val_split
         self.epoch_done = False
+        #self.noise = noise
 
         self._calc_datasize()
         if batch_type == 'single':
@@ -41,9 +42,9 @@ class DataHandler:
             raise ValueError
 
     @classmethod
-    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0):
+    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0):
         ''' Create a datahandler from a CSV file '''
-        data_np, data_pt, t_np, t_pt, dim, ntraj = readcsv(fp, device)
+        data_np, data_pt, t_np, t_pt, dim, ntraj = readcsv(fp, device, noise_to_add = noise)
         return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac)
 
     @classmethod

@@ -31,6 +31,7 @@ def _convert_arguments(settings):
 
     converted_settings['cpu'] = settings.getboolean('cpu')
     converted_settings['val_split'] = settings.getfloat('val_split')
+    converted_settings['noise'] = settings.getfloat('noise')
     converted_settings['epochs'] = settings.getint('epochs')
 
     converted_settings['solve_eq_gridsize'] = settings.getint('solve_eq_gridsize')

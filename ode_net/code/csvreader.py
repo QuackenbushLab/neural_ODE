@@ -6,8 +6,9 @@ try:
 except ImportError:
     from torchdiffeq import odeint_adjoint as odeint
 
-def readcsv(fp, device):
+def readcsv(fp, device, noise_to_add):
     print("Reading from file {}".format(fp))
+    print("Adding requested noise of {}".format(noise_to_add))
     data_np = []
     data_pt = []
     t_np = []
@@ -24,13 +25,16 @@ def readcsv(fp, device):
             current_length = len(data[traj*(dim+1)])
             traj_data = np.zeros((current_length, 1, dim), dtype=np.float32)
             for d in range(dim + 1):
-                row = [float(f) for f in data[traj*(dim+1) + d]]
                 if d == dim:
                     # Row is time data
+                    row = [float(f) for f in data[traj*(dim+1) + d]]
                     t_np.append(np.array(row))
                     t_pt.append(torch.tensor(row).to(device))
                 else:
+                    #row is gene-expression data; so add noise here!
+                    row = [float(f)+ np.random.normal(0, noise_to_add) for f in data[traj*(dim+1) + d]]
                     traj_data[:,:,d] = np.expand_dims(np.array(row), axis=1)
+            
             data_np.append(traj_data)
             data_pt.append(torch.tensor(traj_data).to(device))
     return data_np, data_pt, t_np, t_pt, dim, ntraj

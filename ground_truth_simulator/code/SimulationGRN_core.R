@@ -11,7 +11,7 @@ validSimulationGRN <- function(object) {
 	
 	#local noise
 	if (object@expnoise<0) {
-		stop('Ecperimental noise standard deviation must be greater than 0')
+		stop('Experimental noise standard deviation must be greater than 0')
 	}
 	
 	#global noise
