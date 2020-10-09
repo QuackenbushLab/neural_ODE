@@ -101,9 +101,9 @@ class Visualizator1D(Visualizator):
                 ax.cla()
                 for sample_num, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, self.data_handler.data_np, self.data_handler.data_np_0noise)):
                     ax.plot(times[sample_num].flatten(), traj[:,:,gene].flatten(), 'r-o', alpha=0.2)
-                    ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
                     ax.plot(times[sample_num].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5)
-
+                    ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
+                  
                 ax.set_xlabel(r'$t$')
                 #ax.set_title(r'$gene_{}$'.format(gene+1))
         
