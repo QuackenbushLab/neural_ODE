@@ -37,10 +37,9 @@ class Visualizator1D(Visualizator):
         self.TOT_ROWS = 5
         self.TOT_COLS = 6
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
-        self.legend_traj = [Line2D([0], [0], color='black', linestyle='--', label='NN approximation'),
-                Line2D([0], [0], marker='o', color='red', label='Data', markerfacecolor='red', markersize=5)]
+        self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approximation'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
 
-        self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=2)
+        self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=3)
         
         self._set_ax_limits()
 
@@ -100,9 +99,11 @@ class Visualizator1D(Visualizator):
             for col_num, ax in enumerate(this_row_plots):
                 gene = row_num*self.TOT_COLS + col_num
                 ax.cla()
-                for sample_num, (approx_traj, traj) in enumerate(zip(self.trajectories, self.data_handler.data_np)):
-                    ax.plot(times[sample_num].flatten(), traj[:,:,gene].flatten(), 'r-o', alpha=0.3)
-                    ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k--', lw=2)
+                for sample_num, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, self.data_handler.data_np, self.data_handler.data_np_0noise)):
+                    ax.plot(times[sample_num].flatten(), traj[:,:,gene].flatten(), 'r-o', alpha=0.2)
+                    ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
+                    ax.plot(times[sample_num].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5)
+
                 ax.set_xlabel(r'$t$')
                 #ax.set_title(r'$gene_{}$'.format(gene+1))
         

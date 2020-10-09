@@ -11,6 +11,7 @@ def readcsv(fp, device, noise_to_add):
     print("Adding requested noise of {}".format(noise_to_add))
     data_np = []
     data_pt = []
+    data_np_0noise = []
     t_np = []
     t_pt = []
     with open(fp, 'r') as f:
@@ -24,6 +25,7 @@ def readcsv(fp, device, noise_to_add):
         for traj in range(ntraj):
             current_length = len(data[traj*(dim+1)])
             traj_data = np.zeros((current_length, 1, dim), dtype=np.float32)
+            traj_data_0noise = np.zeros((current_length, 1, dim), dtype=np.float32)
             for d in range(dim + 1):
                 if d == dim:
                     # Row is time data
@@ -34,10 +36,15 @@ def readcsv(fp, device, noise_to_add):
                     #row is gene-expression data; so add noise here!
                     row = [float(f)+ np.random.normal(0, noise_to_add) for f in data[traj*(dim+1) + d]]
                     traj_data[:,:,d] = np.expand_dims(np.array(row), axis=1)
+                    row_0noise =  [float(f) for f in data[traj*(dim+1) + d]]
+                    traj_data_0noise[:,:,d] = np.expand_dims(np.array(row_0noise), axis=1)
             
             data_np.append(traj_data)
+            data_np_0noise.append(traj_data_0noise)
             data_pt.append(torch.tensor(traj_data).to(device))
-    return data_np, data_pt, t_np, t_pt, dim, ntraj
+           
+
+    return data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise
 
 def writecsv(fp, dim, ntraj, data_np, t_np):
     ''' Write data from a datagenerator to a file '''

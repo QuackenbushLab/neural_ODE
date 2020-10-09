@@ -10,9 +10,10 @@ except ImportError:
 
 class DataHandler:
 
-    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac):
+    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise):
         self.data_np = data_np
         self.data_pt = data_pt
+        self.data_np_0noise = data_np_0noise
         self.time_np = time_np
         self.time_pt = time_pt
         self.dim = dim
@@ -44,8 +45,8 @@ class DataHandler:
     @classmethod
     def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0):
         ''' Create a datahandler from a CSV file '''
-        data_np, data_pt, t_np, t_pt, dim, ntraj = readcsv(fp, device, noise_to_add = noise)
-        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac)
+        data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise = readcsv(fp, device, noise_to_add = noise)
+        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise)
 
     @classmethod
     def fromgenerator(cls, generator, val_split, device, normalize=False):
