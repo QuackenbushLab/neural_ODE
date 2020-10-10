@@ -352,7 +352,7 @@ if __name__ == "__main__":
 
     plt.figure()
     plt.plot(range(1, settings['epochs'] + 1), training_loss, color = "blue", label = "Training loss")
-     if len(validation_loss) > 0:
+    if len(validation_loss) > 0:
         plt.plot(range(1, settings['epochs'] + 1), validation_loss, color = "red", label = "Validation loss")
         plt.plot(range(1, settings['epochs'] + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
     plt.yscale('log')
