@@ -351,23 +351,14 @@ if __name__ == "__main__":
         np.save('{}val_loss_at_epochs.npy'.format(output_root_dir), validation_loss)
 
     plt.figure()
-    plt.plot(range(1, settings['epochs'] + 1), training_loss)
+    plt.plot(range(1, settings['epochs'] + 1), training_loss, color = "blue", label = "Training loss")
+     if len(validation_loss) > 0:
+        plt.plot(range(1, settings['epochs'] + 1), validation_loss, color = "red", label = "Validation loss")
+        plt.plot(range(1, settings['epochs'] + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
     plt.yscale('log')
     plt.xlabel("Epoch")
-    plt.ylabel("Training error (MSE)")
-    plt.savefig("{}/training_loss.png".format(img_save_dir))
-    
-    #print("Overall time = ", total_time/3600, "hrs")
-    #print("Best training model's performance (MSE) = ", min(training_loss))
-
-    if len(validation_loss) > 0:
-        plt.figure()
-        plt.plot(range(1, settings['epochs'] + 1), validation_loss, color = "red", label = "Validation loss")
-        plt.plot(range(1, settings['epochs'] + 1), true_mean_losses, color = "green", label = "True mu loss")
-        plt.yscale('log')
-        plt.xlabel("Epoch")
-        plt.legend(loc='upper right')
-        plt.ylabel("Error (MSE)")
-        plt.savefig("{}/validation_mu_loss.png".format(img_save_dir))
-       
+    plt.legend(loc='upper right')
+    plt.ylabel("Error (MSE)")
+    plt.savefig("{}/MSE_loss.png".format(img_save_dir))
+        
  
