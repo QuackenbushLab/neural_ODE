@@ -304,7 +304,7 @@ if __name__ == "__main__":
                     save_model(odenet, output_root_dir, 'best_val_model')
                     
             print("Validation loss {:.5E}".format(val_loss))
-            print("True mu loss {:.5E}".format(mu_loss))
+        print("True mu loss {:.5E}".format(mu_loss))
 
         if settings['viz'] and epoch in viz_epochs:
             print("Saving plot")
