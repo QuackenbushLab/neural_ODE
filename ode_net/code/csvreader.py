@@ -12,6 +12,7 @@ def readcsv(fp, device, noise_to_add):
     data_np = []
     data_pt = []
     data_np_0noise = []
+    data_pt_0noise = []
     t_np = []
     t_pt = []
     with open(fp, 'r') as f:
@@ -42,9 +43,10 @@ def readcsv(fp, device, noise_to_add):
             data_np.append(traj_data)
             data_np_0noise.append(traj_data_0noise)
             data_pt.append(torch.tensor(traj_data).to(device))
+            data_pt_0noise.append(torch.tensor(traj_data_0noise).to(device))
            
 
-    return data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise
+    return data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise,data_pt_0noise
 
 def writecsv(fp, dim, ntraj, data_np, t_np):
     ''' Write data from a datagenerator to a file '''

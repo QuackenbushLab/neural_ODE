@@ -10,10 +10,11 @@ except ImportError:
 
 class DataHandler:
 
-    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise):
+    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise):
         self.data_np = data_np
         self.data_pt = data_pt
         self.data_np_0noise = data_np_0noise
+        self.data_pt_0noise = data_pt_0noise
         self.time_np = time_np
         self.time_pt = time_pt
         self.dim = dim
@@ -45,8 +46,8 @@ class DataHandler:
     @classmethod
     def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0):
         ''' Create a datahandler from a CSV file '''
-        data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise = readcsv(fp, device, noise_to_add = noise)
-        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise)
+        data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise, data_pt_0noise = readcsv(fp, device, noise_to_add = noise)
+        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise)
 
     @classmethod
     def fromgenerator(cls, generator, val_split, device, normalize=False):
@@ -165,6 +166,7 @@ class DataHandler:
         self.val_set_indx = [self.indx[x] for x in val_indx]
         self.train_set_original = [self.indx[x] for x in train_indx]
         self.train_data_length = len(self.train_set_original)
+      
 
     def _split_data_traj(self, val_split):
         ''' Split the data into a training set and validation set '''
@@ -217,6 +219,20 @@ class DataHandler:
     def get_y0(self):
         return [tensor[0] for tensor in self.data_pt]
 
+    def get_true_mu_set(self):
+        all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
+        mean_data = []
+        mean_target = []
+        mean_t = []
+        for i in all_indx:
+            mean_data.append(self.data_pt_0noise[i[0]][i[1]])
+            mean_target.append(self.data_pt_0noise[i[0]][i[1] + 1])
+            mean_t.append(torch.stack([self.time_pt[i[0]][i[1] + ii] for ii in range(2)]))
+        mean_data = torch.stack(mean_data).to(self.device)
+        mean_target = torch.stack(mean_target).to(self.device)
+        mean_t = torch.stack(mean_t).to(self.device)
+        return mean_data, mean_t, mean_target
+       
     def get_times(self):
         times = torch.stack(self.time_pt)
         return times

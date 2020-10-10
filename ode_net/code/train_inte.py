@@ -58,6 +58,18 @@ def validation(odenet, data_handler, method, explicit_time):
         loss = torch.mean((torch.abs(predictions - target) ** 2))
     return loss
 
+def true_loss(odenet, data_handler, method):
+    data, t, target = data_handler.get_true_mu_set()
+    with torch.no_grad():
+        predictions = torch.zeros(data.shape).to(data_handler.device)
+        for index, (time, batch_point) in enumerate(zip(t, data)):
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+        
+        # Calculate true mean loss
+        loss = torch.mean((torch.abs(predictions - target) ** 2))
+    return loss
+
+
 def decrease_lr(opt, verbose, one_time_drop = 0):
     for param_group in opt.param_groups:
         if one_time_drop == 0:
@@ -117,8 +129,8 @@ def save_model(odenet, folder, filename):
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
 clean_name = "simulated_expression_chalmers_30genes_6samples_0noise"
-#parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+#parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 args = parser.parse_args()
 
 # Main function
@@ -190,6 +202,8 @@ if __name__ == "__main__":
     else:
         opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
+    #mu_loss = true_loss(odenet, data_handler, settings['method']) #IH testing!
+    
     # Init plot
     if settings['viz']:
         #if cleaned_file_name.startswith('1d_parabolic'):
@@ -205,6 +219,7 @@ if __name__ == "__main__":
     total_time = 0
     validation_loss = []
     training_loss = []
+    true_mean_losses = []
     A_list = []
 
     min_loss = 0
@@ -222,11 +237,10 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     start_time = perf_counter()
 
-    #data_handler._create_validation_set_traj() #remove IH
-    #val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time']) #remove IH
+    
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [25, 40, 50, 80, 120, 160, 200, 240, tot_epochs]
+    rep_epochs = [3, 25, 40, 50, 80, 120, 160, 200, 240, tot_epochs]
     one_time_drop_done = False
 
     for epoch in range(1, tot_epochs + 1):
@@ -248,6 +262,8 @@ if __name__ == "__main__":
                 pbar.update(1)
                 pbar.set_description("Training loss: {:.5E}".format(loss.item()))
         
+        epoch_times.append(perf_counter() - start_epoch_time)
+
         #Epoch done, now handle training loss
         train_loss = loss.item()
         training_loss.append(train_loss)
@@ -258,9 +274,7 @@ if __name__ == "__main__":
                 min_train_loss = train_loss
                 save_model(odenet, output_root_dir, 'best_train_model')
         
-        epoch_times.append(perf_counter() - start_epoch_time)
-        
-
+               
         if settings['verbose']:
             pbar.close()
 
@@ -269,19 +283,27 @@ if __name__ == "__main__":
             A_list.append(A)
             print('A =\n{}'.format(A))
 
+        #handle true-mu loss
+        mu_loss = true_loss(odenet, data_handler, settings['method'])
+        true_mean_losses.append(mu_loss)
+
         if data_handler.n_val > 0:
             val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
             validation_loss.append(val_loss)
             if epoch == 1:
-                min_loss = val_loss
+                min_val_loss = val_loss
                 print('Model improved, saving current model')
                 save_model(odenet, output_root_dir, 'best_val_model')
             else:
-                if val_loss < min_loss:
-                    min_loss = val_loss
+                if val_loss < min_val_loss:
+                    min_val_loss = val_loss
+                    true_loss_of_min_val_model =  mu_loss
+                    #saving true-mean loss of best val model
                     print('Model improved, saving current model')
-                    save_model(odenet, output_root_dir, 'best_model')
+                    save_model(odenet, output_root_dir, 'best_val_model')
+                    
             print("Validation loss {:.5E}".format(val_loss))
+            print("True mu loss {:.5E}".format(mu_loss))
 
         if settings['viz'] and epoch in viz_epochs:
             print("Saving plot")
@@ -304,8 +326,12 @@ if __name__ == "__main__":
 
         if epoch in rep_epochs:
             print()
-            print("Epoch=",epoch,"; Time so far= ", (perf_counter() - start_time)/3600, "hrs")
-            print("Epoch=",epoch,"; Best training (MSE) so far= ", min_train_loss)
+            print("Epoch=", epoch)
+            print("Time so far= ", (perf_counter() - start_time)/3600, "hrs")
+            print("Best training (MSE) so far= ", min_train_loss)
+            if data_handler.n_val > 0:
+                print("Best validation (MSE) so far = ", min_val_loss.item())
+                print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
             print()
     
     total_time = perf_counter() - start_time
@@ -335,10 +361,12 @@ if __name__ == "__main__":
 
     if len(validation_loss) > 0:
         plt.figure()
-        plt.plot(range(1, settings['epochs'] + 1), validation_loss)
+        plt.plot(range(1, settings['epochs'] + 1), validation_loss, color = "red", label = "Validation loss")
+        plt.plot(range(1, settings['epochs'] + 1), true_mean_losses, color = "green", label = "True mu loss")
+        plt.yscale('log')
         plt.xlabel("Epoch")
-        plt.ylabel("Validation error (MSE)")
-        plt.savefig("{}/validation_loss.png".format(img_save_dir))
-        print("Best model's performance (MSE) = ", min_loss.item())
-
+        plt.legend(loc='upper right')
+        plt.ylabel("Error (MSE)")
+        plt.savefig("{}/validation_mu_loss.png".format(img_save_dir))
+       
  
