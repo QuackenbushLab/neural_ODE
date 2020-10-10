@@ -240,5 +240,12 @@ methods. J Comput Biol. 2009;16:229–39.
         - 100 neurons, noise 0.001, fixed lr = 0.005, epochs = 200, c5.9xlarge
         - we see reasonable performance, looks good for proceeding with more noise experiments
 
+10/10/2020 notes: 
+1) noise experiments with true_mu are interesting
+    - need to discuss with RB the current strategy for evaluating the predicted dynamics w.r.t mu_loss
+    - expanding to 8 samples  
+    - val_split= 0.25; we have same number of data points as with 6 samples val_split = 0
+    - currently testing plots, and basics ... (WORKS!?)
+    - now running 8 sample (vs 0.25) experiment for 200 epochs 
 
 
