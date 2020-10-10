@@ -240,7 +240,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [3, 25, 40, 50, 80, 120, 160, 200, 240, tot_epochs]
+    rep_epochs = [25, 40, 50, 80, 120, 160, 200, 240, tot_epochs]
     one_time_drop_done = False
 
     for epoch in range(1, tot_epochs + 1):
@@ -249,6 +249,7 @@ if __name__ == "__main__":
         data_handler.reset_epoch()
         #visualizer.save(img_save_dir, epoch) #IH added to test
         if settings['verbose']:
+            print()
             print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss: ")
         while not data_handler.epoch_done:
@@ -332,7 +333,7 @@ if __name__ == "__main__":
             if data_handler.n_val > 0:
                 print("Best validation (MSE) so far = ", min_val_loss.item())
                 print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
-            print()
+            #print()
     
     total_time = perf_counter() - start_time
 

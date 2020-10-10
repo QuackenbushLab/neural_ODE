@@ -238,7 +238,7 @@ methods. J Comput Biol. 2009;16:229–39.
     - updated plotting code to plot true dynamics (mean function) as well
     - running small experiment:
         - 100 neurons, noise 0.001, fixed lr = 0.005, epochs = 200, c5.9xlarge
-        - we see that... 
+        - we see reasonable performance, looks good for proceeding with more noise experiments
 
 
 
