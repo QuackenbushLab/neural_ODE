@@ -268,11 +268,15 @@ if __name__ == "__main__":
         #Epoch done, now handle training loss
         train_loss = loss.item()
         training_loss.append(train_loss)
+        mu_loss = true_loss(odenet, data_handler, settings['method'])
+        true_mean_losses.append(mu_loss)
+
         if epoch == 1:
                 min_train_loss = train_loss
         else:
             if train_loss < min_train_loss:
                 min_train_loss = train_loss
+                true_loss_of_min_train_model =  mu_loss
                 save_model(odenet, output_root_dir, 'best_train_model')
         
                
@@ -285,9 +289,7 @@ if __name__ == "__main__":
             print('A =\n{}'.format(A))
 
         #handle true-mu loss
-        mu_loss = true_loss(odenet, data_handler, settings['method'])
-        true_mean_losses.append(mu_loss)
-
+       
         if data_handler.n_val > 0:
             val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
             validation_loss.append(val_loss)
@@ -333,6 +335,9 @@ if __name__ == "__main__":
             if data_handler.n_val > 0:
                 print("Best validation (MSE) so far = ", min_val_loss.item())
                 print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
+            else:
+                print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
+                
             #print()
     
     total_time = perf_counter() - start_time
