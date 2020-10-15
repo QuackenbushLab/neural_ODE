@@ -128,9 +128,10 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_30genes_8 samples_0noise"
+clean_name = "chalmers_30genes_6samples_0noise"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+
 args = parser.parse_args()
 
 # Main function
@@ -359,7 +360,7 @@ if __name__ == "__main__":
     plt.plot(range(1, settings['epochs'] + 1), training_loss, color = "blue", label = "Training loss")
     if len(validation_loss) > 0:
         plt.plot(range(1, settings['epochs'] + 1), validation_loss, color = "red", label = "Validation loss")
-        plt.plot(range(1, settings['epochs'] + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
+    plt.plot(range(1, settings['epochs'] + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
     plt.yscale('log')
     plt.xlabel("Epoch")
     plt.legend(loc='upper right')

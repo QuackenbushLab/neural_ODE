@@ -247,5 +247,6 @@ methods. J Comput Biol. 2009;16:229–39.
     - val_split= 0.25; we have same number of data points as with 6 samples val_split = 0
     - currently testing plots, and basics ... (WORKS!?)
     - now running 8 sample (vs 0.25) experiment for 200 epochs 
+    - now running 8 sample (vs 0) experiment for 200 epochs
 
 
