@@ -216,8 +216,11 @@ class DataHandler:
             self.indx.extend(indices)
             row_indx += 1
 
-    def get_y0(self):
-        return [tensor[0] for tensor in self.data_pt]
+    #def get_y0(self):
+    #    return [tensor[0] for tensor in self.data_pt]
+    
+    def get_mu0(self):
+        return [tensor[0] for tensor in self.data_pt_0noise]
 
     def get_true_mu_set(self):
         all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
@@ -239,12 +242,12 @@ class DataHandler:
 
     def calculate_trajectory(self, odenet, method):
         trajectories = []
-        y0 = self.get_y0()
+        mu0 = self.get_mu0()
         for j in range(self.ntraj):
             if odenet.explicit_time:
-                _y = torch.cat((y0[j], self.time_pt[j][0].reshape((1, 1))), 1)
+                _y = torch.cat((mu0[j], self.time_pt[j][0].reshape((1, 1))), 1)
             else:
-                _y = y0[j]
+                _y = mu0[j]
             y = odeint(odenet, _y, self.time_pt[j], method=method)
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
