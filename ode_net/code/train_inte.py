@@ -362,7 +362,7 @@ if __name__ == "__main__":
     #save_model(odenet, output_root_dir, 'final_model')
 
     print("Saving times")
-    np.savetxt('{}total_time.csv'.format(output_root_dir), [total_time], delimiter=',')
+    #np.savetxt('{}total_time.csv'.format(output_root_dir), [total_time], delimiter=',')
     #np.savetxt('{}batch_times.csv'.format(output_root_dir), batch_times, delimiter=',')
     np.savetxt('{}epoch_times.csv'.format(output_root_dir), epoch_times, delimiter=',')
 
