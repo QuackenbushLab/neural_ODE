@@ -250,3 +250,10 @@ methods. J Comput Biol. 2009;16:229–39.
     - now running 8 sample (vs 0) experiment for 200 epochs
 
 
+10/16/2020 notes:
+1) After meeting with RB it's clear that our procedure works
+    - but need to scale up to include more samples to get better performance
+    - also realistic depiction of real-world time-series data (few t, large n, large g)
+    - currently scaled up to 50 samples (30 genes)
+
+

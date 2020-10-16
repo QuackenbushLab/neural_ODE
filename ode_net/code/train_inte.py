@@ -30,6 +30,19 @@ def validation(trajectories, data_handler):
     return loss
 '''
 
+def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img_save_dir):
+    plt.figure()
+    plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
+    if len(validation_loss) > 0:
+        plt.plot(range(1, epoch_so_far + 1), validation_loss, color = "red", label = "Validation loss")
+    plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
+    plt.yscale('log')
+    plt.xlabel("Epoch")
+    plt.legend(loc='upper right')
+    plt.ylabel("Error (MSE)")
+    plt.savefig("{}/MSE_loss.png".format(img_save_dir))
+        
+
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
     #print(data)
@@ -338,6 +351,8 @@ if __name__ == "__main__":
                 print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
             else:
                 print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
+            print("Saving MSE plot...")
+            plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
                 
             #print()
     
@@ -356,15 +371,6 @@ if __name__ == "__main__":
         np.save('{}A_at_epochs.npy'.format(output_root_dir), A_list)
         np.save('{}val_loss_at_epochs.npy'.format(output_root_dir), validation_loss)
 
-    plt.figure()
-    plt.plot(range(1, settings['epochs'] + 1), training_loss, color = "blue", label = "Training loss")
-    if len(validation_loss) > 0:
-        plt.plot(range(1, settings['epochs'] + 1), validation_loss, color = "red", label = "Validation loss")
-    plt.plot(range(1, settings['epochs'] + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
-    plt.yscale('log')
-    plt.xlabel("Epoch")
-    plt.legend(loc='upper right')
-    plt.ylabel("Error (MSE)")
-    plt.savefig("{}/MSE_loss.png".format(img_save_dir))
-        
+
+  
  
