@@ -255,6 +255,7 @@ methods. J Comput Biol. 2009;16:229–39.
     - but need to scale up to include more samples to get better performance
     - also realistic depiction of real-world time-series data (few t, large n, large g)
     - currently scaled up to 50 samples (30 genes)
+        - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
     - saving MSE_plot more often in case we want to end the experiment early
 
 
