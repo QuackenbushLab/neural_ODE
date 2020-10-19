@@ -1,5 +1,3 @@
-
-
 Questions for Rebekka (early august 2020): 
 0) updates:
     a) not too much progress
@@ -265,5 +263,11 @@ methods. J Comput Biol. 2009;16:229–39.
 1) Keeping 50 samples (30 genes), but with 50 neurons
     - see if we can get ~4.96E-04 with only 50 neurons, now that we've scaled up samples
     - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
+    - NEED TO DO 
+2) Keeping 50 samples (30 genes), 100 neurons, but on GPU!
+    - see if we can get ~4.96E-04 with only 50 neurons, now that we've scaled up samples
+    - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
+3) Discuss validation strategy with RB 
+    - currently doing things in RANDOM pairs instead of ALL pairs per trajectory
 
 
