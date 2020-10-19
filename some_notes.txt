@@ -263,12 +263,20 @@ methods. J Comput Biol. 2009;16:229–39.
 1) Keeping 50 samples (30 genes), but with 50 neurons
     - see if we can get ~4.96E-04 with only 50 neurons, now that we've scaled up samples
     - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
-    - NEED TO DO 
+    - ...
+    - Steps seem too shallow. Maybe repeat with larger step-size (init_lr = 0.01)?
 2) Keeping 50 samples (30 genes), 100 neurons, but on GPU!
     - see if we can see benefits of parallelization, now that we've scaled up samples
     - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
-    - NOT FEASIBLE, VERY SLOW. WILL NEED TO INVESTIGATE LATER
-3) Discuss validation strategy with RB 
+    - NOT FEASIBLE, VERY SLOW. WILL NEED TO INVESTIGATE LATER:
+        - post on Pytorch help community (general neuralODE .backward() question)
+        - check if odeint() is the most expensive step in torchdiffeq's backprop algorithm
+        - pull new torchdiffeq files from NeuralODE authors' GitHub repo
+        - run on GPU with reduced batch-size
+3) Keeping 50 samples; 50 neurons; 150 genes; times = 0,3,6,9        
+4) Discuss validation strategy with RB 
     - currently doing things in RANDOM pairs instead of ALL pairs per trajectory
+    - maybe good to try ALL pairs from 49 people as train, and all pairs from 1 person as test
+     
 
 
