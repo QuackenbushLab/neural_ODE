@@ -5,7 +5,7 @@ import sys
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
     
-    def __init__(self, device, ndim, explicit_time=False, neurons):
+    def __init__(self, device, ndim, explicit_time=False, neurons=100):
         ''' Initialize a new ODE-Net '''
         super(ODENet, self).__init__()
 

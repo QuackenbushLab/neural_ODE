@@ -195,6 +195,7 @@ if __name__ == "__main__":
 
     
     # Initialization
+    print("Using a NN with {} neurons per layer".format(settings['neurons_per_layer']))
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
     if settings['pretrained_model']:
