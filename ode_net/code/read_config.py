@@ -17,6 +17,7 @@ def _convert_arguments(settings):
     converted_settings['viz_every_iteration'] = settings.getboolean('viz_every_iteration')
     converted_settings['verbose'] = settings.getboolean('verbose')
     converted_settings['method'] = settings['method']
+    converted_settings['neurons_per_layer'] = settings['neurons_per_layer']
     converted_settings['optimizer'] = settings['optimizer']
 
     converted_settings['batch_type'] = settings['batch_type']

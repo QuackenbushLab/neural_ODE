@@ -256,6 +256,14 @@ methods. J Comput Biol. 2009;16:229–39.
     - also realistic depiction of real-world time-series data (few t, large n, large g)
     - currently scaled up to 50 samples (30 genes)
         - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
+            - good overall performance (true mu MSE down to 4.96E-04)
+            - but took 21 hours to run.... 
     - saving MSE_plot more often in case we want to end the experiment early
+
+
+10/19/2020 notes:
+1) Keeping 50 samples (30 genes), but with 50 neurons
+    - see if we can get ~4.96E-04 with only 50 neurons, now that we've scaled up samples
+    - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
 
 

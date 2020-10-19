@@ -5,7 +5,7 @@ import sys
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
     
-    def __init__(self, device, ndim, explicit_time=False):
+    def __init__(self, device, ndim, explicit_time=False, neurons):
         ''' Initialize a new ODE-Net '''
         super(ODENet, self).__init__()
 
@@ -14,23 +14,23 @@ class ODENet(nn.Module):
         # Create a new sequential model with ndim inputs and outputs
         if explicit_time:
             self.net = nn.Sequential(
-                nn.Linear(ndim + 1, 100),
+                nn.Linear(ndim + 1, neurons),
                 nn.LeakyReLU(),
-                nn.Linear(100, 100),
+                nn.Linear(neurons, neurons),
                 nn.LeakyReLU(),
-                nn.Linear(100, 100),
+                nn.Linear(neurons, neurons),
                 nn.LeakyReLU(),
-                nn.Linear(100, ndim)
+                nn.Linear(neurons, ndim)
             )
         else:
             self.net = nn.Sequential(
-                nn.Linear(ndim, 100),
+                nn.Linear(ndim, neurons),
                 nn.LeakyReLU(),
-                nn.Linear(100, 100),
+                nn.Linear(neurons, neurons),
                 nn.LeakyReLU(),
-                nn.Linear(100, 100),
+                nn.Linear(neurons, neurons),
                 nn.LeakyReLU(),
-                nn.Linear(100, ndim)
+                nn.Linear(neurons, ndim)
             )
 
         # Initialize the layers of the model

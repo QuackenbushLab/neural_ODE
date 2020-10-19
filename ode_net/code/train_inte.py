@@ -195,7 +195,7 @@ if __name__ == "__main__":
 
     
     # Initialization
-    odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'])
+    odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
     if settings['pretrained_model']:
         pretrained_model_file = '{}/_pretrained_best_model/best_train_model.pt'.format(settings['output_dir'])
