@@ -36,6 +36,7 @@ class Visualizator1D(Visualizator):
         self.fig_traj_split.canvas.set_window_title("Trajectories in each dimension")
         self.TOT_ROWS = 5
         self.TOT_COLS = 6
+        self.genes_to_viz = [1,6,14,16,21,32,37,39,41,43,46,48,49,56,58,60,75,85,92,99,101,103,115,118,120,122,127,128,142,143]
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
 
@@ -97,7 +98,7 @@ class Visualizator1D(Visualizator):
         times = self.data_handler.time_np
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
-                gene = row_num*self.TOT_COLS + col_num
+                gene = self.genes_to_viz[row_num*self.TOT_COLS + col_num] #IH restricting to plot only up to 30 genes
                 ax.cla()
                 for sample_num, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, self.data_handler.data_np, self.data_handler.data_np_0noise)):
                     if sample_num > 7: #IH restrciting to plotting only 7 genes
@@ -105,10 +106,8 @@ class Visualizator1D(Visualizator):
                     ax.plot(times[sample_num].flatten(), traj[:,:,gene].flatten(), 'r-o', alpha=0.15)
                     ax.plot(times[sample_num].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5)
                     ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
-                  
+                
                 ax.set_xlabel(r'$t$')
-                #ax.set_title(r'$gene_{}$'.format(gene+1))
-        
         
             
     def _visualize_dynamics(self):
