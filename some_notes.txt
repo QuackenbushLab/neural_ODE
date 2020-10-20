@@ -278,7 +278,7 @@ methods. J Comput Biol. 2009;16:229–39.
     - Changed plotting so that only upto 30 genes and upto 7 samples are plotted
     - SCALING UP GENES DOESN'T AFFECT RUNTIME, BUT SCALING DOWN TIME-POINTS DOES!
         - i.e. overall "time-points" is what matters!
-    - NOT GETTING TOO GOOD PREDICTIONS:
+    - NOT GETTING GOOD PREDICTIONS:
         - steps seem too shallow. Maybe repeat with larger step-size (init_lr = 0.01)?
         - try upscaling the NN (100 neurons)?
 4) Discuss validation strategy with RB 
@@ -291,7 +291,13 @@ methods. J Comput Biol. 2009;16:229–39.
     - post on Pytorch help community (general neuralODE .backward() question)
     - check if odeint() is the most expensive step in torchdiffeq's backprop algorithm
     - pull new torchdiffeq files from NeuralODE authors' GitHub repo
+        - done, seems to run fine! easy integration.
     - run on GPU with reduced batch-size
+        - trying now with batch_size = 4
+        - doesn't look to promising, but our program does not also look vectorized
+        - can talk to Marouen to see how to parallelize it.
+    - run on CPU for GPU comparison
+        - similar as above, batch_size = 4
 
      
 
