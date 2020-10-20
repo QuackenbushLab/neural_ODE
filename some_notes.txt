@@ -264,7 +264,6 @@ methods. J Comput Biol. 2009;16:229–39.
     - see if we can get ~4.96E-04 with only 50 neurons, now that we've scaled up samples
     - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
     - ...
-    - Steps seem too shallow. Maybe repeat with larger step-size (init_lr = 0.01)?
 2) Keeping 50 samples (30 genes), 100 neurons, but on GPU!
     - see if we can see benefits of parallelization, now that we've scaled up samples
     - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
@@ -276,7 +275,11 @@ methods. J Comput Biol. 2009;16:229–39.
 3) Keeping 50 samples; 50 neurons; 150 genes (scaled up); times = 0,3,6,9 (scaled down)
     - 150 data points (90% training = 135 points = 68/batch, 10% validation = 15 points)
     - Changed plotting so that only upto 30 genes and upto 7 samples are plotted
-    - ...
+    - SCALING UP GENES DOESN'T AFFECT RUNTIME, BUT SCALING DOWN TIME-POINTS DOES!
+        - i.e. overall "time-points" is what matters!
+    - NOT GETTING TOO GOOD PREDICTIONS:
+        - steps seem too shallow. Maybe repeat with larger step-size (init_lr = 0.01)?
+        - try upscaling the NN (100 neurons)
 4) Discuss validation strategy with RB 
     - currently doing things in RANDOM pairs instead of ALL pairs per trajectory
     - maybe good to try ALL pairs from 49 people as train, and all pairs from 1 person as test
