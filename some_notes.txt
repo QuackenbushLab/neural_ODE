@@ -281,6 +281,7 @@ methods. J Comput Biol. 2009;16:229–39.
     - NOT GETTING GOOD PREDICTIONS:
         - steps seem too shallow. Maybe repeat with larger step-size (init_lr = 0.01)?
         - try upscaling the NN (100 neurons)?
+        - try increasing number of samples (150 samples)?
 4) Discuss validation strategy with RB 
     - currently doing things in RANDOM pairs instead of ALL pairs per trajectory
     - maybe good to try ALL pairs from 49 people as train, and all pairs from 1 person as test
@@ -295,13 +296,15 @@ methods. J Comput Biol. 2009;16:229–39.
     - run on GPU with reduced batch-size
         - trying now with batch_size = 4
             - GPU = NO BENEFIT, the main benefit is coming from reduced batch size.
-        - doesn't look to promising, but our program does not also look vectorized
-        - can talk to Marouen to see how to parallelize it.
+        - doesn't look too promising, but our program also does not look properly vectorized
+        - can talk to Marouen to see how to properly parallelize it.
     - run on CPU for GPU comparison
         - similar as above, batch_size = 4
         - runtime goes down DUE TO LOWER BATCH SIZE, but performance poor. 
         - MSE is too volatile!
-
+2) Back to realistic dataset(150 samples; 50 neurons; 150 genes; times = 0,3,6,9):
+    - 450 data points (90% training = 405 points = 203/batch, 10% validation = 45 points)
+    - Note that trying 150 samples now, hope is that more data will lead to better prediction (~10^-4)
      
 
 
