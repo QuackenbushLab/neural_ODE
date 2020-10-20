@@ -294,12 +294,13 @@ methods. J Comput Biol. 2009;16:229–39.
         - done, seems to run fine! easy integration.
     - run on GPU with reduced batch-size
         - trying now with batch_size = 4
-            - no benefit, the main benefit is coming from reduced batch size.
+            - GPU = NO BENEFIT, the main benefit is coming from reduced batch size.
         - doesn't look to promising, but our program does not also look vectorized
         - can talk to Marouen to see how to parallelize it.
     - run on CPU for GPU comparison
         - similar as above, batch_size = 4
-        - runtime goes up, but performance poor. 
+        - runtime goes down DUE TO LOWER BATCH SIZE, but performance poor. 
+        - MSE is too volatile!
 
      
 
