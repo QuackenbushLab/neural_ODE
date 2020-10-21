@@ -312,6 +312,7 @@ methods. J Comput Biol. 2009;16:229–39.
         - ran it for 25 epochs and then stopped. 
     - Try higher learning rate (lr = 0.01)
         - see how this compares to analysis above (point 2)
+        - ...
      
 
 
