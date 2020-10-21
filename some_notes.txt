@@ -327,5 +327,6 @@ methods. J Comput Biol. 2009;16:229–39.
     - check if odeint() is the most expensive step in torchdiffeq's backprop algorithm
     - run on GPU with reduced batch-size
         - doesn't look too promising, but our program also does not look properly vectorized. talk to Marouen
-        - talk to Debbie about using m5.x instance
+    - Talk to Debbie about using m5.x instance
+            - could try m5 16x large and see (similar cost as c5.18xlarge)
 
