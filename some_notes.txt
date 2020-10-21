@@ -303,8 +303,9 @@ methods. J Comput Biol. 2009;16:229–39.
         - runtime goes down DUE TO LOWER BATCH SIZE, but performance poor. 
         - MSE is too volatile!
 2) Back to realistic dataset(150 samples; 50 neurons; 150 genes; times = 0,3,6,9):
-    - 450 data points (90% training = 405 points = 102/batch (4 batches), 10% validation = 45 points)
+    - 450 data points (90% training = 405 points = 203/batch (2 batches), 10% validation = 45 points)
     - Note that trying 150 samples now, hope is that more data will lead to better prediction (~10^-4)
+    - Could later try larger step-size (init_lr = 0.01) and upscaled NN (100 neurons)
      
 
 
