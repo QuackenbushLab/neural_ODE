@@ -308,7 +308,7 @@ methods. J Comput Biol. 2009;16:229–39.
 3) More stuff with realistic dataset (150 samples; 50 neurons; 150 genes; times = 0,3,6,9):
     - Try lower batchsize (4 batches)
         - see how this compares to analysis above (point 2)
-        - performance is poor! so real increase in run-time OR MSE
+        - performance is poor! NO real increase in run-time OR MSE
         - ran it for 25 epochs and then stopped. 
     - Try higher learning rate (lr = 0.01)
         - see how this compares to analysis above (point 2)
