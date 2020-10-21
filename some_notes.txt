@@ -304,8 +304,10 @@ methods. J Comput Biol. 2009;16:229–39.
         - MSE is too volatile!
 2) Back to realistic dataset(150 samples; 50 neurons; 150 genes; times = 0,3,6,9):
     - 450 data points (90% training = 405 points = 203/batch (2 batches), 10% validation = 45 points)
-    - Note that trying 150 samples now, hope is that more data will lead to better prediction (~10^-4)
-    - Could later try larger step-size (init_lr = 0.01) and upscaled NN (100 neurons)
+    - Note that trying 150 samples now, hope is that more data will lead to better prediction (<10^-3)
+3) More stuff with realistic dataset (150 samples; 50 neurons; 150 genes; times = 0,3,6,9):
+    - Try larger step-size (init_lr = 0.01), lower batchsize (4 batches)
+    - see how this compares to analysis above
      
 
 
