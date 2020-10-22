@@ -14,16 +14,16 @@ def read_arguments_from_file(fp):
 def _convert_arguments(settings):
     converted_settings = {}
     converted_settings['viz'] = settings.getboolean('viz')
-    converted_settings['viz_every_iteration'] = settings.getboolean('viz_every_iteration')
-    converted_settings['verbose'] = settings.getboolean('verbose')
+    converted_settings['viz_every_iteration'] = False
+    converted_settings['verbose'] = True
     converted_settings['method'] = settings['method']
     converted_settings['neurons_per_layer'] = settings.getint('neurons_per_layer')
     converted_settings['optimizer'] = settings['optimizer']
 
     converted_settings['batch_type'] = settings['batch_type']
     converted_settings['batch_size'] = settings.getint('batch_size')
-    converted_settings['batch_time'] = settings.getint('batch_time')
-    converted_settings['batch_time_frac'] = settings.getfloat('batch_time_frac')
+    converted_settings['batch_time'] = 99999
+    converted_settings['batch_time_frac'] = 99999
 
     converted_settings['dec_lr'] = settings.getboolean('dec_lr')
     converted_settings['dec_lr_factor'] = settings.getfloat('dec_lr_factor')
@@ -38,11 +38,11 @@ def _convert_arguments(settings):
     converted_settings['solve_eq_gridsize'] = settings.getint('solve_eq_gridsize')
     converted_settings['solve_A'] = settings.getboolean('solve_A')
 
-    converted_settings['debug'] = settings.getboolean('debug')  
-    converted_settings['output_dir'] = settings['output_dir']
+    converted_settings['debug'] = False  
+    converted_settings['output_dir'] = "output"
     converted_settings['normalize_data'] = settings.getboolean('normalize_data')  
     converted_settings['explicit_time'] = settings.getboolean('explicit_time')
-    converted_settings['relative_error'] = settings.getboolean('relative_error') 
+    converted_settings['relative_error'] = False
 
     converted_settings['pretrained_model'] = settings.getboolean('pretrained_model') 
     

@@ -315,7 +315,7 @@ methods. J Comput Biol. 2009;16:229–39.
         - see how this compares to analysis above (point 2)
         - no increase in runtime or MSE. 
 
-10/21/2020 notes: 
+10/21/2020 notes:
 0) Overall takeaways from realistic dataset experiments:
     - Reducing number of time-points has BIG effect on reducing runtime, but makes prediction harder
     - Increasing genes doesn't seem to affect runtime by a huge margin
