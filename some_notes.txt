@@ -329,4 +329,5 @@ methods. J Comput Biol. 2009;16:229–39.
         - doesn't look too promising, but our program also does not look properly vectorized. talk to Marouen
     - Talk to Debbie about using m5.x instance
             - could try m5 16x large and see (similar cost as c5.18xlarge)
-
+                - 150 samples; 50 neurons; 150 genes; times = 0,3,6,9
+                - 
