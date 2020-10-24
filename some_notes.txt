@@ -331,3 +331,12 @@ methods. J Comput Biol. 2009;16:229–39.
             - could try m5 16x large and see (similar cost as c5.18xlarge)
                 - 150 samples; 50 neurons; 150 genes; times = 0,3,6,9
                 - not good; very slow on m5 instances
+    - Tried increasing SWAP space. No luck unfortunately!
+
+
+10/22/2020 notes: 
+1) Speed-up strategies:
+    - post on Pytorch help community (general neuralODE .backward() question)
+    - check if odeint() is the most expensive step in torchdiffeq's backprop algorithm
+    - vectorize properly for GPU support
+        - perhaps best way forward now
