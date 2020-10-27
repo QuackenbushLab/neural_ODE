@@ -318,7 +318,7 @@ methods. J Comput Biol. 2009;16:229–39.
 10/21/2020 notes:
 0) Overall takeaways from realistic dataset experiments:
     - Reducing number of time-points has BIG effect on reducing runtime, but makes prediction harder
-    - Increasing genes doesn't seem to affect runtime by a huge margin
+    - Increasing genes doesn't seem to affect runtime by a huge margin (scalable)
     - Neither batch-size nor LR seem to help learning
     - Doesn't seem like increasing samples can help learning all that much (but maybe can try MANY MANY samples)
     - Next step is to increase NN size!
@@ -334,9 +334,13 @@ methods. J Comput Biol. 2009;16:229–39.
     - Tried increasing SWAP space. No luck unfortunately!
 
 
-10/22/2020 notes: 
-1) Speed-up strategies:
-    - post on Pytorch help community (general neuralODE .backward() question)
-    - check if odeint() is the most expensive step in torchdiffeq's backprop algorithm
-    - vectorize properly for GPU support
-        - perhaps best way forward now
+10/27/2020 notes: 
+0) Recall:
+    - Reducing number of time-points has BIG effect on reducing runtime, but makes prediction harder
+    - Increasing genes doesn't seem to affect runtime by a huge margin (scalable)
+    - Neither batch-size nor LR seem to help learning
+    - Doesn't seem like increasing samples can help learning all that much (but maybe can try MANY MANY samples)
+    - Next step is to increase NN size!
+1) More stuff with realistic dataset (600 samples; 50 neurons; 150 genes; times = 0,3,6,9):
+   - 450 data points (90% training = 1620 points = 810/batch (2 batches), 10% validation = 180 points)
+   - Note that trying 600 samples now, hope is that more data will lead to better prediction (<10^-3) 
