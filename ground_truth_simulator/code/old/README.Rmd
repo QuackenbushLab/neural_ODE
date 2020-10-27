@@ -1,0 +1,197 @@
+---
+title: "A gene regulatory network simulator"
+output: github_document
+---
+
+```{r include=FALSE}
+source('Classes.R')
+source('GraphGRN_core.R')
+source('GraphGRN.R')
+source('SimulationGRN_core.R')
+source('SimulationGRN.R')
+```
+
+This is the code used to simulate data from a gene regulatory network. It can also be used to simulate data with differential associations. Data in the `dcanr` R/Bioconductor package is generated using this simulator in R 3.5. Note that the random number generator was changed in R 3.6 therefore running these functions in R 3.6 will result in different data sets despite the parameters and seeds being the same.
+
+> example_sim102.R shows an example simulation which was used to simulate the data in the `dcanr` package (`data(sim102)`)
+
+## Documentation of code
+
+Code in the package is organised into S4 classes. We created new S4 classes as existing graph-based classes were insufficient to add model information. These classes can be extended to add more elements into the model. Four classes have been developed in this code with additional classes that inherit from them:
+
+- SimulationGRN: holds a GraphGRN object and additional simulation parameters
+  - GraphGRN: holds a list of nodes and edges
+    - Node: holds information for a single node (i.e. molecule)
+      - NodeRNA: used to represent RNA molecules in the regulatory network
+    - Edge: an association between two nodes
+      - EdgeReg: an edge representing a regulatory relationship
+
+## Method list
+
+### SimulationGRN
+
+#### Slots:
+
+```{r}
+slotNames('SimulationGRN')
+```
+
+* graph - the regulatory network
+* expnoise - experimental noise standard deviation
+* bionoise - biological noise standard deviation
+* seed - randomisation seed
+* inputModels - means, variances and proportions defining the Gaussian mixture model for each input gene  (auto generated)
+
+#### Functions:
+
+```{r}
+methods(class = 'SimulationGRN')
+```
+
+
+```{r}
+# simulate dataset from the simulation
+showMethods('simulateDataset')
+```
+
+* numsamples - number of observations to simulate
+* cor.strength - strength of correlations between input genes (high value means stronger correlations 1-100)
+* externalInputs - specify input gene values manually (named matrix)
+
+```{r eval=FALSE}
+sensitivityAnalysis(simulation, pertb, inputs, pertbNodes, tol)
+```
+
+* pertb - amount of knockdown, 0.5 represents 50% reduction in abundance
+* input - input gene values
+* pertbNodes - nodes to perturb for computing the sensitivities
+* tol - tolerance for numerical errors
+
+### GraphGRN
+
+#### Slots:
+
+```{r}
+slotNames('GraphGRN')
+```
+
+* nodeset - list of nodes
+* edgeset - list of edges
+
+#### Functions:
+
+```{r}
+methods(class = 'GraphGRN')
+```
+
+
+```{r}
+# get names of edges and nodes
+showMethods('nodenames')
+showMethods('edgenames')
+```
+
+Regulation of a target node by multiple regulators A, B, and C results in a pseudonode called *A_B_C* being created. Therefore such nodes will appear in the edge and node names.
+
+```{r}
+#get an adjacency representation of the graph
+showMethods('getAM')
+```
+
+* directed - TRUE/FALSE determining whether to return a directed or undirected network
+
+```{r}
+# randomize activation functions for models
+showMethods('randomizeParams')
+```
+
+* type - class of activation functions to use (`linear`, `linear-like`, `exponential`, `sigmoidal`, `mixed`)
+* seed - randomisation seed to use
+
+```{r}
+# sample a subgraph from the original network
+showMethods('sampleGraph')
+```
+
+* size - number of nodes to sample from the original network (i.e. new networks size)
+
+```{r eval=FALSE}
+# functions to switch beteen representations of the network, data.frame, igraph and GraphGRN.
+df2GraphGRN(edges, nodes, propor, loops, seed)
+GraphGRN2df(graph) # returns list of dfs, one for edges and one for nodes
+GraphGRN2igraph(graph, directed)
+```
+
+* edges - edge data frame as used in the `igraph` package, colnames of data frame can have colnames that match slot names of the `Edge`/`EdgeReg` class
+* nodes - node data frame as used in the `igraph` package, colnames of data frame can have colnames that match slot names of the `Node`/`NodeRNA` class
+* propor - proportion of `OR` gates to use when multiple regulators regulate a single target
+* loops - should loops be included in the model (ideally not)
+* seed - randomisation seed for parameter specification
+* directed - should the resulting network be directed
+
+### Node/NodeRNA
+
+#### Slots:
+
+```{r}
+slotNames('Node')
+slotNames('NodeRNA')
+```
+
+* name -  node name
+* spmax - maximum abundance of this molecule (from 0 - 1)
+* spdeg - degradation rate of this molecule (0 - 1)
+* tau - time constant (usually leave as 1 unless the aim is to simulate time-series data)
+* inedges - names of edges that feed in to this node (auto computed when added using `addEdge` function)
+* outedges - names of edges that go out of this node (auto computed when added using `addEdge` function)
+* logiceqn - the logic equation representing the regulation of this node e.g. A ^ B ^ C (auto generated)
+
+#### Functions:
+
+```{r}
+methods(class = 'NodeRNA')
+```
+
+
+```{r}
+# add, retrieve, replace or remove a mRNA node
+showMethods('addNodeRNA')
+showMethods('getNode')
+showMethods('getNode<-')
+showMethods('removeNode')
+```
+
+* nodenames - vector of node names to remove from the network
+* value - node to replace with
+
+### Edge/EdgeReg
+
+#### Slots:
+
+```{r}
+slotNames('Edge')
+slotNames('EdgeReg')
+```
+
+* from - name of the source node
+* to - name of the target node
+* weight - weight of the interaction (from 0 - 1)
+* name - name of the edge (auto computed)
+* EC50 - conc. of regulator required for half maximal activation of the target
+* n - Hill constant for the activation function
+* activation - TRUE/FALSE representing activation/repression respectively
+
+#### Functions:
+
+```{r}
+methods(class = 'EdgeReg')
+```
+
+
+```{r}
+# add, retrieve, replace or remove a regulatory interaction
+showMethods('addEdgeReg')
+showMethods('getEdge')
+showMethods('getEdge<-')
+showMethods('removeEdge')
+```
