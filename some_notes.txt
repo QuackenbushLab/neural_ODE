@@ -343,4 +343,7 @@ methods. J Comput Biol. 2009;16:229–39.
     - Next step is to increase NN size!
 1) More stuff with realistic dataset (600 samples; 50 neurons; 150 genes; times = 0,3,6,9):
    - 450 data points (90% training = 1620 points = 810/batch (2 batches), 10% validation = 180 points)
-   - Note that trying 600 samples now, hope is that more data will lead to better prediction (<10^-3) 
+   - Note that trying 600 samples now,see if many many samples help overcome lack of time stamps 
+   - Not really much help in MSE!
+2) Need to optimize plotting: 
+    - Need to incorporate sample_plot_cutoff by optimizing datahandler.calctraj method
