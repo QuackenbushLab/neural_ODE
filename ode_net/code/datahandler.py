@@ -8,6 +8,8 @@ try:
 except ImportError:
     from torchdiffeq import odeint_adjoint as odeint
 
+#print("Using {} threads datahandler".format(torch.get_num_threads()))
+
 class DataHandler:
 
     def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise):
@@ -240,10 +242,10 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method):
+    def calculate_trajectory(self, odenet, method, num_trajs):
         trajectories = []
         mu0 = self.get_mu0()
-        for j in range(self.ntraj):
+        for j in range(num_trajs):
             if odenet.explicit_time:
                 _y = torch.cat((mu0[j], self.time_pt[j][0].reshape((1, 1))), 1)
             else:
