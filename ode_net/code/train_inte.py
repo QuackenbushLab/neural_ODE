@@ -23,8 +23,8 @@ from solve_eq import solve_eq
 from visualization_inte import *
 
 
-torch.set_num_threads(os.cpu_count()) #USING ALL POSSIBLE THREADS!
-print("Using {} threads".format(torch.get_num_threads()))
+ #USING ALL POSSIBLE THREADS!
+#print("Using {} threads train_inte".format(torch.get_num_threads()))
 
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img_save_dir):
     plt.figure()
@@ -89,7 +89,8 @@ def decrease_lr(opt, verbose, one_time_drop = 0):
         print("Decreasing learning rate to: %f" % opt.param_groups[0]['lr'])
 
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
-    print("Using {} threads".format(torch.get_num_threads()))
+    #torch.set_num_threads(36)
+    #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)

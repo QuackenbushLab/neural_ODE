@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import sys
+torch.set_num_threads(36)
 
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
@@ -41,7 +42,11 @@ class ODENet(nn.Module):
         
         self.net.to(device)
 
+    #print("Using {} threads odenet".format(torch.get_num_threads()))
+
     def forward(self, t, y):
+        #torch.set_num_threads(72)
+        #print("Using {} threads odenet forward".format(torch.get_num_threads()))
         ''' Forward prop through the network '''
         '''
         try:
