@@ -3,13 +3,19 @@ import torch.nn as nn
 from .odeint import SOLVERS, odeint
 from .misc import _check_inputs, _flat_to_shape, _rms_norm, _mixed_linf_rms_norm, _wrap_norm
 
+#adjoint_forward_calls = 0
+#adjoint_backward_calls = 0
 
 class OdeintAdjointMethod(torch.autograd.Function):
-
+    
     @staticmethod
     def forward(ctx, shapes, func, y0, t, rtol, atol, method, options, adjoint_rtol, adjoint_atol, adjoint_method,
                 adjoint_options, t_requires_grad, *adjoint_params):
-
+        #torch.set_num_interop_threads(36)
+        #torch.set_num_threads(1) #USING ALL POSSIBLE THREADS!
+        #global adjoint_forward_calls
+        #adjoint_forward_calls = adjoint_forward_calls + 1
+        #print("Using {} threads adjoint forward, call num {}".format(torch.get_num_threads(), adjoint_forward_calls))
         ctx.shapes = shapes
         ctx.func = func
         ctx.adjoint_rtol = adjoint_rtol
@@ -25,6 +31,11 @@ class OdeintAdjointMethod(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_y):
+        #torch.set_num_interop_threads(1)
+        #torch.set_num_threads(36) #USING ALL POSSIBLE THREADS!
+       # global adjoint_backward_calls
+       # adjoint_backward_calls = adjoint_backward_calls + 1
+       # print("Using {} threads adjoint backward, call num {}".format(torch.get_num_threads(), adjoint_backward_calls))
         with torch.no_grad():
             shapes = ctx.shapes
             func = ctx.func

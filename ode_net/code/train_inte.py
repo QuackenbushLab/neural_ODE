@@ -23,9 +23,6 @@ from solve_eq import solve_eq
 from visualization_inte import *
 
 
- #USING ALL POSSIBLE THREADS!
-#print("Using {} threads train_inte".format(torch.get_num_threads()))
-
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img_save_dir):
     plt.figure()
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
@@ -89,7 +86,6 @@ def decrease_lr(opt, verbose, one_time_drop = 0):
         print("Decreasing learning rate to: %f" % opt.param_groups[0]['lr'])
 
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
-    #torch.set_num_threads(36)
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
     opt.zero_grad()
@@ -118,7 +114,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_30genes_600samples_0noise"
+clean_name = "chalmers_150genes_600samples_earlyT_0noise"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 

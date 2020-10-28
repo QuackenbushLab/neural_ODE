@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import sys
-torch.set_num_threads(36)
+#torch.set_num_threads(36)
 
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
