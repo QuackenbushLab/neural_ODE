@@ -345,5 +345,10 @@ methods. J Comput Biol. 2009;16:229–39.
    - 450 data points (90% training = 1620 points = 810/batch (2 batches), 10% validation = 180 points)
    - Note that trying 600 samples now,see if many many samples help overcome lack of time stamps 
    - Not really much help in MSE!
+2) Back to 30 gene setting to isolate time-effect:
+    a) 10 time points already have this
+    b) 4 times points (0,3,6,9) running now
+    c) 5 times points early (0,1,2,3,9)
 2) Need to optimize plotting: 
     - Need to incorporate sample_plot_cutoff by optimizing datahandler.calctraj method
+        - DONE! plotting is now fast, and fully dynamic (30 random genes, only 7 trajs)

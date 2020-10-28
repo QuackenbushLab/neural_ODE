@@ -240,10 +240,10 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method):
+    def calculate_trajectory(self, odenet, method, num_trajs):
         trajectories = []
         mu0 = self.get_mu0()
-        for j in range(self.ntraj):
+        for j in range(num_trajs):
             if odenet.explicit_time:
                 _y = torch.cat((mu0[j], self.time_pt[j][0].reshape((1, 1))), 1)
             else:

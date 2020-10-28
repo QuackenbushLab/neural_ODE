@@ -4,6 +4,8 @@ import matplotlib.patches as patches
 from figure_saver import save_figure
 import numpy as np
 import torch
+import random 
+
 try:
     from torchdiffeq.__init__ import odeint_adjoint as odeint
 except ImportError:
@@ -37,7 +39,7 @@ class Visualizator1D(Visualizator):
         self.TOT_ROWS = 5
         self.TOT_COLS = 6
         self.sample_plot_cutoff = 7
-        self.genes_to_viz = [1,6,14,16,21,32,37,39,41,43,46,48,49,56,58,60,75,85,92,99,101,103,115,118,120,122,127,128,142,143]
+        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
 
@@ -90,7 +92,7 @@ class Visualizator1D(Visualizator):
          
 
     def visualize(self):
-        self.trajectories = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'])
+        self.trajectories = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], num_trajs = self.sample_plot_cutoff)
         self._visualize_trajectories_split()
         #self._visualize_dynamics()
         self._set_ax_limits()
@@ -102,8 +104,6 @@ class Visualizator1D(Visualizator):
                 gene = self.genes_to_viz[row_num*self.TOT_COLS + col_num] #IH restricting to plot only few genes
                 ax.cla()
                 for sample_num, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, self.data_handler.data_np, self.data_handler.data_np_0noise)):
-                    if sample_num > self.sample_plot_cutoff: #IH restrciting to plotting only few samples
-                        break 
                     ax.plot(times[sample_num].flatten(), traj[:,:,gene].flatten(), 'r-o', alpha=0.15)
                     ax.plot(times[sample_num].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5)
                     ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
