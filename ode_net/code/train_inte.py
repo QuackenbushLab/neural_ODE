@@ -234,6 +234,7 @@ if __name__ == "__main__":
     rep_epochs_train_losses = []
     rep_epochs_val_losses = []
     rep_epochs_mu_losses = []
+    rep_epochs_time_so_far = []
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -322,7 +323,9 @@ if __name__ == "__main__":
         if epoch in rep_epochs:
             print()
             print("Epoch=", epoch)
-            print("Time so far= ", (perf_counter() - start_time)/3600, "hrs")
+            rep_time_so_far = (perf_counter() - start_time)/3600
+            print("Time so far= ", rep_time_so_far, "hrs")
+            rep_epochs_time_so_far.append(rep_time_so_far)
             print("Best training (MSE) so far= ", min_train_loss)
             rep_epochs_train_losses.append(min_train_loss)
             if data_handler.n_val > 0:
@@ -340,7 +343,7 @@ if __name__ == "__main__":
     total_time = perf_counter() - start_time
 
     print("Saving losses")
-    L = [rep_epochs, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
+    L = [rep_epochs, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
     L = np.transpose(np.array(L))
     np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), L, delimiter=',')
     #save_model(odenet, output_root_dir, 'final_model')
