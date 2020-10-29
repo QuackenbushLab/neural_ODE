@@ -65,7 +65,7 @@ def validation(odenet, data_handler, method, explicit_time):
     return loss
 
 def true_loss(odenet, data_handler, method):
-    data, t, target = data_handler.get_true_mu_set()
+    data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
     with torch.no_grad():
         predictions = torch.zeros(data.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t, data)):
