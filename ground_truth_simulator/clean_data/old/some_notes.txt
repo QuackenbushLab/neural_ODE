@@ -349,11 +349,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - Need to incorporate sample_plot_cutoff by optimizing datahandler.calctraj method
         - DONE! plotting is now fast, and fully dynamic (30 random genes, only 7 trajs)
 
-
 10/28/2020 notes: 
 1) Back to 30 gene setting to isolate time-effect:
     a) 10 time points already have this
     b) 4 times points (0,3,6,9) running now
     c) 5 times points early (0,1,2,3,9)
-    *) 30 GENE EXPERIMENTS WERE TOO SLOW! INTERESTING FINDING TO DISCUSS 
-        - double check this using forward/backward pass prints
+    *) 600 sample GENE EXPERIMENTS WERE TOO SLOW! tried 50 and 150 samples for now
