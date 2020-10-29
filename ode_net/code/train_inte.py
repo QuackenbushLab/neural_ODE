@@ -231,6 +231,9 @@ if __name__ == "__main__":
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
     rep_epochs = [25, 40, 50, 80, 120, 160, 200, 240, tot_epochs]
     one_time_drop_done = False 
+    rep_epochs_train_losses = []
+    rep_epochs_val_losses = []
+    rep_epochs_mu_losses = []
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -321,9 +324,12 @@ if __name__ == "__main__":
             print("Epoch=", epoch)
             print("Time so far= ", (perf_counter() - start_time)/3600, "hrs")
             print("Best training (MSE) so far= ", min_train_loss)
+            rep_epochs_train_losses.append(min_train_loss)
             if data_handler.n_val > 0:
                 print("Best validation (MSE) so far = ", min_val_loss.item())
                 print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
+                rep_epochs_val_losses.append(min_val_loss.item())
+                rep_epochs_mu_losses.append(true_loss_of_min_val_model.item())
             else:
                 print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
             print("Saving MSE plot...")
@@ -333,7 +339,10 @@ if __name__ == "__main__":
     
     total_time = perf_counter() - start_time
 
-    #print("Saving final model")
+    print("Saving losses")
+    L = [rep_epochs, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
+    L = np.transpose(np.array(L))
+    np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), L, delimiter=',')
     #save_model(odenet, output_root_dir, 'final_model')
 
     print("Saving times")
