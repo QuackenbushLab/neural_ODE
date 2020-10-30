@@ -22,8 +22,6 @@ from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
-torch.set_num_threads(13) #IH set for c5.4xlarge
-
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img_save_dir):
     plt.figure()
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
