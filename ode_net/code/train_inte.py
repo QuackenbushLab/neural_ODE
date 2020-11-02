@@ -22,6 +22,8 @@ from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
+torch.set_num_threads(64)
+
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img_save_dir):
     plt.figure()
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
@@ -113,7 +115,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_30genes_50samples_earlyT_0noise"
+clean_name = "chalmers_150genes_50samples_earlyT_0noise"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
