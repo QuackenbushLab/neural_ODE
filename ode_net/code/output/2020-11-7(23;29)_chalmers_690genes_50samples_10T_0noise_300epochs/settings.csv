@@ -6,7 +6,7 @@ method,dopri5
 neurons_per_layer,100
 optimizer,adam
 batch_type,single
-batch_size,810
+batch_size,203
 batch_time,99999
 batch_time_frac,99999
 dec_lr,False
