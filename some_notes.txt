@@ -355,3 +355,19 @@ methods. J Comput Biol. 2009;16:229–39.
     b) 4 times points (0,3,6,9) running now
     c) 5 times points early (0,1,2,3,9)
     *) 600 sample GENE EXPERIMENTS WERE TOO SLOW! tried 50 and 150 samples for now
+
+11/09/2020 notes:
+1) Sparse time experiments:
+    - could not find a way to make the model have good performance under sparse time
+    - returned back to 10 times points, will think about this LATER
+2) Full time point, full gene setting: 
+    - scaled up 10 time point dataset to full (690) gene setting:
+    - in general the speed is feasible time-wise (all 72 threads blasting)
+    - MSE needs to improve (can't salvage using higher neurons OR samples)
+    - Is poor MSE (>10^-3) is due to noise in high genes or low stochasticity?
+3) zero noise experiments in 690 gene setting: 
+    - using 200 neurons, 50 samples, 690 genes, and ZERO noise
+    - we see that...
+4) smaller batch size in SGD to avoid suspected local minima
+    - using 200 neurons, 50 samples, 690 genes, 0.03 noise, and batch_size = 162
+    - we see that...
