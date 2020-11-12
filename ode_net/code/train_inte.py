@@ -230,12 +230,13 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
+    rep_epochs = [3, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
     one_time_drop_done = False 
     rep_epochs_train_losses = []
     rep_epochs_val_losses = []
     rep_epochs_mu_losses = []
     rep_epochs_time_so_far = []
+    rep_epochs_so_far = []
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -323,6 +324,7 @@ if __name__ == "__main__":
 
         if epoch in rep_epochs:
             print()
+            rep_epochs_so_far.append(epoch)
             print("Epoch=", epoch)
             rep_time_so_far = (perf_counter() - start_time)/3600
             print("Time so far= ", rep_time_so_far, "hrs")
@@ -338,14 +340,14 @@ if __name__ == "__main__":
                 print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
             print("Saving MSE plot...")
             plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
-                
+            print("Saving losses")
+            L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
+            np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
             #print()
     
     total_time = perf_counter() - start_time
 
-    print("Saving losses")
-    L = [rep_epochs, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
-    np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')
+    
     #save_model(odenet, output_root_dir, 'final_model')
 
     print("Saving times")
@@ -353,11 +355,7 @@ if __name__ == "__main__":
     #np.savetxt('{}batch_times.csv'.format(output_root_dir), batch_times, delimiter=',')
     np.savetxt('{}epoch_times.csv'.format(output_root_dir), epoch_times, delimiter=',')
 
-    if settings['solve_A']:
-        np.savetxt('{}final_A.csv'.format(output_root_dir), A, delimiter=',')
-        np.save('{}A_at_epochs.npy'.format(output_root_dir), A_list)
-        np.save('{}val_loss_at_epochs.npy'.format(output_root_dir), validation_loss)
-
+    print("DONE!")
 
   
  
