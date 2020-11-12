@@ -371,3 +371,4 @@ methods. J Comput Biol. 2009;16:229–39.
 4) smaller batch size in SGD to avoid suspected local minima
     - using 200 neurons, 50 samples, 690 genes, 0.03 noise, and batch_size = 162
     - we see that SGD really helps, now working on tuning SGD params (batchsize + lr) to get even better!
+    - seems like BS = 21 and LR = 0.0005
