@@ -230,7 +230,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [3, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
+    rep_epochs = [ 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
     one_time_drop_done = False 
     rep_epochs_train_losses = []
     rep_epochs_val_losses = []
