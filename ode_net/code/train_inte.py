@@ -114,7 +114,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_690genes_200samples_10T_0noise"
+clean_name = "chalmers_690genes_50samples_10T_0noise"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [ 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
+    rep_epochs = [ 15, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
     one_time_drop_done = False 
     rep_epochs_train_losses = []
     rep_epochs_val_losses = []
@@ -300,7 +300,7 @@ if __name__ == "__main__":
                     print('Model improved, saving current model')
                     save_model(odenet, output_root_dir, 'best_val_model')
                     
-            print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[0]))
+            print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[1]))
         print("True mu loss {:.5E}".format(mu_loss))
 
         if settings['viz'] and epoch in viz_epochs:

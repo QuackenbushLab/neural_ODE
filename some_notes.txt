@@ -377,5 +377,9 @@ methods. J Comput Biol. 2009;16:229–39.
 0) So it seems like heavy SGD:
     - helps in escaping the local minima
     - but comes at the cost of poor performance on the validation set
-1) One solution could be to use slightly higher batch size (say 81) with lower LR (0.001)
+1) One solution could be to use slightly higher batch size (say 81) with higher LR (0.001)
+    - not much help, validation error still plateuing at 2.6*10E-3
 2) Another solution is to increase the size of the validation set (80-20 split?)
+    - not much help, validation error still plateuing at 2.6*10E-3
+3) Going to try simpler NN architecture (50 neurons/layer)
+    - there might be an overfitting issue
