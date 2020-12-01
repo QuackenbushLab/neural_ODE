@@ -364,7 +364,7 @@ methods. J Comput Biol. 2009;16:229–39.
     - scaled up 10 time point dataset to full (690) gene setting:
     - in general the speed is feasible time-wise (all 72 threads blasting)
     - MSE needs to improve (can't salvage using higher neurons OR samples)
-    - Is poor MSE (>10^-3) is due to noise in high genes or low stochasticity?
+    - Is poor MSE (>10^-3) due to noise in high genes or low stochasticity?
 3) zero noise experiments in 690 gene setting: 
     - using 200 neurons, 50 samples, 690 genes, and ZERO noise
     - we're still plateuing; SO THE ISSUE IS NOT NOISE RELATED, BUT SCALE RELATED!
@@ -372,3 +372,10 @@ methods. J Comput Biol. 2009;16:229–39.
     - using 200 neurons, 50 samples, 690 genes, 0.03 noise, and batch_size = 162
     - we see that SGD really helps, now working on tuning SGD params (batchsize + lr) to get even better!
     - seems like BS = 21 and LR = 0.0005
+
+12/1/2020 notes: 
+0) So it seems like heavy SGD:
+    - helps in escaping the local minima
+    - but comes at the cost of poor performance on the validation set
+1) One solution could be to use slightly higher batch size (say 81) with lower LR (0.001)
+2) Another solution is to increase the size of the validation set (80-20 split?)

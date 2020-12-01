@@ -41,7 +41,6 @@ def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
     #print(data)
     #print(data.shape)
-    #print(n_val)
     with torch.no_grad():
         if explicit_time:
             if data_handler.batch_type == 'batch_time':
@@ -63,7 +62,7 @@ def validation(odenet, data_handler, method, explicit_time):
 
         # Calculate validation loss
         loss = torch.mean((torch.abs(predictions - target) ** 2))
-    return loss
+    return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
     data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
@@ -286,7 +285,8 @@ if __name__ == "__main__":
         #handle true-mu loss
        
         if data_handler.n_val > 0:
-            val_loss = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
+            val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
+            val_loss = val_loss_list[0]
             validation_loss.append(val_loss)
             if epoch == 1:
                 min_val_loss = val_loss
@@ -300,7 +300,7 @@ if __name__ == "__main__":
                     print('Model improved, saving current model')
                     save_model(odenet, output_root_dir, 'best_val_model')
                     
-            print("Validation loss {:.5E}".format(val_loss))
+            print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[0]))
         print("True mu loss {:.5E}".format(mu_loss))
 
         if settings['viz'] and epoch in viz_epochs:
