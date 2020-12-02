@@ -383,3 +383,5 @@ methods. J Comput Biol. 2009;16:229–39.
     - not much help, validation error still plateuing at 2.6*10E-3
 3) Going to try simpler NN architecture (50 neurons/layer)
     - there might be an overfitting issue
+    - doing valsplit = 80/20
+    - batch-size = 20% (5 batches), LR = 0.0005
