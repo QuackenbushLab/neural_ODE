@@ -236,6 +236,8 @@ if __name__ == "__main__":
     rep_epochs_mu_losses = []
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
+    consec_epochs_failed = 0
+    epochs_to_fail_to_terminate = 10
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -294,16 +296,21 @@ if __name__ == "__main__":
                 save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_val_loss:
+                    consec_epochs_failed = 0
                     min_val_loss = val_loss
                     true_loss_of_min_val_model =  mu_loss
                     #saving true-mean loss of best val model
                     print('Model improved, saving current model')
                     save_model(odenet, output_root_dir, 'best_val_model')
+                else:
+                    consec_epochs_failed = consec_epochs_failed + 1
+
                     
             print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[1]))
         print("True mu loss {:.5E}".format(mu_loss))
 
-        if settings['viz'] and epoch in viz_epochs:
+            
+        if (settings['viz'] and epoch in viz_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print("Saving plot")
             with torch.no_grad():
                 visualizer.visualize()
@@ -322,7 +329,7 @@ if __name__ == "__main__":
         #    decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
         #    one_time_drop_done = True
 
-        if epoch in rep_epochs:
+        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print()
             rep_epochs_so_far.append(epoch)
             print("Epoch=", epoch)
@@ -344,7 +351,11 @@ if __name__ == "__main__":
             L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
             np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
             #print()
-    
+
+        if consec_epochs_failed==epochs_to_fail_to_terminate:
+            print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
+            break
+
     total_time = perf_counter() - start_time
 
     
