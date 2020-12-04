@@ -39,8 +39,6 @@ class ODENet(nn.Module):
                 nn.LeakyReLU(),
                 nn.Linear(neurons, neurons),
                 nn.LeakyReLU(),
-                nn.Linear(neurons, neurons),
-                nn.LeakyReLU(),
                 nn.Linear(neurons, ndim)
             )
 

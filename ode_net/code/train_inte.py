@@ -172,7 +172,7 @@ if __name__ == "__main__":
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
     param_count = sum(p.numel() for p in odenet.parameters() if p.requires_grad)
-    param_ratio = round((data_handler.dim)**2/param_count, 3)
+    param_ratio = round(param_count/ (data_handler.dim)**2, 3)
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
