@@ -114,7 +114,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_690genes_200samples_10T_0noise"
+clean_name = "chalmers_690genes_50samples_10T_0noise"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -169,9 +169,12 @@ if __name__ == "__main__":
 
     
     # Initialization
-    print("Using a NN with {} neurons per layer".format(settings['neurons_per_layer']))
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
+    param_count = sum(p.numel() for p in odenet.parameters() if p.requires_grad)
+    param_ratio = round(param_count/ (data_handler.dim)**2, 3)
+    print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
+    
     if settings['pretrained_model']:
         pretrained_model_file = '{}/_pretrained_best_model/best_train_model.pt'.format(settings['output_dir'])
         odenet.load(pretrained_model_file)
@@ -229,39 +232,46 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [ 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
+    rep_epochs = [ 15, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
     one_time_drop_done = False 
     rep_epochs_train_losses = []
     rep_epochs_val_losses = []
     rep_epochs_mu_losses = []
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
+    consec_epochs_failed = 0
+    epochs_to_fail_to_terminate = 10
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1
         data_handler.reset_epoch()
         #visualizer.save(img_save_dir, epoch) #IH added to test
+        this_epoch_total_train_loss = 0
         if settings['verbose']:
             print()
             print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
-            pbar = tqdm(total=iterations_in_epoch, desc="Training loss: ")
+            pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
             loss = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'])
             #batch_times.append(perf_counter() - start_batch_time)
 
+            this_epoch_total_train_loss += loss.item()
             # Print and update plots
             iteration_counter += 1
+
             if settings['verbose']:
                 pbar.update(1)
-                pbar.set_description("Training loss: {:.5E}".format(loss.item()))
+                pbar.set_description("Training loss (current batch): {:.5E}".format(loss.item()))
         
         epoch_times.append(perf_counter() - start_epoch_time)
 
         #Epoch done, now handle training loss
-        train_loss = loss.item()
+        train_loss = this_epoch_total_train_loss/iterations_in_epoch
         training_loss.append(train_loss)
+        print("Overall training loss {:.5E}".format(train_loss))
+
         mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss)
 
@@ -294,16 +304,21 @@ if __name__ == "__main__":
                 save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_val_loss:
+                    consec_epochs_failed = 0
                     min_val_loss = val_loss
                     true_loss_of_min_val_model =  mu_loss
                     #saving true-mean loss of best val model
                     print('Model improved, saving current model')
                     save_model(odenet, output_root_dir, 'best_val_model')
+                else:
+                    consec_epochs_failed = consec_epochs_failed + 1
+
                     
-            print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[0]))
+            print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[1]))
         print("True mu loss {:.5E}".format(mu_loss))
 
-        if settings['viz'] and epoch in viz_epochs:
+            
+        if (settings['viz'] and epoch in viz_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print("Saving plot")
             with torch.no_grad():
                 visualizer.visualize()
@@ -322,7 +337,7 @@ if __name__ == "__main__":
         #    decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
         #    one_time_drop_done = True
 
-        if epoch in rep_epochs:
+        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print()
             rep_epochs_so_far.append(epoch)
             print("Epoch=", epoch)
@@ -341,10 +356,17 @@ if __name__ == "__main__":
             print("Saving MSE plot...")
             plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
             print("Saving losses")
-            L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
-            np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
-            #print()
-    
+            if data_handler.n_val > 0:
+                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
+                np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
+            #else:
+            #    L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_mu_losses]
+            #    np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
+           
+        if consec_epochs_failed==epochs_to_fail_to_terminate:
+            print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
+            break
+
     total_time = perf_counter() - start_time
 
     
