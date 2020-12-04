@@ -169,9 +169,12 @@ if __name__ == "__main__":
 
     
     # Initialization
-    print("Using a NN with {} neurons per layer".format(settings['neurons_per_layer']))
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
+    param_count = sum(p.numel() for p in odenet.parameters() if p.requires_grad)
+    param_ratio = round((data_handler.dim)**2/param_count, 3)
+    print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
+    
     if settings['pretrained_model']:
         pretrained_model_file = '{}/_pretrained_best_model/best_train_model.pt'.format(settings['output_dir'])
         odenet.load(pretrained_model_file)
@@ -248,7 +251,7 @@ if __name__ == "__main__":
         if settings['verbose']:
             print()
             print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
-            pbar = tqdm(total=iterations_in_epoch, desc="Training loss: ")
+            pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
             loss = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'])
@@ -356,9 +359,9 @@ if __name__ == "__main__":
             if data_handler.n_val > 0:
                 L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
                 np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
-            else:
-                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_mu_losses]
-                np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
+            #else:
+            #    L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_mu_losses]
+            #    np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
            
         if consec_epochs_failed==epochs_to_fail_to_terminate:
             print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
