@@ -39,7 +39,7 @@ simseeds = sample.int(1E7, 1000)
 
 #----simulation parameters----
 #simulation parameters
-nsamp = 500#number of samples
+nsamp = 10#number of samples
 netSize = 150 #network size of sampled networks
 minTFs = 10 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
@@ -55,7 +55,7 @@ simseed = simseeds[102]
 #----1: sample network and create simulation----
 set.seed(simseed)
 #grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
-grnSmall = grnFull
+grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
 grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
 
 simSmall = new(
@@ -98,7 +98,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_200samples_T_0noise.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_150genes_10samples_10T_0noise.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
