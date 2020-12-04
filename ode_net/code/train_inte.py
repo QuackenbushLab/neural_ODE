@@ -244,6 +244,7 @@ if __name__ == "__main__":
         iteration_counter = 1
         data_handler.reset_epoch()
         #visualizer.save(img_save_dir, epoch) #IH added to test
+        this_epoch_total_train_loss = 0
         if settings['verbose']:
             print()
             print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
@@ -253,17 +254,21 @@ if __name__ == "__main__":
             loss = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'])
             #batch_times.append(perf_counter() - start_batch_time)
 
+            this_epoch_total_train_loss += loss.item()
             # Print and update plots
             iteration_counter += 1
+
             if settings['verbose']:
                 pbar.update(1)
-                pbar.set_description("Training loss: {:.5E}".format(loss.item()))
+                pbar.set_description("Training loss (current batch): {:.5E}".format(loss.item()))
         
         epoch_times.append(perf_counter() - start_epoch_time)
 
         #Epoch done, now handle training loss
-        train_loss = loss.item()
+        train_loss = this_epoch_total_train_loss/iterations_in_epoch
         training_loss.append(train_loss)
+        print("Overall training loss {:.5E}".format(train_loss))
+
         mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss)
 
@@ -348,10 +353,13 @@ if __name__ == "__main__":
             print("Saving MSE plot...")
             plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
             print("Saving losses")
-            L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
-            np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
-            #print()
-
+            if data_handler.n_val > 0:
+                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
+                np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
+            else:
+                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_mu_losses]
+                np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
+           
         if consec_epochs_failed==epochs_to_fail_to_terminate:
             print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
             break
