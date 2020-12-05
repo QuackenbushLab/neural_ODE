@@ -44,6 +44,8 @@ def _convert_arguments(settings):
     converted_settings['explicit_time'] = settings.getboolean('explicit_time')
     converted_settings['relative_error'] = False
 
-    converted_settings['pretrained_model'] = settings.getboolean('pretrained_model') 
+    converted_settings['pretrained_model'] = settings.getboolean('pretrained_model')
+    converted_settings['lr_range_test'] = settings.getboolean('lr_range_test') 
+    
     
     return converted_settings

@@ -24,6 +24,17 @@ from visualization_inte import *
 
 torch.set_num_threads(72)
 
+def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
+    plt.figure()
+    plt.plot(all_lrs_used, training_loss, color = "blue", label = "Training loss")
+    plt.plot(all_lrs_used, true_mean_losses, color = "green", label = r'True $\mu$ loss')
+    #plt.yscale('log')
+    plt.xscale('log')
+    plt.xlabel("Learning rate")
+    plt.ylabel("Error (MSE)")
+    plt.legend(loc='upper right')
+    plt.savefig("{}/LR_range_test.png".format(img_save_dir))
+
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img_save_dir):
     plt.figure()
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
@@ -232,7 +243,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [ 15, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
+    rep_epochs = [5, 15, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
     one_time_drop_done = False 
     rep_epochs_train_losses = []
     rep_epochs_val_losses = []
@@ -241,6 +252,7 @@ if __name__ == "__main__":
     rep_epochs_so_far = []
     consec_epochs_failed = 0
     epochs_to_fail_to_terminate = 10
+    all_lrs_used = []
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -274,7 +286,8 @@ if __name__ == "__main__":
 
         mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss)
-
+        all_lrs_used.append(opt.param_groups[0]['lr'])
+        
         if epoch == 1:
                 min_train_loss = train_loss
         else:
@@ -283,7 +296,8 @@ if __name__ == "__main__":
                 true_loss_of_min_train_model =  mu_loss
                 save_model(odenet, output_root_dir, 'best_train_model')
         
-               
+
+
         if settings['verbose']:
             pbar.close()
 
@@ -336,6 +350,7 @@ if __name__ == "__main__":
         #if train_loss < 5*10**(-5) and one_time_drop_done == False:
         #    decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
         #    one_time_drop_done = True
+            
 
         if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print()
@@ -355,6 +370,10 @@ if __name__ == "__main__":
                 print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
             print("Saving MSE plot...")
             plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
+            
+            if settings['lr_range_test']:
+                plot_LR_range_test(all_lrs_used, training_loss, img_save_dir)
+
             print("Saving losses")
             if data_handler.n_val > 0:
                 L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
@@ -363,9 +382,12 @@ if __name__ == "__main__":
             #    L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_mu_losses]
             #    np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
            
+        
+
         if consec_epochs_failed==epochs_to_fail_to_terminate:
             print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
             break
+
 
     total_time = perf_counter() - start_time
 
