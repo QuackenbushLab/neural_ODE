@@ -385,3 +385,16 @@ methods. J Comput Biol. 2009;16:229–39.
     - there might be an overfitting issue
     - doing valsplit = 80/20
     - batch-size = 20% (5 batches), LR = 0.0005
+
+12/7/2020 notes:
+0) We have a scaling issue. Cannot seem to get good prediction for higher number of genes. So need to think of ways to figure out best hyperparameters. 
+1) Number of neurons: 
+    - doing this based on parametrization ratio.
+    - currently scaled all the way down to 30 genes and will then scale up.
+2) Learning rate: 
+    - doing this based on range test. So far seems like 1e-3 is best rate. 
+    - think of "jumps every 5 epochs" (discuss with RB)
+
+ 
+
+
