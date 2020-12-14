@@ -282,7 +282,7 @@ if __name__ == "__main__":
         #Epoch done, now handle training loss
         train_loss = this_epoch_total_train_loss/iterations_in_epoch
         training_loss.append(train_loss)
-        print("Overall training loss {:.5E}".format(train_loss))
+        #print("Overall training loss {:.5E}".format(train_loss))
 
         mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss)
@@ -329,6 +329,7 @@ if __name__ == "__main__":
 
                     
             print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[1]))
+        print("Overall training loss {:.5E}".format(train_loss))
         print("True mu loss {:.5E}".format(mu_loss))
 
             
