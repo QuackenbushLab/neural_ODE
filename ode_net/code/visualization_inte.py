@@ -36,15 +36,16 @@ class Visualizator1D(Visualizator):
         
         self.fig_traj_split = plt.figure(figsize=(15,15), tight_layout=True)
         self.fig_traj_split.canvas.set_window_title("Trajectories in each dimension")
+        
         self.TOT_ROWS = 5
         self.TOT_COLS = 6
         self.sample_plot_cutoff = 7
         self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
-        self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
-
-        self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=3)
         
+        self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
+        self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=3)
+
         self._set_ax_limits()
 
         #plt.show()
@@ -110,31 +111,6 @@ class Visualizator1D(Visualizator):
                 
                 ax.set_xlabel(r'$t$')
         
-            
-    def _visualize_dynamics(self):
-        GRIDSIZE = 20
-
-        self.ax_dyn.cla()
-        for j in range(self.data_handler.ntraj-1, -1, -1):
-            self.ax_dyn.plot(self.data_handler.data_np[j][:,:,0].flatten(), self.data_handler.data_np[j][:,:,1].flatten(), '-r', alpha=0.3, linewidth=2)
-
-        xv, yv = torch.meshgrid([torch.linspace(self.x_span[0]-self.x_width*self.EXTRA_WIDTH_DYN, 
-                                                self.x_span[1]+self.x_width*self.EXTRA_WIDTH_DYN, 
-                                                GRIDSIZE),
-                                 torch.linspace(self.xdot_span[0]-self.xdot_width*self.EXTRA_WIDTH_DYN,
-                                                self.xdot_span[1]+self.xdot_width*self.EXTRA_WIDTH_DYN, 
-                                                GRIDSIZE)])
-        inputs = torch.from_numpy(np.vstack([array for array in map(np.ravel, (xv, yv))])).to(self.data_handler.device)
-        inputs = torch.transpose(inputs, 1, 0)
-        t = torch.zeros(1).to(self.data_handler.device)
-        grad = self.odenet.forward(t, inputs)
-        grad_x = grad[:, 0].reshape(xv.shape).cpu().numpy()
-        grad_y = grad[:, 1].reshape(yv.shape).cpu().numpy()
-
-        self.ax_dyn.quiver(xv, yv, grad_x, grad_y)
-        self.ax_dyn.set_xlabel(r'$x$')
-        self.ax_dyn.set_ylabel(r'$\dot{x}$')
-        self.ax_dyn.legend(handles=self.legend_traj, loc='upper center', ncol=2)
 
     def save(self, dir, epoch):
          # IH: uncomment this when vis dyn

@@ -8,11 +8,17 @@ try:
 except ImportError:
     from torchdiffeq import odeint_adjoint as odeint
 
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+import matplotlib.patches as patches
+from figure_saver import save_figure
+import random
+
 #print("Using {} threads datahandler".format(torch.get_num_threads()))
 
 class DataHandler:
 
-    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise):
+    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir):
         self.data_np = data_np
         self.data_pt = data_pt
         self.data_np_0noise = data_np_0noise
@@ -29,6 +35,7 @@ class DataHandler:
         self.device = device
         self.val_split = val_split
         self.epoch_done = False
+        self.img_save_dir = img_save_dir
         #self.noise = noise
 
         self._calc_datasize()
@@ -44,12 +51,13 @@ class DataHandler:
         else:
             print("Invalid batch type: '{}'".format(batch_type))
             raise ValueError
+        self.compare_train_val_plot()
 
     @classmethod
-    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0):
+    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0, img_save_dir = ""):
         ''' Create a datahandler from a CSV file '''
         data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise, data_pt_0noise = readcsv(fp, device, noise_to_add = noise)
-        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise)
+        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir)
 
     @classmethod
     def fromgenerator(cls, generator, val_split, device, normalize=False):
@@ -299,3 +307,36 @@ class DataHandler:
 
     def get_validation_set(self):
         return self.val_data, self.val_t, self.val_target, self.n_val
+
+    
+    def compare_train_val_plot(self):
+        self.fig_traj_split = plt.figure(figsize=(15,15), tight_layout=True)
+        self.fig_traj_split.canvas.set_window_title("Comparison of train and test data")
+        
+        self.TOT_ROWS = 5
+        self.TOT_COLS = 6
+        self.sample_plot_cutoff = 7
+        self.genes_to_viz = sorted(random.sample(range(self.dim),30)) #only plot 30 genes
+        self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
+        
+        self.legend_traj = [Line2D([0], [0], marker='o', color='red', markerfacecolor='red', markersize=10, label='Validation set'),Line2D([0], [0], marker='o', color='blue', markerfacecolor='red', markersize=10, label='Training set')]
+        self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=2)
+
+        for row_num,this_row_plots in enumerate(self.axes_traj_split):
+            for col_num, ax in enumerate(this_row_plots):
+                gene = self.genes_to_viz[row_num*self.TOT_COLS + col_num] #IH restricting to plot only few genes
+                ax.cla()
+                all_this_gene_vals_for_hist = []
+                all_this_gene_trains_for_hist = []
+
+                for val_samp in range(self.n_val):
+                    this_samp_gene_init_val = self.val_data[val_samp][0][0][gene].item()
+                    all_this_gene_vals_for_hist.append(this_samp_gene_init_val)
+                for train_samp in self.train_set_original:
+                    this_samp_gene_init_train = self.data_pt[train_samp][0][0][gene].item()
+                    all_this_gene_trains_for_hist.append(this_samp_gene_init_train)
+
+                ax.hist(x= all_this_gene_vals_for_hist, bins='auto', color='red',alpha=0.7, rwidth=0.85, label = 'Validation')
+                ax.hist(x= all_this_gene_trains_for_hist, bins='auto', color='blue',alpha=0.2, rwidth=0.85, label = 'Training')
+
+        self.fig_traj_split.savefig('{}train_val_compare.png'.format(self.img_save_dir))
