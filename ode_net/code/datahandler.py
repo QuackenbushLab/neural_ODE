@@ -45,13 +45,14 @@ class DataHandler:
         elif batch_type == 'trajectory':
             self._split_data_traj(val_split)
             self._create_validation_set_traj()
+            self.compare_train_val_plot() #only plot it trajectory
         elif batch_type == 'batch_time':
             self._split_data_time(val_split)
             self._create_validation_set_time()
         else:
             print("Invalid batch type: '{}'".format(batch_type))
             raise ValueError
-        self.compare_train_val_plot()
+        
 
     @classmethod
     def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0, img_save_dir = ""):
@@ -250,10 +251,11 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method, num_trajs):
+    def calculate_trajectory(self, odenet, method, num_val_trajs):
         trajectories = []
         mu0 = self.get_mu0()
-        for j in range(num_trajs):
+        all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs)) + sorted(np.random.choice(self.train_set_original, 7 - num_val_trajs))
+        for j in all_plotted_samples:
             if odenet.explicit_time:
                 _y = torch.cat((mu0[j], self.time_pt[j][0].reshape((1, 1))), 1)
             else:
@@ -261,7 +263,7 @@ class DataHandler:
             y = odeint(odenet, _y, self.time_pt[j], method=method)
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
-        return trajectories
+        return trajectories, all_plotted_samples
 
     def _create_validation_set_single(self):
         ''' Create the validation set '''
@@ -317,9 +319,9 @@ class DataHandler:
         self.TOT_COLS = 6
         self.sample_plot_cutoff = 7
         self.genes_to_viz = sorted(random.sample(range(self.dim),30)) #only plot 30 genes
-        self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
+        self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=True, sharey=True, subplot_kw={'frameon':True})
         
-        self.legend_traj = [Line2D([0], [0], marker='o', color='red', markerfacecolor='red', markersize=10, label='Validation set'),Line2D([0], [0], marker='o', color='blue', markerfacecolor='red', markersize=10, label='Training set')]
+        self.legend_traj = [Line2D([0], [0], marker='o', color='red', markerfacecolor='red', markersize=10, label='Validation set initial values'),Line2D([0], [0], marker='o', color='blue', markerfacecolor='blue', markersize=10, label='Training set initial values')]
         self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=2)
 
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
@@ -336,7 +338,7 @@ class DataHandler:
                     this_samp_gene_init_train = self.data_pt[train_samp][0][0][gene].item()
                     all_this_gene_trains_for_hist.append(this_samp_gene_init_train)
 
-                ax.hist(x= all_this_gene_vals_for_hist, bins='auto', color='red',alpha=0.7, rwidth=0.85, label = 'Validation')
-                ax.hist(x= all_this_gene_trains_for_hist, bins='auto', color='blue',alpha=0.2, rwidth=0.85, label = 'Training')
+                ax.hist(x= all_this_gene_vals_for_hist, density = False, bins='auto', color='red',alpha=0.7, rwidth=0.85, label = 'Validation')
+                ax.hist(x= all_this_gene_trains_for_hist, density = False, bins='auto', color='blue',alpha=0.2, rwidth=0.85, label = 'Training')
 
         self.fig_traj_split.savefig('{}train_val_compare.png'.format(self.img_save_dir))

@@ -39,7 +39,7 @@ class Visualizator1D(Visualizator):
         
         self.TOT_ROWS = 5
         self.TOT_COLS = 6
-        self.sample_plot_cutoff = 7
+        self.sample_plot_val_cutoff = 2
         self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
@@ -93,21 +93,28 @@ class Visualizator1D(Visualizator):
          
 
     def visualize(self):
-        self.trajectories = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], num_trajs = self.sample_plot_cutoff)
+        self.trajectories, self.all_plotted_samples = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], num_val_trajs = self.sample_plot_val_cutoff)
         self._visualize_trajectories_split()
         #self._visualize_dynamics()
         self._set_ax_limits()
 
     def _visualize_trajectories_split(self):
         times = self.data_handler.time_np
+        data_np_to_plot = [self.data_handler.data_np[i] for i in self.all_plotted_samples]
+        data_np_0noise_to_plot = [self.data_handler.data_np_0noise[i] for i in self.all_plotted_samples]
+
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
                 gene = self.genes_to_viz[row_num*self.TOT_COLS + col_num] #IH restricting to plot only few genes
                 ax.cla()
-                for sample_num, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, self.data_handler.data_np, self.data_handler.data_np_0noise)):
-                    ax.plot(times[sample_num].flatten(), traj[:,:,gene].flatten(), 'r-o', alpha=0.15)
-                    ax.plot(times[sample_num].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5)
-                    ax.plot(times[sample_num].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
+                for sample_idx, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, data_np_to_plot, data_np_0noise_to_plot)):
+                    if sample_idx < self.sample_plot_val_cutoff:
+                        plot_col = "red"
+                    else:
+                        plot_col = "lightblue"    
+                    ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
+                    ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5)
+                    ax.plot(times[sample_idx].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
                 
                 ax.set_xlabel(r'$t$')
         

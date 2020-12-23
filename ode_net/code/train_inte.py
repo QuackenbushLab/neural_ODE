@@ -334,7 +334,7 @@ if __name__ == "__main__":
         print("True mu loss {:.5E}".format(mu_loss))
 
             
-        if (settings['viz'] and epoch in viz_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
+        if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print("Saving plot")
             with torch.no_grad():
                 visualizer.visualize()
