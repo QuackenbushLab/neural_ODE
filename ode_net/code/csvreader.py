@@ -36,9 +36,9 @@ def readcsv(fp, device, noise_to_add):
                 else:
                     #row is gene-expression data; so add noise here!
                     row = [float(f)+ np.random.normal(0, noise_to_add) for f in data[traj*(dim+1) + d]]
-                    traj_data[:,:,d] = np.expand_dims(np.array(row), axis=1)
+                    traj_data[:,:,d] = 100*np.expand_dims(np.array(row), axis=1)
                     row_0noise =  [float(f) for f in data[traj*(dim+1) + d]]
-                    traj_data_0noise[:,:,d] = np.expand_dims(np.array(row_0noise), axis=1)
+                    traj_data_0noise[:,:,d] = 100*np.expand_dims(np.array(row_0noise), axis=1)
             
             data_np.append(traj_data)
             data_np_0noise.append(traj_data_0noise)
