@@ -35,8 +35,8 @@ def _convert_arguments(settings):
     converted_settings['noise'] = settings.getfloat('noise')
     converted_settings['epochs'] = settings.getint('epochs')
 
-    converted_settings['solve_eq_gridsize'] = settings.getint('solve_eq_gridsize')
-    converted_settings['solve_A'] = settings.getboolean('solve_A')
+    converted_settings['solve_eq_gridsize'] = 100
+    converted_settings['solve_A'] = False
 
     converted_settings['debug'] = False  
     converted_settings['output_dir'] = "output"
@@ -44,8 +44,9 @@ def _convert_arguments(settings):
     converted_settings['explicit_time'] = settings.getboolean('explicit_time')
     converted_settings['relative_error'] = False
 
-    converted_settings['pretrained_model'] = settings.getboolean('pretrained_model')
+    converted_settings['pretrained_model'] = False
     converted_settings['lr_range_test'] = settings.getboolean('lr_range_test') 
+    converted_settings['scale_expression'] = settings.getfloat('scale_expression')
     
     
     return converted_settings

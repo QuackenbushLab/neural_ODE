@@ -125,7 +125,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_150genes_100samples_10T_0noise_0bimod"
+clean_name = "chalmers_150genes_50samples_10T_0noise_0bimod"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -177,7 +177,8 @@ if __name__ == "__main__":
                                         batch_type=settings['batch_type'], batch_time=settings['batch_time'], 
                                         batch_time_frac=settings['batch_time_frac'],
                                         noise = settings['noise'],
-                                        img_save_dir = img_save_dir)
+                                        img_save_dir = img_save_dir,
+                                        scale_expression = settings['scale_expression'])
 
     
     # Initialization
