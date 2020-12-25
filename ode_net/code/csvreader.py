@@ -9,6 +9,7 @@ except ImportError:
 def readcsv(fp, device, noise_to_add, scale_expression):
     print("Reading from file {}".format(fp))
     print("Adding requested noise of {}".format(noise_to_add))
+    print("Scaling gene-expression values by {} fold".format(scale_expression))
     data_np = []
     data_pt = []
     data_np_0noise = []
