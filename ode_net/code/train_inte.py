@@ -392,7 +392,7 @@ if __name__ == "__main__":
             break
 
         if val_loss < (0.01 * settings['scale_expression'])**2:
-            print("SUCCESS: Reached validation target! terminating.")
+            print("SUCCESS! Reached validation target; terminating.")
             break    
 
     total_time = perf_counter() - start_time
