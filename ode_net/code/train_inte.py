@@ -103,7 +103,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
-    loss = torch.mean((torch.abs(predictions - target) ** 2))
+    loss = torch.mean((torch.abs(predictions - target) ** 1))
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 1000
+    epochs_to_fail_to_terminate = 10
     all_lrs_used = []
 
     for epoch in range(1, tot_epochs + 1):
@@ -391,7 +391,7 @@ if __name__ == "__main__":
             print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
             break
 
-        if val_loss < (0.01 * settings['scale_expression'])**2:
+        if val_loss < (0.01 * settings['scale_expression'])**1:
             print("SUCCESS! Reached validation target; terminating.")
             break    
 
