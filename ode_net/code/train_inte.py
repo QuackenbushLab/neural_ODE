@@ -72,7 +72,7 @@ def validation(odenet, data_handler, method, explicit_time):
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = torch.mean((torch.abs(predictions - target) ** 2))
+        loss = torch.mean((torch.abs(predictions - target) ** 1))
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -83,7 +83,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
         
         # Calculate true mean loss
-        loss = torch.mean((torch.abs(predictions - target) ** 2))
+        loss = torch.mean((torch.abs(predictions - target) ** 1))
     return loss
 
 
