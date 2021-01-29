@@ -9,8 +9,8 @@ setwd("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/code")
 source('Classes.R')
 source('GraphGRN_core.R')
 source('GraphGRN.R')
-source('SimulationGRN_core.R')
-source('SimulationGRN.R')
+source('SimulationGRN_core_init_var.R')
+source('SimulationGRN_init_var.R')
 
 get_edge_params <- function(edgeset){
   X = lapply(edgeset,
@@ -39,7 +39,7 @@ simseeds = sample.int(1E7, 1000)
 
 #----simulation parameters----
 #simulation parameters
-nsamp = 300#number of samples
+nsamp = 50#number of samples
 netSize = 150 #network size of sampled networks
 minTFs = 10 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
@@ -75,7 +75,10 @@ bimgenes = names(bimgenes)[bimgenes == 2]
   #simulate dataset
 time_stamps <- 0:9
 simu_list = simulateDataset(simSmall, nsamp, 
-                            timeStamps = time_stamps)
+                            timeStamps = time_stamps,
+                            cor.strength = 0,
+                            inputGeneVar  = 0.1,
+                            outputGeneVar = 999)
 datamat = simu_list$emat
 edgepropmat = get_edge_params(grnSmall@edgeset)
 ode_system_function = getODEFunc_modified(grnSmall)
@@ -98,7 +101,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_150genes_300samples_10T_0noise_0bimod.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_150genes_50samples_10T_0noise_0.1initvar.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
