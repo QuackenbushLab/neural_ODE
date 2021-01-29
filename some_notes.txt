@@ -396,7 +396,8 @@ methods. J Comput Biol. 2009;16:229–39.
     - think of "jumps every 5 epochs" (discuss with RB)
 
 1/29/2021 notes:
-0) shift in gears: 
+0) shift in gears:
+    - Doing L1 loss (tried plain L2 loss but val loss plateuas at 2*10^-3)
     - saw that inherent heterogeneity in input genes can lead to chaotic system
         - leads to differences b/w train and test datasets. 
         - for now focus on generating from model with:

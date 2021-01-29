@@ -72,7 +72,7 @@ def validation(odenet, data_handler, method, explicit_time):
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = torch.mean(torch.abs(predictions - target) ** 1)
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -83,7 +83,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
         
         # Calculate true mean loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = torch.mean(torch.abs(predictions - target) ** 1)
     return loss
 
 
@@ -103,7 +103,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
-    loss = torch.mean((predictions - target) ** 2)
+    loss = torch.mean(torch.abs(predictions - target) ** 1)
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss
@@ -355,7 +355,7 @@ if __name__ == "__main__":
         #    one_time_drop_done = True
             
 
-        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate) or (val_loss < (0.01 * settings['scale_expression'])**2):
+        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate) or (val_loss < (0.01 * settings['scale_expression'])**1):
             print()
             rep_epochs_so_far.append(epoch)
             print("Epoch=", epoch)
@@ -391,7 +391,7 @@ if __name__ == "__main__":
             print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
             break
 
-        if val_loss < (0.01 * settings['scale_expression'])**2:
+        if val_loss < (0.01 * settings['scale_expression'])**1:
             print("SUCCESS! Reached validation target; terminating.")
             break    
 
