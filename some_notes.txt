@@ -395,6 +395,15 @@ methods. J Comput Biol. 2009;16:229–39.
     - doing this based on range test. So far seems like 1e-3 is best rate. 
     - think of "jumps every 5 epochs" (discuss with RB)
 
+1/29/2021 notes:
+0) shift in gears: 
+    - saw that inherent heterogeneity in input genes can lead to chaotic system
+        - leads to differences b/w train and test datasets. 
+        - for now focus on generating from model with:
+            - low heterogeneity b/w samples (init var = 0.1)
+            - varying amounts of experimental noise
+                - start with 0 expertimental noise
+
  
 
 
