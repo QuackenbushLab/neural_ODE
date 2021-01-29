@@ -125,7 +125,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_150genes_50samples_10T_0noise_0.1initvar.csv"
+clean_name = "chalmers_150genes_50samples_10T_0noise_0pt1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -391,7 +391,7 @@ if __name__ == "__main__":
             print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
             break
 
-        if val_loss < (0.01 * settings['scale_expression'])**1:
+        if val_loss < (0.01 * settings['scale_expression'])**2:
             print("SUCCESS! Reached validation target; terminating.")
             break    
 

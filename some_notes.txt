@@ -402,7 +402,7 @@ methods. J Comput Biol. 2009;16:229–39.
         - for now focus on generating from model with:
             - low heterogeneity b/w samples (init var = 0.1)
             - varying amounts of experimental noise
-                - start with 0 expertimental noise
+                - start with 0 experimental noise
 
  
 
