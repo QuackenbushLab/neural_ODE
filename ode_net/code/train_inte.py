@@ -355,7 +355,7 @@ if __name__ == "__main__":
         #    one_time_drop_done = True
             
 
-        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate) or (val_loss < (0.01 * settings['scale_expression'])**1):
+        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate) or (val_loss < (0.01 * settings['scale_expression'])**2):
             print()
             rep_epochs_so_far.append(epoch)
             print("Epoch=", epoch)
