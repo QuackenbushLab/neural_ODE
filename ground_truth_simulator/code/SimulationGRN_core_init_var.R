@@ -37,34 +37,6 @@ initSimulationGRN <- function(.Object, ..., graph, expnoise = 0, bionoise = 0, s
 	return(.Object)
 }
 
-solveSteadyState <- function(object, externalInputs) {
-  #external inputs
-  if (is.null(names(externalInputs)) |
-      !all(names(externalInputs) %in% getInputNodes(object@graph))) {
-    stop('Invalid external inputs vector, named vector expected for ALL input nodes')
-  }
-  
-  #set random seed
-  set.seed(object@seed)
-  
-  #solve ODE
-	ode = generateODE(object@graph)
-	ext = externalInputs
-	graph = object@graph
-	nodes = setdiff(nodenames(graph), names(ext))
-	exprs = rbeta(length(nodes), 2, 2)
-	exprs[exprs < 0] = 0
-	exprs[exprs > 1] = 1
-	names(exprs) = nodes
-	
-	soln = nleqslv(exprs, ode, jac = NULL, ext)
-	
-	#check if convergence is reached or not
-	if(soln$termcd != 1) {
-	  warning('Solution not achieved. use \'diagnostics(simulation)\' to get details')
-	}
-	return(soln)
-}
 
 createInputModels <- function(simulation, propBimodal) {
   set.seed(simulation@seed)
@@ -127,7 +99,7 @@ vineS <- function(d, betaparam = 5, seed = sample.int(1E6, 1)) {
 }
 
 # beta = 0 means no correlated inputs, smaller beta means stronger correlations
-generateInputData <- function(simulation, numsamples, cor.strength = 5, constantInputGenes) {
+generateInputData <- function(simulation, numsamples, cor.strength = 5, inputGeneVar) {
   set.seed(simulation@seed)
   
   innodes = getInputNodes(simulation@graph)
@@ -149,9 +121,9 @@ generateInputData <- function(simulation, numsamples, cor.strength = 5, constant
     outbounds = 1
     while (sum(outbounds) > 0){
       outbounds = externalInputs[ , n] < 0 | externalInputs[ , n] > 1
-      externalInputs[outbounds & mix == 1, n] = rnorm(sum(outbounds & mix == 1), m$mean[1], m$sd[1])
+      externalInputs[outbounds & mix == 1, n] = rnorm(sum(outbounds & mix == 1), m$mean[1], m$sd[1] * inputGeneVar)
       if (length(m$prop) > 1) {
-        externalInputs[outbounds & mix == 2, n] = rnorm(sum(outbounds & mix == 2), m$mean[2], m$sd[2])
+        externalInputs[outbounds & mix == 2, n] = rnorm(sum(outbounds & mix == 2), m$mean[2], m$sd[2] * inputGeneVar)
       }
     }
     
@@ -180,12 +152,7 @@ generateInputData <- function(simulation, numsamples, cor.strength = 5, constant
     externalInputs = cordata
   }
   
-  #if constantInputGenes is set to true than make all samples have same initial conditions
-  if(constantInputGenes){
-    for(sample_id in 1:numsamples){
-      externalInputs[sample_id,] <- externalInputs[1,]
-    }  
-  }
+ 
   
   #add mixture info to attributes
   attr(externalInputs, 'classf') = classf
@@ -195,7 +162,7 @@ generateInputData <- function(simulation, numsamples, cor.strength = 5, constant
 }
 
 #cor.strength used for generating correlated inputs
-simDataset <- function(simulation, numsamples, cor.strength, externalInputs,timeStamps, constantInputGenes, constantOutputGenes) {
+simDataset <- function(simulation, numsamples, cor.strength, externalInputs,timeStamps, inputGeneVar, outputGeneVar) {
   #browser()
   if (missing(cor.strength)) {
     cor.strength = 5
@@ -212,7 +179,7 @@ simDataset <- function(simulation, numsamples, cor.strength, externalInputs,time
     classf = NULL
   } else{
     #browser()
-    externalInputs = generateInputData(simulation, numsamples, cor.strength, constantInputGenes)
+    externalInputs = generateInputData(simulation, numsamples, cor.strength, inputGeneVar)
     
     #extract class information
     classf = attr(externalInputs, 'classf')

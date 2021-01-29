@@ -64,20 +64,20 @@ setMethod(
 #----SimulationGRN: simulateDataset----
 setGeneric(
   name = 'simulateDataset',
-  def = function(simulation, numsamples, cor.strength, externalInputs, timeStamps, constantInputGenes, constantOutputGenes) {
+  def = function(simulation, numsamples, cor.strength, externalInputs, timeStamps, inputGeneVar, outputGeneVar) {
     standardGeneric('simulateDataset')
   }
 )
 
 setMethod(
   f = 'simulateDataset',
-  signature = c('SimulationGRN', 'numeric', 'missing', 'missing','missing', 'logical', 'logical'),
+  signature = c('SimulationGRN', 'numeric', 'missing', 'missing','missing', 'numeric', 'numeric'),
   definition = simDataset
 )
 
 setMethod(
   f = 'simulateDataset',
-  signature = c('SimulationGRN', 'numeric', 'numeric', 'missing','numeric', 'logical', 'logical'),
+  signature = c('SimulationGRN', 'numeric', 'numeric', 'missing','numeric', 'numeric', 'numeric'),
   definition = simDataset
 )
 
