@@ -354,8 +354,8 @@ if __name__ == "__main__":
         #    decrease_lr(opt, settings['verbose'], one_time_drop= 0.001)
         #    one_time_drop_done = True
             
-
-        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate) or (val_loss < (0.01 * settings['scale_expression'])**1):
+        #val_loss < (0.01 * settings['scale_expression'])**1
+        if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print()
             rep_epochs_so_far.append(epoch)
             print("Epoch=", epoch)
@@ -391,9 +391,9 @@ if __name__ == "__main__":
             print("Went {} epochs without improvement; terminating.".format(epochs_to_fail_to_terminate))
             break
 
-        if val_loss < (0.01 * settings['scale_expression'])**1:
-            print("SUCCESS! Reached validation target; terminating.")
-            break    
+        #if data_handler.n_val > 0 & val_loss < (0.01 * settings['scale_expression'])**1:
+        #    print("SUCCESS! Reached validation target; terminating.")
+        #    break    
 
     total_time = perf_counter() - start_time
 
