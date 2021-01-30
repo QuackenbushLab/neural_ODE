@@ -398,15 +398,18 @@ methods. J Comput Biol. 2009;16:229–39.
 1/29/2021 notes:
 0) shift in gears:
     - Doing L1 loss (tried plain L2 loss but val loss plateuas at 2*10^-3)
-        - ensure that the approach works on 150 gene, 50 sample, 0 noise, low heterogeneity dataset with 0 valsplit
-            - we see that .... 
-    - saw that inherent heterogeneity in input genes can lead to chaotic system
+        - need to ensure that the approach works on 150 gene, 50 sample, 0 noise, low heterogeneity dataset with 0 valsplit
+     - saw that inherent heterogeneity in input genes can lead to chaotic system
         - leads to differences b/w train and test datasets. 
         - for now focus on generating from model with:
             - low heterogeneity b/w samples (init var = 0.1)
             - varying amounts of experimental noise
                 - start with 0 experimental noise
 
+1/30/2021 notes: 
+0) another shift in gears: 
+    - revert to L2 loss and just focus on training a good model without validation. 
+    - will test on validation data separately once the training is done (on a big 300 sample dataset with low heterogeneity)
  
 
 
