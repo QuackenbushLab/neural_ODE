@@ -254,7 +254,10 @@ class DataHandler:
     def calculate_trajectory(self, odenet, method, num_val_trajs):
         trajectories = []
         mu0 = self.get_mu0()
-        all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, 7 - num_val_trajs, replace=False))
+        if num_val_trajs >0 :
+            all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, 7 - num_val_trajs, replace=False))
+        else:
+            all_plotted_samples = sorted(np.random.choice(self.train_set_original, 7, replace=False))
         for j in all_plotted_samples:
             if odenet.explicit_time:
                 _y = torch.cat((mu0[j], self.time_pt[j][0].reshape((1, 1))), 1)

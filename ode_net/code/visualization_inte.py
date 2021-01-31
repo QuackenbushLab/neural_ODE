@@ -109,11 +109,12 @@ class Visualizator1D(Visualizator):
                 gene = self.genes_to_viz[row_num*self.TOT_COLS + col_num] #IH restricting to plot only few genes
                 ax.cla()
                 for sample_idx, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, data_np_to_plot, data_np_0noise_to_plot)):
-                    if sample_idx < self.sample_plot_val_cutoff:
+                    if self.data_handler.n_val > 0 and sample_idx < self.sample_plot_val_cutoff:
                         plot_col = "red"
                     else:
                         plot_col = "lightblue"    
-                    ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
+                    #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
+                    ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), 'ro', alpha=0.2)
                     ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5)
                     ax.plot(times[sample_idx].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
                 
