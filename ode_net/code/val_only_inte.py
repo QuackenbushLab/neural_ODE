@@ -128,6 +128,7 @@ if __name__ == "__main__":
 
     
     # Initialization
+    print(data_handler.dim)
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
     pretrained_model_file = 'output/_pretrained_best_model/best_train_model.pt'
