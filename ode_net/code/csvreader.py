@@ -24,6 +24,7 @@ def readcsv(fp, device, noise_to_add, scale_expression):
         dim = int(rows[0][0])
         ntraj = int(rows[0][1])
         data = rows[1:]
+        print(ntraj)
         for traj in range(ntraj):
             current_length = len(data[traj*(dim+1)])
             traj_data = np.zeros((current_length, 1, dim), dtype=np.float32)

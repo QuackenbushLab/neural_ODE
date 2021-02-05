@@ -130,11 +130,11 @@ if __name__ == "__main__":
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
-    pretrained_model_file = 'output/_pretrained_best_model/best_train_model.pt'.format(settings['output_dir'])
+    pretrained_model_file = 'output/_pretrained_best_model/best_train_model.pt'
     odenet.load(pretrained_model_file)
     
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
-    net_file.write(odenet.__str__())
+        net_file.write(odenet.__str__())
     
     print("Loaded in pre-trained model!")
         
