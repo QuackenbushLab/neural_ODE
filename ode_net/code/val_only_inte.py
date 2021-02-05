@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     
     # Initialization
-    print(data_handler.dim)
+    #print(data_handler.dim)
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
     pretrained_model_file = 'output/_pretrained_best_model/best_train_model.pt'
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     
     val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    print(val_loss_list)
+    #print(val_loss_list)
     print("Validation loss {:.5E}, using {} points".format(val_loss_list[0], val_loss_list[1]))
     print("DONE!")
 

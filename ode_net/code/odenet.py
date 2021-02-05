@@ -23,7 +23,7 @@ class ODENet(nn.Module):
                 nn.LeakyReLU(),
                 nn.Linear(neurons, ndim)
             )
-        else:
+        else: #6 layers
             self.net = nn.Sequential(
                 nn.Linear(ndim, neurons),
                 nn.LeakyReLU(),
