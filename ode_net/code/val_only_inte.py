@@ -27,7 +27,7 @@ torch.set_num_threads(8) #since we are on c5.2xlarge
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
-    print("validation was called, you sure?")
+    #print("validation was called, you sure?")
     #print(data)
     #print(data.shape)
     with torch.no_grad():
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     
     val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
     print(val_loss_list)
-    #print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[1]))
+    print("Validation loss {:.5E}, using {} points".format(val_loss_list[0], val_loss_list[1]))
     print("DONE!")
 
   
