@@ -86,7 +86,7 @@ if __name__ == "__main__":
     sys.setrecursionlimit(3000)
     print('Loading settings from file {}'.format(args.settings))
     settings = read_arguments_from_file(args.settings)
-    cleaned_file_name = clean_name
+    cleaned_file_name = "val_only_"+clean_name
     save_file_name = _build_save_file_name(cleaned_file_name, settings['epochs'])
 
     output_root_dir = '{}/{}/'.format(settings['output_dir'], save_file_name)
