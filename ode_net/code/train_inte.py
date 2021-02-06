@@ -50,7 +50,7 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
-    print("validation was called, you sure?")
+    #print("validation was called, you sure?")
     #print(data)
     #print(data.shape)
     with torch.no_grad():
