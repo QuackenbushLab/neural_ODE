@@ -26,11 +26,11 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential(
                 nn.Linear(ndim, neurons),
-                nn.LeakyReLU(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.LeakyReLU(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.LeakyReLU(),
+                nn.Sigmoid(),
                 #nn.Linear(neurons, neurons),
                 #nn.LeakyReLU(),
                 #nn.Linear(neurons, neurons),
@@ -45,7 +45,7 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('leaky_relu')) #IH changed init scheme
+                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('sigmoid')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
         self.net.to(device)
