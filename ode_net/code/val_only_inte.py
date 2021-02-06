@@ -152,6 +152,7 @@ if __name__ == "__main__":
     val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
     #print(val_loss_list)
     print("Validation loss {:.5E}, using {} points".format(val_loss_list[0], val_loss_list[1]))
+    np.savetxt('{}val_loss.csv'.format(output_root_dir), [val_loss_list[0]], delimiter=',')
     print("DONE!")
 
   
