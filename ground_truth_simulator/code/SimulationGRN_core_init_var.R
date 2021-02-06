@@ -156,7 +156,7 @@ generateInputData <- function(simulation, numsamples, cor.strength = 5, inputGen
   
   #add mixture info to attributes
   attr(externalInputs, 'classf') = classf
-  
+  #browser()
   colnames(externalInputs) = innodes
   return(externalInputs)
 }
@@ -193,16 +193,25 @@ simDataset <- function(simulation, numsamples, cor.strength, externalInputs,time
   my_ode = generateODE(graph)
   
   #generate LN noise for simulation
-  lnnoise = exp(rnorm(numsamples * length(nodenames(graph)), 0, simulation@bionoise))
-  lnnoise = matrix(lnnoise, nrow = numsamples, byrow = T)
-  colnames(lnnoise) = nodenames(graph)
+  #lnnoise = exp(rnorm(numsamples * length(nodenames(graph)), 0, simulation@bionoise))
+  #lnnoise = matrix(lnnoise, nrow = numsamples, byrow = T)
+  #colnames(lnnoise) = nodenames(graph)
   
+  #browser()
   #initialize solutions
   nodes = setdiff(nodenames(graph), colnames(externalInputs))
-  exprs = rbeta(length(nodes) * numsamples, 2, 2)
+  exprs = matrix(NA,ncol = length(nodes), nrow = numsamples)
+  
+  #initialize output genes
+  #every output gene has a slightly different mean, but we control the overall SD
+  for(col in 1:length(nodes)){
+    exprs[,col] <- rbeta(numsamples, 2 * 1/outputGeneVar, 2* 1/outputGeneVar)
+    mean_pos <- runif(1,min = -0.25, max = 0.25)
+    exprs[,col] <- exprs[,col] + mean_pos
+  }
   exprs[exprs < 0] = 0
   exprs[exprs > 1] = 1
-  exprs = matrix(exprs, nrow = numsamples)
+  
   colnames(exprs) = nodes
 
   #solve ODEs for different inputs

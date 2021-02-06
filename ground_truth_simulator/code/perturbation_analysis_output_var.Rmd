@@ -147,7 +147,8 @@ makeVarStabilizationPlots <- function(datamat){
     geom_line(aes(group = gene, col = gene)) + 
     theme_bw() + 
     facet_grid(.~input_node) + 
-    theme(legend.position = "none")
+    theme(legend.position = "none")+
+    ylim(0,0.3)
 
 }
 ```
@@ -155,32 +156,54 @@ makeVarStabilizationPlots <- function(datamat){
 
 
 # {.tabset .tabset-pills}
-## No heterogeneity in input genes across samples {.tabset}
+## Heterogeneity in input genes AND output genes {.tabset}
+
+### Input heter = 0.1, Output heter = 0.05 {.tabset}
+
 ```{r}
 simu_list = simulateDataset(simSmall, nsamp, 
-                            timeStamps = time_stamps, 
+                            timeStamps = time_stamps,
                             cor.strength = 0,
-                            inputGeneVar  = 0,
-                            outputGeneVar = 1)
+                            inputGeneVar  = 0.1,
+                            outputGeneVar = 0.05)
 datamat = simu_list$emat
 ```
 
-
-
-### Variance analysis
+#### Variance analysis
 ```{r, fig.height = 5}
 makeVarStabilizationPlots(datamat)
 ```
 
-### Sample-by-sample inspection
+#### Sample-by-sample inspection
 ```{r}
 makePerturbationPlots(datamat)
 ```
 
 
-## Varying heterogeneity in input genes across samples {.tabset}
+### Input heter = 1, Output heter = 0.05 {.tabset}
 
-### Variance inflation = 0.1 {.tabset}
+```{r}
+simu_list = simulateDataset(simSmall, nsamp, 
+                            timeStamps = time_stamps,
+                            cor.strength = 0,
+                            inputGeneVar  = 1,
+                            outputGeneVar = 0.05)
+datamat = simu_list$emat
+```
+
+#### Variance analysis
+```{r, fig.height = 5}
+makeVarStabilizationPlots(datamat)
+```
+
+#### Sample-by-sample inspection
+```{r}
+makePerturbationPlots(datamat)
+```
+
+
+
+### Input heter = 0.1, Output heter = 1 {.tabset}
 
 ```{r}
 simu_list = simulateDataset(simSmall, nsamp, 
@@ -202,28 +225,7 @@ makePerturbationPlots(datamat)
 ```
 
 
-### Variance inflation = 0.5 {.tabset}
-
-```{r}
-simu_list = simulateDataset(simSmall, nsamp, 
-                            timeStamps = time_stamps,
-                            cor.strength = 0,
-                            inputGeneVar  = 0.5,
-                            outputGeneVar = 1)
-datamat = simu_list$emat
-```
-
-#### Variance analysis
-```{r, fig.height = 5}
-makeVarStabilizationPlots(datamat)
-```
-
-#### Sample-by-sample inspection
-```{r}
-makePerturbationPlots(datamat)
-```
-
-### Variance inflation = 1 {.tabset}
+### Input heter = 1, Output heter = 1 {.tabset}
 
 ```{r}
 simu_list = simulateDataset(simSmall, nsamp, 
@@ -243,27 +245,3 @@ makeVarStabilizationPlots(datamat)
 ```{r}
 makePerturbationPlots(datamat)
 ```
-
-
-### Variance inflation = 2 {.tabset}
-
-```{r}
-simu_list = simulateDataset(simSmall, nsamp, 
-                            timeStamps = time_stamps,
-                            cor.strength = 0,
-                            inputGeneVar  = 2,
-                            outputGeneVar = 1)
-datamat = simu_list$emat
-```
-
-#### Variance analysis
-```{r, fig.height = 5}
-makeVarStabilizationPlots(datamat)
-```
-
-#### Sample-by-sample inspection
-```{r}
-makePerturbationPlots(datamat)
-```
-
-
