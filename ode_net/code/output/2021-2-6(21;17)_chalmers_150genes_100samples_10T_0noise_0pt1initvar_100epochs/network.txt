@@ -1,0 +1,15 @@
+ODENet(
+  (net): Sequential(
+    (0): Linear(in_features=150, out_features=600, bias=True)
+    (1): Sigmoid()
+    (2): Linear(in_features=600, out_features=600, bias=True)
+    (3): Sigmoid()
+    (4): Linear(in_features=600, out_features=600, bias=True)
+    (5): Sigmoid()
+    (6): Linear(in_features=600, out_features=600, bias=True)
+    (7): Sigmoid()
+    (8): Linear(in_features=600, out_features=600, bias=True)
+    (9): Sigmoid()
+    (10): Linear(in_features=600, out_features=150, bias=True)
+  )
+)
