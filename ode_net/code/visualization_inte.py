@@ -117,8 +117,8 @@ class Visualizator1D(Visualizator):
                         plot_col = "red"
                     else:
                         plot_col = "lightblue"    
-                    ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
-                    #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), 'ro', alpha=0.2)
+                    #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
+                    ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), 'ro', alpha=0.2)
                     ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5)
                     ax.plot(times[sample_idx].flatten(), approx_traj[:,:,gene].numpy().flatten(),'k-.', lw=1)
                 
