@@ -39,7 +39,7 @@ simseeds = sample.int(1E7, 1000)
 
 #----simulation parameters----
 #simulation parameters
-nsamp = 300#number of samples
+nsamp = 100#number of samples
 netSize = 150 #network size of sampled networks
 minTFs = 10 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
@@ -77,7 +77,7 @@ time_stamps <- 0:9
 simu_list = simulateDataset(simSmall, nsamp, 
                             timeStamps = time_stamps,
                             cor.strength = 0,
-                            inputGeneVar  = 0.1,
+                            inputGeneVar  = 1,
                             outputGeneVar = 1)
 datamat = simu_list$emat
 edgepropmat = get_edge_params(grnSmall@edgeset)
@@ -101,7 +101,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_150genes_15samples_10T_0noise_0pt1initvar.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_150genes_100samples_10T_0noise_1initvar.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
