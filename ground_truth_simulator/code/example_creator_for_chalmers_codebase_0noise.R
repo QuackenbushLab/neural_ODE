@@ -44,7 +44,7 @@ netSize = 150 #network size of sampled networks
 minTFs = 10 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
 bionoise = 0 #biological noise standard deviation (superimposed log-normal)
-propbimodal = 0 #proportion of bimodal genes (may be << prop*netSize)
+propbimodal = 0.2 #proportion of bimodal genes (may be << prop*netSize)
 
 #use seed number 102 to perform one simulation
 #using R3.5 will give the same results as sim102 packages in the dcanr package
@@ -101,7 +101,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_150genes_100samples_earlyT_0noise_0bimod_0pt1initvar.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_150genes_100samples_earlyT_0noise_0pt2bimod_0pt1initvar.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
