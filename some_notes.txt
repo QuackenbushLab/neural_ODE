@@ -419,14 +419,13 @@ methods. J Comput Biol. 2009;16:229–39.
 1) Running on 150 genes, 100 samples, noise = 0.05, valsplit = 0.05
 2) Works well for: 
     - low heterogeneity (initvar 0.1) and no bimod input gene (bimod 0)
+    - low heterogeneity (initvar 0.1) and no bimod input gene (bimod 0) and sparse time (0,2,3,7,9)
     
    Works OK for (prefers to learn a average trajectory): 
     - low heterogeneity (initvar 0.1) and bimodal input genes (bimod 0.2)
     - high heterogeneity (initvar 1) and no bimod input gene (bimod 0)
     - high heterogeneity (initvar 1) and bimodal input genes (bimod 0.2)
-
-   Currently running:
-    -  low heterogeneity (initvar 0.1) and no bimod input gene (bimod 0) and sparse time (0,2,3,7,9)
     -  low heterogeneity (initvar 0.1) and bimodal input gene (bimod 0.2) and sparse time (0,2,3,7,9)
 
 
+  
