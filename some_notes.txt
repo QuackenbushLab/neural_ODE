@@ -412,4 +412,21 @@ methods. J Comput Biol. 2009;16:229–39.
     - will test on validation data separately once the training is done (on a big 300 sample dataset with low heterogeneity)
  
 
+2/11/2021 notes: 
+0) Big changes: 
+    - a Tanh activation function really helped (easier to learn both positive and negative gradients)
+    - the NN is now 500N/HL with 2 HL only (so it's pretty efficient)
+1) Running on 150 genes, 100 samples, noise = 0.05, valsplit = 0.05
+2) Works well for: 
+    - low heterogeneity (initvar 0.1) and no bimod input gene (bimod 0)
+    
+   Works OK for (prefers to learn a average trajectory): 
+    - low heterogeneity (initvar 0.1) and bimodal input genes (bimod 0.2)
+    - high heterogeneity (initvar 1) and no bimod input gene (bimod 0)
+    - high heterogeneity (initvar 1) and bimodal input genes (bimod 0.2)
+
+   Currently running:
+    -  low heterogeneity (initvar 0.1) and no bimod input gene (bimod 0) and sparse time (0,2,3,7,9)
+    -  low heterogeneity (initvar 0.1) and bimodal input gene (bimod 0.2) and sparse time (0,2,3,7,9)
+
 
