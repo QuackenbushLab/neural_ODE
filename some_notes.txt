@@ -427,5 +427,8 @@ methods. J Comput Biol. 2009;16:229–39.
     - high heterogeneity (initvar 1) and bimodal input genes (bimod 0.2)
     -  low heterogeneity (initvar 0.1) and bimodal input gene (bimod 0.2) and sparse time (0,2,3,7,9)
 
+3) Scaling up to full gene set: 
+    - low heterogeneity (initvar 0.1) and no bimod input gene (bimod 0)
+
 
   
