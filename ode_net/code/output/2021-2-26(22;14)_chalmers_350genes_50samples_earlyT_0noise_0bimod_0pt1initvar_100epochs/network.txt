@@ -1,9 +1,0 @@
-ODENet(
-  (net): Sequential(
-    (0): Linear(in_features=350, out_features=1000, bias=True)
-    (1): Tanh()
-    (2): Linear(in_features=1000, out_features=1000, bias=True)
-    (3): Tanh()
-    (4): Linear(in_features=1000, out_features=350, bias=True)
-  )
-)
