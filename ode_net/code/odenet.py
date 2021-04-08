@@ -35,14 +35,6 @@ class ODENet(nn.Module):
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
                 nn.Sigmoid(),
-                nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
-                nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
-                nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
-                nn.Linear(neurons, neurons),
-                nn.Tanh(),
                 #nn.Linear(neurons, neurons),
                 #nn.Tanh(),
                 #nn.Linear(neurons, neurons),
@@ -53,7 +45,8 @@ class ODENet(nn.Module):
                 #nn.Tanh(),
                 #nn.Linear(neurons, neurons),
                 #nn.Tanh(),
-                nn.Linear(neurons, ndim)
+                nn.Linear(neurons, ndim),
+                nn.Tanh()
             )
 
         # Initialize the layers of the model
