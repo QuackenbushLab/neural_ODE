@@ -26,11 +26,11 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential(
                 nn.Linear(ndim, neurons),
-                nn.ReLU(),
+                #nn.ReLU(),
+                #nn.Linear(neurons, neurons),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.ReLU(),
-                nn.Linear(neurons, neurons),
-                nn.ReLU(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
                 nn.Tanh(),
                 #nn.Linear(neurons, neurons),
