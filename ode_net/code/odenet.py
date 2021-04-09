@@ -39,12 +39,6 @@ class ODENet(nn.Module):
                 Hill(),
                 nn.Linear(neurons, neurons),
                 Hill(),
-                #nn.Linear(neurons, neurons),
-                #Hill(),
-                #nn.Linear(neurons, neurons),
-                #Hill(),
-                #nn.Linear(neurons, neurons),
-                #Hill(),
                 nn.Linear(neurons, ndim)
             )
 
@@ -60,14 +54,7 @@ class ODENet(nn.Module):
 
     def forward(self, t, y):
         #torch.set_num_threads(72)
-        #print("Using {} threads odenet forward".format(torch.get_num_threads()))
         ''' Forward prop through the network '''
-        '''
-        try:
-            grad = self.net(torch.cat((y, t * torch.ones((y.shape[0],1))), 1))
-        except:
-            grad = self.net(torch.cat((y, t.reshape((1,1))), 1))
-        '''
         grad = self.net(y)
         #print("y: {}, t: {}, grad: {:.20f}\n".format(y, t, grad[0,0]))
         if self.explicit_time:
