@@ -3,8 +3,13 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
-def hill(x):
-    return 1/(1+x)
+class Hill(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+
+    def forward(self, input):
+        ex = torch.reciprocal(1+input)
+        return(ex)
 
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
@@ -29,25 +34,17 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential(
                 nn.Linear(ndim, neurons),
-                hill(),
+                Hill(),
                 nn.Linear(neurons, neurons),
-                hill(),
+                Hill(),
                 nn.Linear(neurons, neurons),
-                hill(),
-                nn.Linear(neurons, neurons),
-                hill(),
-                nn.Linear(neurons, neurons),
-                hill(),
-                nn.Linear(neurons, neurons),
-                hill(),
-                nn.Linear(neurons, neurons),
-                hill(),
-                nn.Linear(neurons, neurons),
-                hill(),
-                nn.Linear(neurons, neurons),
-                hill(),
-                nn.Linear(neurons, neurons),
-                hill(),
+                Hill(),
+                #nn.Linear(neurons, neurons),
+                #Hill(),
+                #nn.Linear(neurons, neurons),
+                #Hill(),
+                #nn.Linear(neurons, neurons),
+                #Hill(),
                 nn.Linear(neurons, ndim)
             )
 
