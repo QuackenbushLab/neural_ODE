@@ -58,7 +58,7 @@ class ODENet(nn.Module):
 
     #print("Using {} threads odenet".format(torch.get_num_threads()))
 
-    def hill(x)
+    def hill(x):
         return 1/(1+x)
 
     def forward(self, t, y):
