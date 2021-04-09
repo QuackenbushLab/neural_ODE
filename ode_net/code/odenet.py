@@ -3,6 +3,9 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
+def hill(x):
+    return 1/(1+x)
+
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
     
@@ -57,9 +60,6 @@ class ODENet(nn.Module):
         self.net.to(device)
 
     #print("Using {} threads odenet".format(torch.get_num_threads()))
-
-    def hill(x):
-        return 1/(1+x)
 
     def forward(self, t, y):
         #torch.set_num_threads(72)
