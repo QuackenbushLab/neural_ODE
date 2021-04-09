@@ -26,25 +26,25 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential(
                 nn.Linear(ndim, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                hill(),
                 nn.Linear(neurons, neurons),
-                nn.Tanh(),
+                hill(),
                 nn.Linear(neurons, ndim)
             )
 
@@ -57,6 +57,9 @@ class ODENet(nn.Module):
         self.net.to(device)
 
     #print("Using {} threads odenet".format(torch.get_num_threads()))
+
+    def hill(x)
+        return 1/(1+x)
 
     def forward(self, t, y):
         #torch.set_num_threads(72)
