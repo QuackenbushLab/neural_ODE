@@ -40,15 +40,15 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, neurons),
                 nn.Softplus(),
                 nn.Linear(neurons, neurons),
-                nn.Softplus(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Softplus(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Softplus(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Softplus(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Softplus(),
+                nn.Tanh(),
                 nn.Linear(neurons, ndim)
             )
 
