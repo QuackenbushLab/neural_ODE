@@ -352,7 +352,7 @@ if __name__ == "__main__":
         
         # Decrease learning rate as a one-time thing:
         if train_loss < 2*10**(-2) and one_time_drop_done == False:
-            decrease_lr(opt, settings['verbose'], one_time_drop= 5**10^(-5))
+            decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-5))
             one_time_drop_done = True
             
         #val_loss < (0.01 * settings['scale_expression'])**1
