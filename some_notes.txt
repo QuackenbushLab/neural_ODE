@@ -431,4 +431,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - low heterogeneity (initvar 0.1) and no bimod input gene (bimod 0)
 
 
-  
+4/12/2021 notes:
+1) tried many different activation function schemes:
+    - working on 350 genes, 50 sample dataset
+    - seems like 5 hidden layers of 300 neurons each, is where a performance plateau of 1.2*10^-2 hits
+    - increasing depth and switching activation functions work. 
+    - so use 5 hidden layers (300 neur each), all sigmoids, as a starting point.

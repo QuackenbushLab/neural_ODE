@@ -33,30 +33,24 @@ class ODENet(nn.Module):
             )
         else: #6 layers
             self.net = nn.Sequential(
-                nn.Tanh(),
+                #nn.Tanh(),
                 nn.Linear(ndim, neurons),
-                nn.Softplus(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Softplus(),
-                nn.Linear(neurons, neurons),
-                nn.Softplus(),
-                nn.Linear(neurons, neurons),
-                nn.Softplus(),
-                nn.Linear(neurons, neurons),
-                nn.Softplus(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Tanh(),
+                nn.Sigmoid(),
                 nn.Linear(neurons, ndim)
             )
 
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('tanh')) #IH changed init scheme
+                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('sigmoid')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
         self.net.to(device)
