@@ -437,3 +437,4 @@ methods. J Comput Biol. 2009;16:229–39.
     - seems like 5 hidden layers of 300 neurons each, is where a performance plateau of 1.2*10^-2 hits
     - increasing depth and switching activation functions work. 
     - so use 5 hidden layers (300 neur each), all sigmoids, as a starting point.
+2) trying single-mode train-test as an option
