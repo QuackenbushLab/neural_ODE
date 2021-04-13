@@ -9,7 +9,7 @@ ODENet(
     (6): Linear(in_features=350, out_features=350, bias=True)
     (7): Sigmoid()
     (8): Linear(in_features=350, out_features=350, bias=True)
-    (9): Sigmoid()
+    (9): Tanh()
     (10): Linear(in_features=350, out_features=350, bias=True)
   )
 )

@@ -5,13 +5,13 @@ verbose,True
 method,dopri5
 neurons_per_layer,350
 optimizer,adam
-batch_type,single
+batch_type,trajectory
 batch_size,4
 batch_time,99999
 batch_time_frac,99999
 dec_lr,False
 dec_lr_factor,0.995
-init_lr,0.0001
+init_lr,0.001
 weight_decay,0.0
 cpu,True
 val_split,0.05

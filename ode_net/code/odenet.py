@@ -43,7 +43,7 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                nn.Tanh(),
                 nn.Linear(neurons, ndim)
             )
 
