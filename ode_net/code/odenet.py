@@ -9,19 +9,21 @@ class Expo(nn.Module):
 
     def forward(self, input):
         ex = torch.exp(input)
+
         return(ex)
 
-class LogOneMinusX(nn.Module):
+class LogOnePlusX(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
 
     def forward(self, input):
-        ex = torch.log1p(-1*input)
+        if any(input <-1):
+            print("OMGGGGGG! less than -1")
+        ex = torch.log1p(input)
         return(ex)
 
 
-        torch.log1p
-
+       
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
     
@@ -48,9 +50,11 @@ class ODENet(nn.Module):
                 nn.Linear(ndim, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                LogOneMinusX(),
+                nn.Softplus(), #need to change
                 nn.Linear(neurons, neurons),
                 Expo(),
+                #nn.Linear(neurons, neurons),
+                #nn.LeakyReLU(),
                 nn.Linear(neurons, ndim)
             )
 
