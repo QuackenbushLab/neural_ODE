@@ -16,7 +16,7 @@ class LogOneMinusX(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        ex = torch.log1p(-input)
+        ex = torch.log1p(-1*input)
         return(ex)
 
 
@@ -48,11 +48,9 @@ class ODENet(nn.Module):
                 nn.Linear(ndim, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                LogOneMinusX(),
                 nn.Linear(neurons, neurons),
                 Expo(),
-                nn.Linear(neurons, neurons),
-                nn.LeakyReLU(),
                 nn.Linear(neurons, ndim)
             )
 
