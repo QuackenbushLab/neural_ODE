@@ -97,7 +97,7 @@ class Visualizator1D(Visualizator):
             for col_num, ax in enumerate(this_row_plots):
                 ax.set_xlim((self.time_span[0]-self.time_width*self.EXTRA_WIDTH_TRAJ,
                             self.time_span[1]+self.time_width*self.EXTRA_WIDTH_TRAJ))
-                ax.set_ylim((self.settings['scale_expression']*-0.7,self.settings['scale_expression']*0.7))
+                ax.set_ylim((self.settings['scale_expression']*-0.5,self.settings['scale_expression']*0.5))
          
 
     def visualize(self):
