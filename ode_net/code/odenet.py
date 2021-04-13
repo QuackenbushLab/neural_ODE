@@ -3,13 +3,24 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
-class Hill(nn.Module):
+class Expo(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
 
     def forward(self, input):
-        ex = torch.reciprocal(1+input)
+        ex = torch.exp(input)
         return(ex)
+
+class LogOneMinusX(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+
+    def forward(self, input):
+        ex = torch.log1p(-input)
+        return(ex)
+
+
+        torch.log1p
 
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
@@ -39,11 +50,9 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
+                Expo(),
                 nn.Linear(neurons, neurons),
-                nn.Sigmoid(),
-                nn.Linear(neurons, neurons),
-                nn.Tanh(),
+                nn.LeakyReLU(),
                 nn.Linear(neurons, ndim)
             )
 

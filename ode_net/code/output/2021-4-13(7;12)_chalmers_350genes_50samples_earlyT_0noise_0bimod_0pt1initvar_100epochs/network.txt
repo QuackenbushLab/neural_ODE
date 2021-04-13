@@ -1,0 +1,13 @@
+ODENet(
+  (net): Sequential(
+    (0): Linear(in_features=350, out_features=350, bias=True)
+    (1): Sigmoid()
+    (2): Linear(in_features=350, out_features=350, bias=True)
+    (3): Sigmoid()
+    (4): Linear(in_features=350, out_features=350, bias=True)
+    (5): Expo()
+    (6): Linear(in_features=350, out_features=350, bias=True)
+    (7): LeakyReLU(negative_slope=0.01)
+    (8): Linear(in_features=350, out_features=350, bias=True)
+  )
+)

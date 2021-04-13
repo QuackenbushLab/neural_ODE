@@ -439,4 +439,8 @@ methods. J Comput Biol. 2009;16:229–39.
     - so use 5 hidden layers (300 neur each), all sigmoids, as a starting point.
 2) trying single-mode train-test as an option
     - not very good. revert to trajectory training
-3) will now try log transforming the data f(x) = log(x+1)
+3) will now try log transforming the data f(x) = log(x+1):
+    - simply log transforming does not help much
+    - now trying to incorporate more info into activation functions 
+        - Expo and LogOneMinusX as discussed with RB
+        
