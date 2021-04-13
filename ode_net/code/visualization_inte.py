@@ -40,10 +40,13 @@ class Visualizator1D(Visualizator):
         self.TOT_ROWS = 5
         self.TOT_COLS = 6
 
-        if self.data_handler.val_split !=1 :
-            self.sample_plot_val_cutoff = min(self.data_handler.n_val, 2)
+        if self.data_handler.batch_type == "single":
+            self.sample_plot_val_cutoff = 0
         else:
-            self.sample_plot_val_cutoff = self.data_handler.n_val
+            if self.data_handler.val_split !=1 :
+                self.sample_plot_val_cutoff = min(self.data_handler.n_val, 2)
+            else:
+                self.sample_plot_val_cutoff = self.data_handler.n_val
 
         self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
