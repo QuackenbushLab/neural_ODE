@@ -443,4 +443,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - simply log transforming does not help much
     - now trying to incorporate more info into activation functions 
         - Expo and LogOneMinusX as discussed with RB
-        
+            - no help by itself
+4) let's try to use all leaky relu to see if that helps:
+    - not helpful. ALL leaky relu layers does good training fit, but poor validation performance
+    - similar problem to what we saw a long time ago
+5) let's try slightly wider network with all sigmoids
+6) let's try to do batch normalization (maybe we have vanishing grads)

@@ -50,11 +50,11 @@ class ODENet(nn.Module):
                 nn.Linear(ndim, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.Softplus(), #need to change
+                nn.Sigmoid(), #need to change
                 nn.Linear(neurons, neurons),
-                Expo(),
-                #nn.Linear(neurons, neurons),
-                #nn.LeakyReLU(),
+                nn.Sigmoid(),
+                nn.Linear(neurons, neurons),
+                nn.LeakyReLU(),
                 nn.Linear(neurons, ndim)
             )
 
