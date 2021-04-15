@@ -448,4 +448,6 @@ methods. J Comput Biol. 2009;16:229–39.
     - not helpful. ALL leaky relu layers does good training fit, but poor validation performance
     - similar problem to what we saw a long time ago
 5) let's try slightly wider network with all sigmoids+Tanh
+    - not helpful. tried 4 layers of sigmoids and tanhH with 500N/HL
 6) let's try to do batch normalization (maybe we have vanishing grads)
+    
