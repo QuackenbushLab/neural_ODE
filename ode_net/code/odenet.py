@@ -54,7 +54,7 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, neurons),
                 nn.Sigmoid(),
                 nn.Linear(neurons, neurons),
-                nn.LeakyReLU(),
+                nn.Tanh(),
                 nn.Linear(neurons, ndim)
             )
 
