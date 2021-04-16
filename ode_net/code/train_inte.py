@@ -50,9 +50,7 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
-    #print("validation was called, you sure?")
-    #print(data)
-    #print(data.shape)
+    odenet.eval()
     with torch.no_grad():
         if explicit_time:
             if data_handler.batch_type == 'batch_time':
@@ -78,6 +76,7 @@ def validation(odenet, data_handler, method, explicit_time):
 
 def true_loss(odenet, data_handler, method):
     data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
+    odenet.eval()
     with torch.no_grad():
         predictions = torch.zeros(data.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t, data)):
@@ -101,6 +100,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
     opt.zero_grad()
+    odenet.train()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment

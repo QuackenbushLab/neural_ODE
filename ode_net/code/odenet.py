@@ -61,7 +61,7 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, neurons),
                 nn.BatchNorm1d(neurons),
                 nn.Tanh(),
-                
+
                 nn.Linear(neurons, ndim)
             )
 

@@ -270,6 +270,7 @@ class DataHandler:
                 _y = torch.cat((mu0[j], self.time_pt[j][0].reshape((1, 1))), 1)
             else:
                 _y = mu0[j]
+            odenet.eval()
             y = odeint(odenet, _y, self.time_pt[j], method=method)
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
