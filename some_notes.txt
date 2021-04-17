@@ -450,8 +450,12 @@ methods. J Comput Biol. 2009;16:229–39.
 5) let's try slightly wider network with all sigmoids+Tanh
     - not helpful. tried 4 layers of sigmoids and tanhH with 500N/HL
 6) let's try to do batch normalization (maybe we have vanishing grads)
-    - implemented nn.BatchNorm1d() layers
+    - implemented nn.LayerNorm() layers
     - "Batch Normalization seeks a stable distribution of activation values throughout training, and normalizes the inputs of a nonlinearity since that is where matching the moments is more likely to stabilize the distribution"
     - So normally, it is inserted after dense layers and before the nonlinearity.
     - Simple 3Sig + 1Tanh 350n/HL network
+    - Works ok. train set has better performance, but test set plateaus.
+    - Reverted out of log-scale to understand performance. 
+    - Need to compare with previous issues where train-test performances were not lining up
+
     
