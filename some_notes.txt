@@ -458,4 +458,12 @@ methods. J Comput Biol. 2009;16:229–39.
     - Reverted out of log-scale to understand performance. 
     - Need to compare with previous issues where train-test performances were not lining up
 
+4/17/2021 notes:
+1) After layer normalization 
+    - the NN (simple 3Sigm + 1Tanh 350n/HL) clearly fits the training data TOO well. 
+    - Doesn't generalize to validation set. 
+    - Revert to testing with 0 noise and prune down to find more parsimonious model
+        - hypothesis is that model should do well in 0 noise setting. 
+
+
     
