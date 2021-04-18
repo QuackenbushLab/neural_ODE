@@ -1,0 +1,14 @@
+ODENet(
+  (net): Sequential(
+    (0): Linear(in_features=350, out_features=100, bias=True)
+    (1): LayerNorm((100,), eps=1e-05, elementwise_affine=False)
+    (2): Sigmoid()
+    (3): Linear(in_features=100, out_features=100, bias=True)
+    (4): LayerNorm((100,), eps=1e-05, elementwise_affine=False)
+    (5): Sigmoid()
+    (6): Linear(in_features=100, out_features=100, bias=True)
+    (7): LayerNorm((100,), eps=1e-05, elementwise_affine=False)
+    (8): Tanh()
+    (9): Linear(in_features=100, out_features=350, bias=True)
+  )
+)

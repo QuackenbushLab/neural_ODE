@@ -464,6 +464,9 @@ methods. J Comput Biol. 2009;16:229–39.
     - Doesn't generalize to validation set. 
     - Revert to testing with 0 noise and prune down to find more parsimonious model
         - hypothesis is that model should do well in 0 noise setting. 
+            - does well, but validation performance is poor as hypothesized (model overfits)
+        - now try to prune now NN to prevent overfitting
+
 
 
     

@@ -50,13 +50,13 @@ class ODENet(nn.Module):
                 nn.LayerNorm(neurons, elementwise_affine=False),
                 nn.Sigmoid(),
 
-                nn.Linear(neurons, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Sigmoid(), 
+                #nn.Linear(neurons, neurons),
+                #nn.LayerNorm(neurons, elementwise_affine=False),
+                #nn.Sigmoid(), 
 
-                nn.Linear(neurons, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Sigmoid(),
+                #nn.Linear(neurons, neurons),
+                #nn.LayerNorm(neurons, elementwise_affine=False),
+                #nn.Sigmoid(),
 
                 nn.Linear(neurons, neurons),
                 nn.LayerNorm(neurons, elementwise_affine=False),
