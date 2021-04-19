@@ -468,7 +468,7 @@ methods. J Comput Biol. 2009;16:229–39.
         - now try to prune now NN to prevent overfitting
             - havent had much luck with this, so let's try LR increase on simplest architecture
         - OK so observed that increasing LR to 0.01 helps in terms of getting validation error down lower
-            - need to test even higher LR in this context (maybe 0.05)
+            - need to test even higher LR in this context (maybe 0.05) (TESTED; DOESNT WORK!)
             - need to test with fewer samples
             - need to test if this works w/ old NN structure (w/o layer norm) (TESTED; DOESNT WORK!)
             - need to test in conjuction with a variety of NN architectures
