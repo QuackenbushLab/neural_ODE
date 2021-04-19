@@ -48,18 +48,18 @@ class ODENet(nn.Module):
             self.net = nn.Sequential(
                 nn.Linear(ndim, neurons),
                 nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Sigmoid(),
+                #nn.Sigmoid(),
 
-                nn.Linear(neurons, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Sigmoid(),
+               # nn.Linear(neurons, neurons),
+               # nn.LayerNorm(neurons, elementwise_affine=False),
+               # nn.Sigmoid(),
 
-                nn.Linear(neurons, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Sigmoid(),
+                #nn.Linear(neurons, neurons),
+                #nn.LayerNorm(neurons, elementwise_affine=False),
+                #nn.Sigmoid(),
 
-                nn.Linear(neurons, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
+                #nn.Linear(neurons, neurons),
+                #nn.LayerNorm(neurons, elementwise_affine=False),
                 nn.Tanh(),
 
                 nn.Linear(neurons, ndim)

@@ -466,6 +466,13 @@ methods. J Comput Biol. 2009;16:229–39.
         - hypothesis is that model should do well in 0 noise setting. 
             - does well, but validation performance is poor as hypothesized (model overfits)
         - now try to prune now NN to prevent overfitting
+            - havent had much luck with this, so let's try LR increase on simplest architecture
+        - OK so observed that increasing LR to 0.01 helps in terms of getting validation error down lower
+            - need to test even higher LR in this context (maybe 0.05)
+            - need to test with fewer samples
+            - need to test if this is applicable to our old NN structure (w/o layer norm)
+            - need to test in conjuction with a variety of NN architectures
+        - can try weight decay regulatization
 
 
 
