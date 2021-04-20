@@ -1,0 +1,11 @@
+ODENet(
+  (net): Sequential(
+    (0): Linear(in_features=350, out_features=200, bias=True)
+    (1): LayerNorm((200,), eps=1e-05, elementwise_affine=False)
+    (2): Softplus(beta=1, threshold=20)
+    (3): Linear(in_features=200, out_features=200, bias=True)
+    (4): LayerNorm((200,), eps=1e-05, elementwise_affine=False)
+    (5): ReLU()
+    (6): Linear(in_features=200, out_features=350, bias=True)
+  )
+)

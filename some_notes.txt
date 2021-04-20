@@ -473,6 +473,8 @@ methods. J Comput Biol. 2009;16:229–39.
             - need to test if this works w/ old NN structure (w/o layer norm) (TESTED; DOESNT WORK!)
             - need to test in conjuction with a variety of NN architectures
                 - increased to 2HL (1Sigm + 1 Tanh; 100n per HL)
+                    - seems like 1HL stil performs better. 
+                    - can try to increase to 98% training split for 100 samples for 2HL though
 
         - ASIDE: can try softplus to emulate our ODE (with log transformed data)
             

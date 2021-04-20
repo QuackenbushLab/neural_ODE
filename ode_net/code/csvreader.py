@@ -37,9 +37,9 @@ def readcsv(fp, device, noise_to_add, scale_expression):
                     t_pt.append(torch.tensor(row).to(device))
                 else:
                     #row is gene-expression data; so add noise here!
-                    row = [log(float(f)+1 + np.random.normal(0, noise_to_add)) for f in data[traj*(dim+1) + d]]
+                    row = [np.log(float(f)+1 + np.random.normal(0, noise_to_add)) for f in data[traj*(dim+1) + d]]
                     traj_data[:,:,d] = scale_expression*np.expand_dims(np.array(row), axis=1)
-                    row_0noise =  [log(float(f)+1) for f in data[traj*(dim+1) + d]]
+                    row_0noise =  [np.log(float(f)+1) for f in data[traj*(dim+1) + d]]
                     traj_data_0noise[:,:,d] = scale_expression*np.expand_dims(np.array(row_0noise), axis=1)
             
             data_np.append(traj_data)
