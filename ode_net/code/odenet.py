@@ -52,7 +52,7 @@ class ODENet(nn.Module):
                 
                 nn.Linear(neurons, neurons),
                 nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.ReLU(),
+                Expo(),
 
                 #nn.Linear(neurons, neurons),
                 #nn.LayerNorm(neurons, elementwise_affine=False),
