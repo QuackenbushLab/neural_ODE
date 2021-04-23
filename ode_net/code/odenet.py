@@ -47,13 +47,15 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential(
                 nn.Linear(ndim, neurons),
+                nn.Sigmoid(),
+                nn.Dropout(p=0.2),
                 nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Softplus(),
                 
                 nn.Linear(neurons, neurons),
+                nn.Tanh(),
+                nn.Dropout(p=0.2),
                 nn.LayerNorm(neurons, elementwise_affine=False),
-                Expo(),
-
+                
                 #nn.Linear(neurons, neurons),
                 #nn.LayerNorm(neurons, elementwise_affine=False),
                 #nn.Sigmoid(),
@@ -68,7 +70,7 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('sigmoid')) #IH changed init scheme
+                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('tanh')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
         self.net.to(device)
