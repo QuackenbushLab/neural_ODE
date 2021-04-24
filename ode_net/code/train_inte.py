@@ -246,7 +246,8 @@ if __name__ == "__main__":
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
     rep_epochs = [5, 15, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
-    one_time_drop_done = False 
+    first_drop_done = False 
+    second_drop_done = False
     rep_epochs_train_losses = []
     rep_epochs_val_losses = []
     rep_epochs_mu_losses = []
@@ -349,10 +350,14 @@ if __name__ == "__main__":
         if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
             decrease_lr(opt, settings['verbose'])
         
-        # Decrease learning rate as a one-time thing:
-        #if train_loss < 1.5*10**(-2) and one_time_drop_done == False:
-        #    decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-5))
-        #    one_time_drop_done = True
+        #Decrease learning rate as a one-time thing:
+        if train_loss < 6*10**(-4) and first_drop_done == False:
+            decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-3))
+            first_drop_done = True
+        
+        if train_loss < 1.8*10**(-4) and second_drop_done == False:
+            decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-4))
+            second_drop_done = True
             
         #val_loss < (0.01 * settings['scale_expression'])**1
         if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
