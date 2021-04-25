@@ -246,6 +246,7 @@ if __name__ == "__main__":
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
     rep_epochs = [5, 15, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
+    zeroth_drop_done = False
     first_drop_done = False 
     second_drop_done = False
     rep_epochs_train_losses = []
@@ -351,11 +352,15 @@ if __name__ == "__main__":
             decrease_lr(opt, settings['verbose'])
         
         #Decrease learning rate as a one-time thing:
-        if (train_loss < 7*10**(-4) and first_drop_done == False) or (epoch == 60 and first_drop_done == False):
+        if (train_loss < 9*10**(-3) and zeroth_drop_done == False) or (epoch == 25 and zeroth_drop_done == False):
+            decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-3))
+            zeroth_drop_done = True
+
+        if (train_loss < 7*10**(-4) and first_drop_done == False) or (epoch == 50 and first_drop_done == False):
             decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-3))
             first_drop_done = True
         
-        if train_loss < 2*10**(-4) and second_drop_done == False:
+        if (train_loss < 2*10**(-4) and second_drop_done == False)  or (epoch == 75 and first_drop_done == False):
             decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-4))
             second_drop_done = True
             
