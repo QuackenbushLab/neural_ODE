@@ -478,7 +478,8 @@ methods. J Comput Biol. 2009;16:229–39.
 
         - ASIDE: can try softplus to emulate our ODE (with log transformed data)
             
-        - can try dropout regularization
+        - can try dropout regularization:
+            doesnt work in neural ode framework
         
 
 
