@@ -39,7 +39,7 @@ simseeds = sample.int(1E7, 1000)
 
 #----simulation parameters----
 #simulation parameters
-nsamp = 100#number of samples
+nsamp = 300#number of samples
 netSize = 350 #network size of sampled networks
 minTFs = 20 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
@@ -101,7 +101,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_100samples_earlyT_0noise_0bimod_0pt1initvar.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_300samples_earlyT_0noise_0bimod_0pt1initvar.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
