@@ -352,17 +352,17 @@ if __name__ == "__main__":
             decrease_lr(opt, settings['verbose'])
         
         #Decrease learning rate as a one-time thing:
-        #if (train_loss < 9*10**(-3) and zeroth_drop_done == False) or (epoch == 25 and zeroth_drop_done == False):
-        #    decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-3))
-        #    zeroth_drop_done = True
+        if (train_loss < 9*10**(-3) and zeroth_drop_done == False) or (epoch == 25 and zeroth_drop_done == False):
+            decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-3))
+            zeroth_drop_done = True
 
-        #if (train_loss < 7*10**(-4) and first_drop_done == False) or (epoch == 40 and first_drop_done == False):
-        #    decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-3))
-        #    first_drop_done = True
+        if (train_loss < 9*10**(-4) and first_drop_done == False) or (epoch == 50 and first_drop_done == False):
+            decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-3))
+            first_drop_done = True
         
-        #if (train_loss < 2*10**(-4) and second_drop_done == False)  or (epoch == 70 and second_drop_done == False):
-        #    decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-4))
-        #    second_drop_done = True
+        if (train_loss < 2*10**(-4) and second_drop_done == False)  or (epoch == 75 and second_drop_done == False):
+            decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-4))
+            second_drop_done = True
             
         #val_loss < (0.01 * settings['scale_expression'])**1
         if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
