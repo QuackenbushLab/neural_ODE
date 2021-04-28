@@ -482,5 +482,5 @@ methods. J Comput Biol. 2009;16:229–39.
             doesnt work in neural ode framework
         
 
-
+Need to try cyclic learning rate
     
