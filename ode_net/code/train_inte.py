@@ -87,14 +87,21 @@ def true_loss(odenet, data_handler, method):
     return loss
 
 
-def decrease_lr(opt, verbose, one_time_drop = 0):
+def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr, one_time_drop = 0):
+    lr_step_size = (10*lower_lr-lower_lr)/(tot_epochs/2)
+    if epoch <= tot_epochs/2:
+        lr_direction = 1
+        dir_string = "Increasing"
+    else:
+        lr_direction = -1
+        dir_string = "Decreasing"
     for param_group in opt.param_groups:
         if one_time_drop == 0:
-            param_group['lr'] = param_group['lr']*settings['dec_lr_factor']
+            param_group['lr'] = param_group['lr']+ lr_direction * lr_step_size
         else:
             param_group['lr'] = one_time_drop
     if verbose:
-        print("Decreasing learning rate to: %f" % opt.param_groups[0]['lr'])
+        print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
 
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
@@ -125,7 +132,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_350genes_300samples_earlyT_0noise_0bimod_0pt1initvar"
+clean_name = "chalmers_350genes_50samples_earlyT_0noise_0bimod_0pt1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -349,9 +356,11 @@ if __name__ == "__main__":
 
         # Decrease learning rate if specified
         if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
-            decrease_lr(opt, settings['verbose'])
+            decrease_lr(opt, settings['verbose'],tot_epochs= tot_epochs,
+             epoch = epoch, lower_lr = settings['init_lr'])
         
         #Decrease learning rate as a one-time thing:
+        '''
         if (train_loss < 9*10**(-3) and zeroth_drop_done == False) or (epoch == 25 and zeroth_drop_done == False):
             decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-3))
             zeroth_drop_done = True
@@ -363,6 +372,7 @@ if __name__ == "__main__":
         if (train_loss < 2*10**(-4) and second_drop_done == False)  or (epoch == 75 and second_drop_done == False):
             decrease_lr(opt, settings['verbose'], one_time_drop= 1*10**(-4))
             second_drop_done = True
+        '''
             
         #val_loss < (0.01 * settings['scale_expression'])**1
         if (epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
