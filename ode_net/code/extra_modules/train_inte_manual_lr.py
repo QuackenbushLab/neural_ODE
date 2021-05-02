@@ -86,7 +86,7 @@ def true_loss(odenet, data_handler, method):
         loss = torch.mean((predictions - target) ** 2)
     return loss
 
-'''
+
 def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr, one_time_drop = 0):
     lr_step_size = (10*lower_lr-lower_lr)/(tot_epochs/2)
     if epoch <= tot_epochs/2:
@@ -102,7 +102,6 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr, one_time_drop = 0):
             param_group['lr'] = one_time_drop
     if verbose:
         print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
-'''
 
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
@@ -215,9 +214,8 @@ if __name__ == "__main__":
     else:
         opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
-    scheduler = ReduceLROnPlateau(opt, mode='min', factor=1/2, patience=5, threshold=0.0001, 
-    threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
-
+    #mu_loss = true_loss(odenet, data_handler, settings['method']) #IH testing!
+    
     # Init plot
     if settings['viz']:
         #if cleaned_file_name.startswith('1d_parabolic'):
@@ -342,8 +340,6 @@ if __name__ == "__main__":
 
                     
             print("Validation loss {:.5E}, using {} points".format(val_loss, val_loss_list[1]))
-            scheduler.step(val_loss)
-
         print("Overall training loss {:.5E}".format(train_loss))
         print("True mu loss {:.5E}".format(mu_loss))
 
@@ -357,14 +353,14 @@ if __name__ == "__main__":
         
         #print("Saving intermediate model")
         #save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
-    
-        '''
+
         # Decrease learning rate if specified
         if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
             decrease_lr(opt, settings['verbose'],tot_epochs= tot_epochs,
              epoch = epoch, lower_lr = settings['init_lr'])
         
         #Decrease learning rate as a one-time thing:
+        '''
         if (train_loss < 9*10**(-3) and zeroth_drop_done == False) or (epoch == 25 and zeroth_drop_done == False):
             decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-3))
             zeroth_drop_done = True
