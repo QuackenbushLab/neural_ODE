@@ -10,6 +10,7 @@ from time import perf_counter, process_time
 
 import torch
 import torch.optim as optim
+
 try:
     from torchdiffeq.__init__ import odeint_adjoint as odeint
 except ImportError:
@@ -133,7 +134,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_690genes_100samples_earlyT_0noise_0bimod_0pt1initvar"
+clean_name = "chalmers_350genes_100samples_earlyT_0noise_0bimod_0pt1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -215,7 +216,7 @@ if __name__ == "__main__":
     else:
         opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
-    scheduler = ReduceLROnPlateau(opt, mode='min', factor=1/2, patience=5, threshold=0.0001, 
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', factor=0.8, patience=5, threshold=0.0001, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     # Init plot
