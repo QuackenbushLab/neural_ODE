@@ -12,14 +12,12 @@ class Expo(nn.Module):
 
         return(ex)
 
-class LogOnePlusX(nn.Module):
+class LogX(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
 
     def forward(self, input):
-        if any(input <-1):
-            print("OMGGGGGG! less than -1")
-        ex = torch.log1p(input)
+        ex = torch.log(input)
         return(ex)
 
 
@@ -46,15 +44,14 @@ class ODENet(nn.Module):
             )
         else: #6 layers
             self.net = nn.Sequential(
+                LogX(),
                 nn.Linear(ndim, neurons),
-                #nn.BatchNorm1d(num_features=neurons),
                 nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Sigmoid(),
+                nn.Softplus(),
                 
                 nn.Linear(neurons, neurons),
-                #nn.BatchNorm1d(num_features=neurons),
                 nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Tanh(),
+                Expo(),
 
                 nn.Linear(neurons, ndim)
             )
@@ -63,7 +60,7 @@ class ODENet(nn.Module):
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 #torch.nn.init.xavier_normal_(n.weight, gain = nn.init.calculate_gain('tanh'))
-                nn.init.orthogonal_(n.weight, gain=nn.init.calculate_gain('tanh')) #IH changed init scheme
+                nn.init.orthogonal_(n.weight) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
         self.net.to(device)

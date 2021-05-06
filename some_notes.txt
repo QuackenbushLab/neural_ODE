@@ -482,5 +482,7 @@ methods. J Comput Biol. 2009;16:229–39.
             doesnt work in neural ode framework
         
 
-Need to try cyclic learning rate
+5/6/21 notes:
+1) Let's give it a lot of examples spanning a large range 
+    - (so increase the output gene variance, while keeping input gene variance low)
     

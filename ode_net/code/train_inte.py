@@ -134,7 +134,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_350genes_100samples_earlyT_0noise_0bimod_0pt1initvar"
+clean_name = "chalmers_350genes_50samples_earlyT_0noise_0bimod_0pt1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -298,7 +298,8 @@ if __name__ == "__main__":
         training_loss.append(train_loss)
         #print("Overall training loss {:.5E}".format(train_loss))
 
-        mu_loss = true_loss(odenet, data_handler, settings['method'])
+       # mu_loss = true_loss(odenet, data_handler, settings['method'])
+        mu_loss = train_loss
         true_mean_losses.append(mu_loss)
         all_lrs_used.append(opt.param_groups[0]['lr'])
         
@@ -391,11 +392,13 @@ if __name__ == "__main__":
             rep_epochs_train_losses.append(min_train_loss)
             if data_handler.n_val > 0:
                 print("Best validation (MSE) so far = ", min_val_loss.item())
-                print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
+                #print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
                 rep_epochs_val_losses.append(min_val_loss.item())
-                rep_epochs_mu_losses.append(true_loss_of_min_val_model.item())
+                rep_epochs_mu_losses.append(0)
+                #rep_epochs_mu_losses.append(true_loss_of_min_val_model.item())
             else:
-                print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
+                #print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
+                print("True loss of best training model (MSE) = ", 0)
             print("Saving MSE plot...")
             plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
             
