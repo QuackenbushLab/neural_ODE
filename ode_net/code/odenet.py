@@ -8,7 +8,7 @@ class Expo(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        ex = torch.exp(input)
+        ex = torch.exp(-1*input)
 
         return(ex)
 
@@ -48,11 +48,8 @@ class ODENet(nn.Module):
                 nn.Linear(ndim, neurons),
                 nn.LayerNorm(neurons, elementwise_affine=False),
                 nn.Softplus(),
-                
-                nn.Linear(neurons, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
                 Expo(),
-
+                
                 nn.Linear(neurons, ndim)
             )
 
