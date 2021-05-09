@@ -1,0 +1,8 @@
+ODENet(
+  (net): Sequential(
+    (0): Linear(in_features=350, out_features=200, bias=True)
+    (1): Softplus(beta=1, threshold=20)
+    (2): ExpoMinus()
+    (3): Linear(in_features=200, out_features=350, bias=True)
+  )
+)

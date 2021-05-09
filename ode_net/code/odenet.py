@@ -3,7 +3,7 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
-class Expo(nn.Module):
+class ExpoMinus(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
 
@@ -44,11 +44,11 @@ class ODENet(nn.Module):
             )
         else: #6 layers
             self.net = nn.Sequential(
-                LogX(),
+                #LogX(),
                 nn.Linear(ndim, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
+                #nn.LayerNorm(neurons, elementwise_affine=False),
                 nn.Softplus(),
-                Expo(),
+                ExpoMinus(),
                 
                 nn.Linear(neurons, ndim)
             )
