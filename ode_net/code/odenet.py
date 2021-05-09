@@ -3,6 +3,14 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
+class ExpoHalfMinus(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+
+    def forward(self, input):
+        ex = torch.exp(1-2*input)
+        return(ex)
+
 class ExpoMinus(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
@@ -56,9 +64,9 @@ class ODENet(nn.Module):
                 nn.Linear(ndim, neurons),
                 #nn.LayerNorm(neurons, elementwise_affine=False),
                 nn.Softplus(),
-                Expo(),
-                
-                nn.Linear(neurons, ndim)
+                #ExpoHalfMinus(),
+                nn.Linear(neurons, ndim),
+                Expo()
             )
 
         # Initialize the layers of the model
