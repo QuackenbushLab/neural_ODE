@@ -59,23 +59,22 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, ndim)
             )
         else: #6 layers
-            self.net = nn.Sequential(
-                #LogX(),
-                nn.Linear(ndim, neurons),
-                #nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Softplus(),
-                #ExpoHalfMinus(),
-                nn.Linear(neurons, ndim),
-                Expo()
-            )
-
+            self.net = nn.Sequential()
+            self.net.add_module('linear_0', nn.Linear(ndim, neurons))
+            self.net.add_module('linear_1', nn.Linear(neurons, neurons))
+            self.net.add_module('activation_1', nn.Tanh())
+            self.net.add_module('linear_2', nn.Linear(neurons, ndim))
+            
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 #torch.nn.init.xavier_normal_(n.weight, gain = nn.init.calculate_gain('tanh'))
-                nn.init.orthogonal_(n.weight) #IH changed init scheme
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('relu')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
+        self.net.linear_1.weight.requires_grad = False
+        self.net.linear_1.bias.requires_grad = False
+
         self.net.to(device)
 
     #print("Using {} threads odenet".format(torch.get_num_threads()))
