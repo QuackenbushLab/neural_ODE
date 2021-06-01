@@ -39,11 +39,7 @@ def readcsv(fp, device, noise_to_add, scale_expression):
                     #row is gene-expression data; so add noise here!
                     row = [float(f) + np.random.normal(0, noise_to_add) for f in data[traj*(dim+1) + d]]
                     traj_data[:,:,d] = scale_expression*np.expand_dims(np.array(row), axis=1)
-<<<<<<< HEAD
-                    row_0noise =  [float(f)   for f in data[traj*(dim+1) + d]]
-=======
                     row_0noise =  [float(f) for f in data[traj*(dim+1) + d]]
->>>>>>> 69b82e9eeaf8ac04968e6f9b1388587ba4042748
                     traj_data_0noise[:,:,d] = scale_expression*np.expand_dims(np.array(row_0noise), axis=1)
             
             data_np.append(traj_data)
