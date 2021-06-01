@@ -3,14 +3,30 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
+class ExpoHalfMinus(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+
+    def forward(self, input):
+        ex = torch.exp(1-2*input)
+        return(ex)
+
+class ExpoMinus(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+
+    def forward(self, input):
+        ex = torch.exp(-1*input)
+        return(ex)
+
 class Expo(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
 
     def forward(self, input):
         ex = torch.exp(input)
-
         return(ex)
+
 
 class LogX(nn.Module):
     def __init__(self):
@@ -43,26 +59,25 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, ndim)
             )
         else: #6 layers
-            self.net = nn.Sequential(
-                LogX(),
-                nn.Linear(ndim, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
-                nn.Softplus(),
-                
-                nn.Linear(neurons, neurons),
-                nn.LayerNorm(neurons, elementwise_affine=False),
-                Expo(),
-
-                nn.Linear(neurons, ndim)
-            )
-
+            self.net = nn.Sequential()
+            self.net.add_module('linear_0', nn.Linear(ndim, neurons))
+            self.net.add_module('activation_0', nn.Tanh())
+            self.net.add_module('linear_1', nn.Linear(neurons, neurons))
+            self.net.add_module('activation_1', nn.Tanh())
+            self.net.add_module('linear_2', nn.Linear(neurons, ndim))
+            
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 #torch.nn.init.xavier_normal_(n.weight, gain = nn.init.calculate_gain('tanh'))
-                nn.init.orthogonal_(n.weight) #IH changed init scheme
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('tanh')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
+        self.net.linear_0.weight.requires_grad = False
+        self.net.linear_0.bias.requires_grad = False
+        self.net.linear_1.weight.requires_grad = False
+        self.net.linear_1.bias.requires_grad = False
+
         self.net.to(device)
 
     #print("Using {} threads odenet".format(torch.get_num_threads()))
