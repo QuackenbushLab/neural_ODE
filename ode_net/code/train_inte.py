@@ -187,7 +187,8 @@ if __name__ == "__main__":
                                         batch_time_frac=settings['batch_time_frac'],
                                         noise = settings['noise'],
                                         img_save_dir = img_save_dir,
-                                        scale_expression = settings['scale_expression'])
+                                        scale_expression = settings['scale_expression'],
+                                        log_scale = settings['log_scale'])
 
     
     # Initialization

@@ -6,7 +6,14 @@ try:
 except ImportError:
     from torchdiffeq import odeint_adjoint as odeint
 
-def readcsv(fp, device, noise_to_add, scale_expression):
+def expression_maker(val, log_scale):
+    if log_scale: 
+        return(np.log(val+1))
+    else:
+        return(val)    
+
+
+def readcsv(fp, device, noise_to_add, scale_expression, log_scale):
     print("Reading from file {}".format(fp))
     print("Adding requested noise of {}".format(noise_to_add))
     print("Scaling gene-expression values by {} fold".format(scale_expression))
@@ -37,9 +44,9 @@ def readcsv(fp, device, noise_to_add, scale_expression):
                     t_pt.append(torch.tensor(row).to(device))
                 else:
                     #row is gene-expression data; so add noise here!
-                    row = [float(f) + np.random.normal(0, noise_to_add) for f in data[traj*(dim+1) + d]]
+                    row = [expression_maker(float(f)+ np.random.normal(0, noise_to_add), log_scale) for f in data[traj*(dim+1) + d]]
                     traj_data[:,:,d] = scale_expression*np.expand_dims(np.array(row), axis=1)
-                    row_0noise =  [float(f) for f in data[traj*(dim+1) + d]]
+                    row_0noise =  [expression_maker(float(f), log_scale) for f in data[traj*(dim+1) + d]]
                     traj_data_0noise[:,:,d] = scale_expression*np.expand_dims(np.array(row_0noise), axis=1)
             
             data_np.append(traj_data)

@@ -93,12 +93,20 @@ class Visualizator1D(Visualizator):
         #self.ax_dyn.set_ylim((self.xdot_span[0]-self.xdot_width*self.EXTRA_WIDTH_DYN,
         #                       self.xdot_span[1]+self.xdot_width*self.EXTRA_WIDTH_DYN))
 
+        log_scale = self.settings['log_scale']
+        if log_scale:
+            upper_lim = 0.8
+            lower_lim = -0.4
+        else: 
+            upper_lim = 1.2
+            lower_lim = -0.2
+
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
                 ax.set_xlim((self.time_span[0]-self.time_width*self.EXTRA_WIDTH_TRAJ,
                             self.time_span[1]+self.time_width*self.EXTRA_WIDTH_TRAJ))
-                ax.set_ylim((self.settings['scale_expression']*-0.2,
-                self.settings['scale_expression']*1.2))
+                ax.set_ylim((self.settings['scale_expression']*lower_lim,
+                self.settings['scale_expression']*upper_lim))
          
 
     def visualize(self):

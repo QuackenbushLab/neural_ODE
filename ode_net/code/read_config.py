@@ -47,6 +47,8 @@ def _convert_arguments(settings):
     converted_settings['pretrained_model'] = False
     converted_settings['lr_range_test'] = settings.getboolean('lr_range_test') 
     converted_settings['scale_expression'] = settings.getfloat('scale_expression')
+    converted_settings['log_scale'] = settings.getboolean('log_scale') 
+    
     
     
     return converted_settings
