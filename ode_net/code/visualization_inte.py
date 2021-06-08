@@ -94,10 +94,13 @@ class Visualizator1D(Visualizator):
         #                       self.xdot_span[1]+self.xdot_width*self.EXTRA_WIDTH_DYN))
 
         log_scale = self.settings['log_scale']
-        if log_scale:
+        if log_scale == "log":
             upper_lim = 0.8
             lower_lim = -0.4
-        else: 
+        elif log_scale == "reciprocal":    
+            upper_lim = 1.3
+            lower_lim = 0.4
+        else: #i.e. linear 
             upper_lim = 1.2
             lower_lim = -0.2
 

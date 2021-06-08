@@ -7,10 +7,12 @@ except ImportError:
     from torchdiffeq import odeint_adjoint as odeint
 
 def expression_maker(val, log_scale):
-    if log_scale: 
+    if log_scale == "log": 
         return(np.log(val+1))
-    else:
-        return(val)    
+    elif log_scale == "reciprocal":
+        return(np.reciprocal(val+1))    
+    else: #i.e. "linear"
+        return(val)
 
 
 def readcsv(fp, device, noise_to_add, scale_expression, log_scale):
