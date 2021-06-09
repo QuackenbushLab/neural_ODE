@@ -11,7 +11,7 @@ batch_time,99999
 batch_time_frac,99999
 dec_lr,False
 dec_lr_factor,99999.0
-init_lr,0.01
+init_lr,0.001
 weight_decay,0.0
 cpu,True
 val_split,0.02
