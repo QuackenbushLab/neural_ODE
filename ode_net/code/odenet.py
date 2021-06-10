@@ -3,12 +3,12 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
-class ExpoMinus(nn.Module):
+class Odds(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
 
     def forward(self, input):
-        ex = torch.exp(-1*input)
+        ex = input*torch.reciprocal(1.001-input)
         return(ex)
 
 class Expo(nn.Module):
@@ -60,10 +60,9 @@ class ODENet(nn.Module):
             )
         else: #6 layers
             self.net = nn.Sequential()
-            self.net.add_module('linear_0', nn.Linear(ndim, neurons))
-            self.net.add_module('activation_0',nn.Softshrink(lambd=0.1))
-            #self.net.add_module('linear_1', nn.Linear(neurons, neurons))
-            #self.net.add_module('activation_1', nn.Sigmoid())
+            self.net.add_module('activation_0',nn.Softsign())
+            self.net.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net.add_module('activation_1',nn.Softsign())
             self.net.add_module('linear_2', nn.Linear(neurons, ndim))
             
         # Initialize the layers of the model
@@ -73,11 +72,9 @@ class ODENet(nn.Module):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('tanh')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
-        #self.net.linear_0.weight.requires_grad = False
-        #self.net.linear_0.bias.requires_grad = False
-        #self.net.linear_1.weight.requires_grad = False
-        #self.net.linear_1.bias.requires_grad = False
-
+        linear_2.bias.data.fill_(0) #trying this out
+        self.net.linear_2.bias.requires_grad = False #trying this out
+        
         self.net.to(device)
 
     #print("Using {} threads odenet".format(torch.get_num_threads()))
@@ -86,13 +83,12 @@ class ODENet(nn.Module):
         #torch.set_num_threads(72)
         ''' Forward prop through the network '''
         grad = self.net(y)
-        #print("y: {}, t: {}, grad: {:.20f}\n".format(y, t, grad[0,0]))
         if self.explicit_time:
             try:
                 grad = torch.cat((grad, torch.ones((y.shape[0], 1, 1))), 2)
             except:
                 grad = torch.cat((grad, torch.ones(1).reshape((1, 1))), 1)
-        return grad
+        return grad - y # trying this out!
 
     def save(self, fp):
         ''' Save the model to file '''
