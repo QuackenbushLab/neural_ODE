@@ -72,7 +72,7 @@ class ODENet(nn.Module):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('tanh')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
-        linear_2.bias.data.fill_(0) #trying this out
+        self.net.linear_2.bias.data.fill_(0) #trying this out
         self.net.linear_2.bias.requires_grad = False #trying this out
         
         self.net.to(device)
