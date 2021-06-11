@@ -3,14 +3,6 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
-class Odds(nn.Module):
-    def __init__(self):
-        super().__init__() # init the base class
-
-    def forward(self, input):
-        ex = input*torch.reciprocal(1.001-input)
-        return(ex)
-
 class Expo(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
@@ -63,7 +55,7 @@ class ODENet(nn.Module):
             self.net.add_module('activation_0',nn.Softsign())
             self.net.add_module('linear_1', nn.Linear(ndim, neurons))
             self.net.add_module('activation_1',nn.Softsign())
-            self.net.add_module('linear_2', nn.Linear(neurons, ndim))
+            self.net.add_module('linear_out', nn.Linear(neurons, ndim))
             
         # Initialize the layers of the model
         for n in self.net.modules():
@@ -72,8 +64,8 @@ class ODENet(nn.Module):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('tanh')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
-        self.net.linear_2.bias.data.fill_(0) #trying this out
-        self.net.linear_2.bias.requires_grad = False #trying this out
+        self.net.linear_out.bias.data.fill_(0) #trying this out
+        self.net.linear_out.bias.requires_grad = False #trying this out
         
         self.net.to(device)
 

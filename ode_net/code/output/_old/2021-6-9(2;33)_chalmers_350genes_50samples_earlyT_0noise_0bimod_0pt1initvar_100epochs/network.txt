@@ -1,7 +1,0 @@
-ODENet(
-  (net): Sequential(
-    (linear_0): Linear(in_features=350, out_features=20, bias=True)
-    (activation_0): Sigmoid()
-    (linear_2): Linear(in_features=20, out_features=350, bias=True)
-  )
-)
