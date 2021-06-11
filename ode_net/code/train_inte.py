@@ -49,6 +49,11 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
         
 
+def regulated_loss(predictions, target, time):
+    t_cost = torch.unsqueeze((9 - torch.mean(time, 1)), 1)
+    pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
+    return(torch.mean(pred_cost + t_cost))
+
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
     #odenet.eval()
@@ -72,7 +77,7 @@ def validation(odenet, data_handler, method, explicit_time):
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = regulated_loss(predictions, target, t)
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -84,7 +89,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
         
         # Calculate true mean loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = regulated_loss(predictions, target, t)
     return loss
 
 '''
@@ -112,7 +117,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
-    loss = torch.mean((predictions - target) ** 2)
+    loss = regulated_loss(predictions, target, t)
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss

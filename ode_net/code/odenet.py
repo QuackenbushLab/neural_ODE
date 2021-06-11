@@ -80,7 +80,7 @@ class ODENet(nn.Module):
                 grad = torch.cat((grad, torch.ones((y.shape[0], 1, 1))), 2)
             except:
                 grad = torch.cat((grad, torch.ones(1).reshape((1, 1))), 1)
-        return 10*grad - y # trying this out!
+        return grad - y # trying this out!
 
     def save(self, fp):
         ''' Save the model to file '''
