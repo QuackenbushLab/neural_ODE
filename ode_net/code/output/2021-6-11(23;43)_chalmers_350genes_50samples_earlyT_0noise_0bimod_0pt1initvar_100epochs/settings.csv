@@ -15,13 +15,13 @@ init_lr,0.001
 weight_decay,0.0
 cpu,True
 val_split,0.02
-noise,0.0
+noise,0.05
 epochs,100
 solve_eq_gridsize,100
 solve_A,False
 debug,False
 output_dir,output
-normalize_data,True
+normalize_data,False
 explicit_time,False
 relative_error,False
 pretrained_model,False

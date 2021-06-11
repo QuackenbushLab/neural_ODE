@@ -50,9 +50,10 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
         
 
 def regulated_loss(predictions, target, time):
-    t_cost = torch.unsqueeze((9 - torch.mean(time, 1)), 1)
-    pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
-    return(torch.mean(pred_cost * t_cost)) #the hope is that earlier points will get penalized more
+    return(torch.mean((predictions - target) ** 2))
+    #t_cost = torch.unsqueeze((9 - torch.mean(time, 1)), 1)
+    #pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
+    #return(torch.mean(pred_cost * t_cost * t_cost)) #the hope is that earlier points will get penalized more
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
@@ -77,7 +78,7 @@ def validation(odenet, data_handler, method, explicit_time):
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = regulated_loss(predictions, target, t)
+        loss = torch.mean((predictions - target) ** 2)
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -89,7 +90,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
         
         # Calculate true mean loss
-        loss = regulated_loss(predictions, target, t)
+        loss = torch.mean((predictions - target) ** 2)
     return loss
 
 '''
@@ -117,7 +118,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
-    loss = regulated_loss(predictions, target, t)
+    loss = torch.mean((predictions - target) ** 2)
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss
@@ -139,7 +140,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_350genes_50samples_earlyT_0noise_0bimod_1initvar"
+clean_name = "chalmers_690genes_100samples_earlyT_0noise_0bimod_0pt1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -223,7 +224,7 @@ if __name__ == "__main__":
         opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=5e-05, 
+    factor=0.9, patience=3, threshold=1e-04, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     # Init plot
@@ -336,6 +337,7 @@ if __name__ == "__main__":
             validation_loss.append(val_loss)
             if epoch == 1:
                 min_val_loss = val_loss
+                true_loss_of_min_val_model = mu_loss
                 print('Model improved, saving current model')
                 save_model(odenet, output_root_dir, 'best_val_model')
             else:
