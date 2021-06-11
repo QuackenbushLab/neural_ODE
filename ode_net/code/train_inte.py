@@ -52,7 +52,7 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
 def regulated_loss(predictions, target, time):
     t_cost = torch.unsqueeze((9 - torch.mean(time, 1)), 1)
     pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
-    return(torch.mean(pred_cost + t_cost))
+    return(torch.mean(pred_cost * t_cost)) #the hope is that earlier points will get penalized more
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
