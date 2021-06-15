@@ -52,9 +52,9 @@ class ODENet(nn.Module):
             )
         else: #6 layers
             self.net = nn.Sequential()
-            self.net.add_module('activation_0',nn.Softsign())
+            #self.net.add_module('activation_0',nn.Softsign())
             self.net.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net.add_module('activation_1',nn.Softsign())
+            self.net.add_module('activation_1',nn.Softplus())
             self.net.add_module('linear_out', nn.Linear(neurons, ndim))
             
         # Initialize the layers of the model
@@ -72,16 +72,12 @@ class ODENet(nn.Module):
     #print("Using {} threads odenet".format(torch.get_num_threads()))
 
     def forward(self, t, y):
-        #torch.set_num_threads(72)
         ''' Forward prop through the network '''
-        grad = self.net(y)
-        if self.explicit_time:
-            try:
-                grad = torch.cat((grad, torch.ones((y.shape[0], 1, 1))), 2)
-            except:
-                grad = torch.cat((grad, torch.ones(1).reshape((1, 1))), 1)
-        return grad - y # trying this out!
-
+        #grad = self.net(y)
+        #return grad - y # trying this out!
+        grad = self.net(torch.log(y+0.0001)) #0.0001 to offset (need to FIX!)
+        return(torch.exp(grad) - y)
+        
     def save(self, fp):
         ''' Save the model to file '''
         idx = fp.index('.')
