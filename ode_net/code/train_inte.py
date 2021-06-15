@@ -48,12 +48,13 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
     plt.ylabel("Error (MSE)")
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
         
-
+'''
 def regulated_loss(predictions, target, time):
     return(torch.mean((predictions - target) ** 2))
-    #t_cost = torch.unsqueeze((9 - torch.mean(time, 1)), 1)
-    #pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
-    #return(torch.mean(pred_cost * t_cost * t_cost)) #the hope is that earlier points will get penalized more
+    t_cost = torch.unsqueeze((9 - torch.mean(time, 1)), 1)
+    pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
+    return(torch.mean(pred_cost * t_cost * t_cost)) #the hope is that earlier points will get penalized more
+'''
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
@@ -123,14 +124,6 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     opt.step()
     return loss
 
-#def _clean_file_path(fp):
-    """Removed folder path and file extension from fp, to be used for saving the model with data name"""
-    # Check formatting if on Windows
- #   if os.name == 'nt':
-  #      return fp.replace(".\\data\\", '').replace("data/", '').replace(".csv", '')
-  #  else:
-  #      return fp.replace("data/", '').replace(".csv", '')
-
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
         str(datetime.now().day), str(datetime.now().hour), str(datetime.now().minute), save_path, epochs)
@@ -140,7 +133,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_690genes_100samples_earlyT_0noise_0bimod_0pt1initvar"
+clean_name = "chalmers_350genes_50samples_earlyT_0noise_0bimod_1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
