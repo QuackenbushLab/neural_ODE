@@ -61,7 +61,7 @@ class ODENet(nn.Module):
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 #torch.nn.init.xavier_normal_(n.weight, gain = nn.init.calculate_gain('tanh'))
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('tanh')) #IH changed init scheme
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid')) #IH changed init scheme
                 #nn.init.constant_(n.bias, val=1)
         
         #self.net.linear_out.bias.data.fill_(0) #trying this out
@@ -75,7 +75,7 @@ class ODENet(nn.Module):
         ''' Forward prop through the network '''
         #grad = self.net(y)
         #return grad - y # trying this out!
-        grad = self.net(torch.log(y+0.0001)) #0.0001 to offset (need to FIX!)
+        grad = self.net(torch.log(y+0.05)) #0.0001 to offset (need to FIX!)
         return(torch.exp(grad) - y)
         
     def save(self, fp):
