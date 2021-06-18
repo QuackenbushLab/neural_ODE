@@ -178,9 +178,14 @@ AND <- function(expr1, expr2) {
   return(expr)
 }
 
+
+#IH 20210618 changing OR to AND
+#OR <- function(expr1, expr2) {
+#  expr = paste0('(', expr1, ' + ', expr2, ' - ', expr1, ' * ', expr2, ')')
+#  return(expr)
+#}
 OR <- function(expr1, expr2) {
-  expr = paste0('(', expr1, ' + ', expr2, ' - ', expr1, ' * ', expr2, ')')
-  return(expr)
+  AND(expr1, expr2)
 }
 
 ADD <- function(...) {
