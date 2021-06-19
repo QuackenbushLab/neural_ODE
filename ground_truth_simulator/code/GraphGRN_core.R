@@ -185,7 +185,9 @@ AND <- function(expr1, expr2) {
 #  return(expr)
 #}
 OR <- function(expr1, expr2) {
-  AND(expr1, expr2)
+ #browser()
+  expr = paste0('(', expr1, ' * ', expr2, ')')
+  return(expr)
 }
 
 ADD <- function(...) {

@@ -218,6 +218,7 @@ simDataset <- function(simulation, numsamples, cor.strength, externalInputs,time
   res <- lapply(1:numsamples, function(i){
     message(paste("solving",i,"of",numsamples))
     times <- timeStamps
+    #browser()
     soln <- deSolve::ode(y = exprs[i, ], times = times, 
                 func = my_ode, parms = externalInputs[i, ])
     soln_DT <- data.table(soln)

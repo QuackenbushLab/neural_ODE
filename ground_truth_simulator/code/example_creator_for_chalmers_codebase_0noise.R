@@ -101,18 +101,18 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_50samples_earlyT_0noise_0pt2bimod_0pt1initvar_ANDonly.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_50samples_earlyT_0noise_0bimod_0pt1initvar_ANDonly.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
 
 write.csv(edgepropmat, 
-          "C:/STUDIES/RESEARCH/ODE_project/clean_data/edge_properties.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties.csv", 
           row.names = F)
 
 write.csv(ode_system_function, 
-          "C:/STUDIES/RESEARCH/ODE_project/clean_data/ode_system_functions.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/ode_system_functions.csv", 
           row.names = F)
 
 
