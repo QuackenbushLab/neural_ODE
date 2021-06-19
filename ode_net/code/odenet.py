@@ -77,7 +77,7 @@ class ODENet(nn.Module):
         #grad = self.net(y)
         #return grad - y # trying this out!
         grad = self.net(y) #0.0001 to offset (need to FIX!)
-        return(torch.exp(grad - y) -1)
+        return(torch.exp(grad-y) -1) #grad - y
         
     def save(self, fp):
         ''' Save the model to file '''
