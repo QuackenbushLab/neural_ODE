@@ -53,7 +53,7 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential()
             #self.net.add_module('activation_0',nn.Softsign())
-            self.net.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net.add_module('linear_1', nn.Linear(68, neurons))
             self.net.add_module('activation_1',nn.Softplus())
             self.net.add_module('linear_out', nn.Linear(neurons, ndim))
             
