@@ -75,13 +75,10 @@ class ODENet(nn.Module):
         
         self.net.to(device)
 
-    #print("Using {} threads odenet".format(torch.get_num_threads()))
-
     def forward(self, t, y):
-        ''' Forward prop through the network '''
+        ''' Forward prop through the network'''
         #grad = self.net(y)
-        #return grad - y # trying this out!
-        grad = self.net(y[:,0:self.num_tf]) #0.0001 to offset (need to FIX!)
+        grad = self.net(y[...,0:self.num_tf]) #subsetting the last dimension
         return(torch.exp(grad-y) -1) #grad - y
         
     def save(self, fp):
