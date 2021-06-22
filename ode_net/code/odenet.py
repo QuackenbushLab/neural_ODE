@@ -42,7 +42,7 @@ class ODENet(nn.Module):
         
         #only use first 68 (i.e. TFs) as NN inputs
         #in general should be num_tf = ndim
-        self.num_tf = 68 
+        self.num_tf = 73 
         
         # Create a new sequential model with ndim inputs and outputs
         if explicit_time:
