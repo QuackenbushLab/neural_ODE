@@ -79,7 +79,7 @@ class ODENet(nn.Module):
         ''' Forward prop through the network'''
         final = torch.zeros(y.shape)
         grad = self.net(y) #subsetting the last dimension [...,0:self.num_tf]
-        transformed = torch.exp(grad-y[...,self.num_tf:]) -1
+        transformed = torch.exp(grad-y[...,self.num_tf:]) + torch.exp(-y) - 1
         final[...,self.num_tf:] = transformed
         return(final) 
         
