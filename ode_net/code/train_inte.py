@@ -60,17 +60,6 @@ def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
     #odenet.eval()
     with torch.no_grad():
-        if explicit_time:
-            if data_handler.batch_type == 'batch_time':
-                data = torch.cat((data, t[:,0:-1].reshape((t[:,0:-1].shape[0], t[:,0:-1].shape[1], 1))), 2)
-            else:
-                data = torch.cat((data, t[:,0].reshape((t[:,0].shape[0], 1, 1))), 2)
-
-            if data_handler.batch_type == 'batch_time':
-                target = torch.cat((target, t[:,1::].reshape((t[:,1::].shape[0], t[:,1::].shape[1], 1))), 2)
-            else:
-                target = torch.cat((target, t[:,1].reshape((t[:,1].shape[0], 1, 1))), 2)
-        
         predictions = torch.zeros(data.shape).to(data_handler.device)
         # For now we have to loop through manually, their implementation of odenet can only take fixed time lists.
         for index, (time, batch_point) in enumerate(zip(t, data)):

@@ -39,6 +39,11 @@ class ODENet(nn.Module):
 
         self.ndim = ndim
         self.explicit_time = explicit_time
+        
+        #only use first 68 (i.e. TFs) as NN inputs
+        #in general should be num_tf = ndim
+        self.num_tf = 68 
+        
         # Create a new sequential model with ndim inputs and outputs
         if explicit_time:
             self.net = nn.Sequential(
@@ -53,7 +58,7 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential()
             #self.net.add_module('activation_0',nn.Softsign())
-            self.net.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net.add_module('linear_1', nn.Linear(self.num_tf, neurons))
             self.net.add_module('activation_1',nn.Softplus())
             self.net.add_module('linear_out', nn.Linear(neurons, ndim))
             
@@ -70,14 +75,11 @@ class ODENet(nn.Module):
         
         self.net.to(device)
 
-    #print("Using {} threads odenet".format(torch.get_num_threads()))
-
     def forward(self, t, y):
-        ''' Forward prop through the network '''
+        ''' Forward prop through the network'''
         #grad = self.net(y)
-        #return grad - y # trying this out!
-        grad = self.net(y) #0.0001 to offset (need to FIX!)
-        return(torch.exp(grad - y) -1)
+        grad = self.net(y[...,0:self.num_tf]) #subsetting the last dimension
+        return(torch.exp(grad-y) -1) #grad - y
         
     def save(self, fp):
         ''' Save the model to file '''
