@@ -73,12 +73,12 @@ bimgenes = unlist(lapply(simSmall$inputModels, function(x) length(x$prop)))
 bimgenes = names(bimgenes)[bimgenes == 2]
   
   #simulate dataset
-time_stamps <- 0:9
+time_stamps <- c(0,2,3,7,9) #0:9
 simu_list = simulateDataset(simSmall, nsamp, 
                             timeStamps = time_stamps,
                             cor.strength = 0,
-                            inputGeneVar  = 0.1,
-                            outputGeneVar = 1)
+                            inputGeneVar  = 1,
+                            outputGeneVar = 0.05) #1
 datamat = simu_list$emat
 edgepropmat = get_edge_params(grnSmall@edgeset)
 ode_system_function = getODEFunc_modified(grnSmall)
@@ -101,7 +101,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_50samples_10T_0noise_0bimod_0pt1initvar_ANDonly.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_50samples_earlyT_0bimod_1initvar_0pt05outvar_ANDonly.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
