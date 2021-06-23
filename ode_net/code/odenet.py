@@ -72,9 +72,13 @@ class ODENet(nn.Module):
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid')) #IH changed init scheme
-                
-        #self.net.linear_out.weight.data.fill_(-1) #trying this out
-        #self.net.linear_out.weight.requires_grad = False #trying this out
+
+        for n in self.net2.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+        
+        #self.net2.linear_out.weight.data.fill_(1) #trying this out
+        #self.net2.linear_out.weight.requires_grad = False #trying this out
         
         self.net.to(device)
 
@@ -82,7 +86,7 @@ class ODENet(nn.Module):
         grad = self.net(y)
         grad2 = self.net2(y)
         #final = torch.exp(grad-y) + torch.exp(-1*y) - 1
-        final = torch.exp(grad-y) - grad2
+        final = torch.exp(grad-y) + grad2
         
         #final = torch.zeros(y.shape)
         #grad = self.net(y[...,self.num_tf:]) #subsetting the last dimension [...,0:self.num_tf]
