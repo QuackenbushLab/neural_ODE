@@ -58,7 +58,7 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net = nn.Sequential()
             #self.net.add_module('activation_0',nn.Softsign())
-            self.net.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net.add_module('linear_1', nn.Linear(ndim - self.num_tf, neurons))
             self.net.add_module('activation_1',nn.Softplus())
             self.net.add_module('linear_out', nn.Linear(neurons, ndim - self.num_tf))
             
@@ -78,8 +78,8 @@ class ODENet(nn.Module):
     def forward(self, t, y):
         ''' Forward prop through the network'''
         final = torch.zeros(y.shape)
-        grad = self.net(y) #subsetting the last dimension [...,0:self.num_tf]
-        transformed = torch.exp(grad-y[...,self.num_tf:]) + torch.exp(-y) - 1
+        grad = self.net(y[...,self.num_tf:]) #subsetting the last dimension [...,0:self.num_tf]
+        transformed = torch.exp(grad-y[...,self.num_tf:]) + torch.exp(-1*y[...,self.num_tf:]) - 1
         final[...,self.num_tf:] = transformed
         return(final) 
         
