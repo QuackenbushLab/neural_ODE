@@ -232,7 +232,10 @@ class DataHandler:
     
     def get_mu0(self):
         return [tensor[0] for tensor in self.data_pt_0noise]
-
+    
+    def get_mu1(self):
+        return [tensor[1] for tensor in self.data_pt_0noise]
+    
     def get_true_mu_set(self):
         all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         mean_data = []
@@ -254,6 +257,7 @@ class DataHandler:
     def calculate_trajectory(self, odenet, method, num_val_trajs):
         trajectories = []
         mu0 = self.get_mu0()
+        mu1 = self.get_mu1() #remove later
         if self.val_split == 1:
             all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
         else:
@@ -270,8 +274,9 @@ class DataHandler:
                 _y = torch.cat((mu0[j], self.time_pt[j][0].reshape((1, 1))), 1)
             else:
                 _y = mu0[j]
-            #odenet.eval()
-            y = odeint(odenet, _y, self.time_pt[j], method=method)
+            
+            _y = mu1[j] #remove later
+            y = odeint(odenet, _y, self.time_pt[j][1:], method=method)
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples
