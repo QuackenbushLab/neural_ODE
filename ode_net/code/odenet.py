@@ -61,15 +61,18 @@ class ODENet(nn.Module):
             self.net.add_module('linear_1', nn.Linear(ndim, neurons))
             self.net.add_module('activation_1',nn.Softplus())
             self.net.add_module('linear_out', nn.Linear(neurons, ndim))
+
+            self.net2 = nn.Sequential()
+            self.net2.add_module('activation_0', nn.Sigmoid())
+            self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
+            
+
             
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
-                #nn.init.xavier_normal_(n.weight)
-                #nn.init.xavier_normal_(n.bias)
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid')) #IH changed init scheme
-                #nn.init.constant_(n.bias, val=1)
-        
+                
         #self.net.linear_out.weight.data.fill_(-1) #trying this out
         #self.net.linear_out.weight.requires_grad = False #trying this out
         
@@ -77,7 +80,10 @@ class ODENet(nn.Module):
 
     def forward(self, t, y):
         grad = self.net(y)
-        final = torch.exp(grad-y) + torch.exp(-1*y) - 1
+        grad2 = self.net2(y)
+        #final = torch.exp(grad-y) + torch.exp(-1*y) - 1
+        final = torch.exp(grad-y) - grad2
+        
         #final = torch.zeros(y.shape)
         #grad = self.net(y[...,self.num_tf:]) #subsetting the last dimension [...,0:self.num_tf]
         #transformed = torch.exp(grad-y[...,self.num_tf:]) + torch.exp(-1*y[...,self.num_tf:]) - 1

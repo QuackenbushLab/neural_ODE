@@ -275,8 +275,8 @@ class DataHandler:
             else:
                 _y = mu0[j]
             
-            _y = mu1[j] #remove later
-            y = odeint(odenet, _y, self.time_pt[j][1:], method=method)
+           # _y = mu1[j] #remove later
+            y = odeint(odenet, _y, self.time_pt[j][0:], method=method)
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples
