@@ -68,19 +68,23 @@ class ODENet(nn.Module):
 
             if log_scale == "log":
                 self.net2 = nn.Sequential()
-                    self.net2.add_module('activation_0',nn.Sigmoid())
+                self.net2.add_module('activation_0',nn.Sigmoid())
                 self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
+            else:
+                self.net2 = nn.Sequential()
+                self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
+                self.net2.add_module('activation_0',nn.Sigmoid())
                 
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid')) #IH changed init scheme
 
-        if log_scale == "log":
-            for n in self.net2.modules():
-                if isinstance(n, nn.Linear):
-                    nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
-            
+        for n in self.net2.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+
+
         #self.net2.linear_out.weight.data.fill_(1) #trying this out
         #self.net2.linear_out.weight.requires_grad = False #trying this out
         
@@ -88,11 +92,11 @@ class ODENet(nn.Module):
 
     def forward(self, t, y):
         grad = self.net(y)
+        grad2 = self.net2(y)
         if self.log_scale == "log":
-            grad2 = self.net2(y)
             final = torch.exp(grad-y) + grad2
         else:
-           final = grad - y     
+           final = grad2*(grad - y)     
         
         #final = torch.zeros(y.shape)
         #grad = self.net(y[...,self.num_tf:]) #subsetting the last dimension [...,0:self.num_tf]
