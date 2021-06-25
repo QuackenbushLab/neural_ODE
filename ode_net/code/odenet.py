@@ -33,13 +33,13 @@ class Recipro(nn.Module):
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
     
-    def __init__(self, device, ndim, explicit_time=False, neurons=100):
+    def __init__(self, device, ndim, explicit_time=False, neurons=100, log_scale = "linear"):
         ''' Initialize a new ODE-Net '''
         super(ODENet, self).__init__()
 
         self.ndim = ndim
         self.explicit_time = explicit_time
-        
+        self.log_scale = log_scale
         #only use first 68 (i.e. TFs) as NN inputs
         #in general should be num_tf = ndim
         self.num_tf = 73 
@@ -57,26 +57,30 @@ class ODENet(nn.Module):
             )
         else: #6 layers
             self.net = nn.Sequential()
-            #self.net.add_module('activation_0',nn.Softsign())
+            if log_scale != "log":
+                self.net.add_module('activation_0',nn.Softsign())
             self.net.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net.add_module('activation_1',nn.Softplus())
+            if log_scale == "log":
+                self.net.add_module('activation_1',nn.Softplus())
+            else:
+                self.net.add_module('activation_1',nn.Softsign())
             self.net.add_module('linear_out', nn.Linear(neurons, ndim))
 
-            self.net2 = nn.Sequential()
-            self.net2.add_module('activation_0', nn.Sigmoid())
-            self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
-            
-
-            
+            if log_scale == "log":
+                self.net2 = nn.Sequential()
+                    self.net2.add_module('activation_0',nn.Sigmoid())
+                self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
+                
         # Initialize the layers of the model
         for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid')) #IH changed init scheme
 
-        for n in self.net2.modules():
-            if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
-        
+        if log_scale == "log":
+            for n in self.net2.modules():
+                if isinstance(n, nn.Linear):
+                    nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+            
         #self.net2.linear_out.weight.data.fill_(1) #trying this out
         #self.net2.linear_out.weight.requires_grad = False #trying this out
         
@@ -84,9 +88,11 @@ class ODENet(nn.Module):
 
     def forward(self, t, y):
         grad = self.net(y)
-        grad2 = self.net2(y)
-        #final = torch.exp(grad-y) + torch.exp(-1*y) - 1
-        final = torch.exp(grad-y) + grad2
+        if self.log_scale == "log":
+            grad2 = self.net2(y)
+            final = torch.exp(grad-y) + grad2
+        else:
+           final = grad - y     
         
         #final = torch.zeros(y.shape)
         #grad = self.net(y[...,self.num_tf:]) #subsetting the last dimension [...,0:self.num_tf]

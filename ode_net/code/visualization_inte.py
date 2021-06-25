@@ -95,7 +95,7 @@ class Visualizator1D(Visualizator):
 
         log_scale = self.settings['log_scale']
         if log_scale == "log":
-            upper_lim = 0.8
+            upper_lim =  0.8
             lower_lim = -0.4
         elif log_scale == "reciprocal":    
             upper_lim = 1.3
