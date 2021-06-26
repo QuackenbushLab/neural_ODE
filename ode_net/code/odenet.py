@@ -89,6 +89,7 @@ class ODENet(nn.Module):
         #self.net2.linear_out.weight.requires_grad = False #trying this out
         
         self.net.to(device)
+        self.net2.to(device)
 
     def forward(self, t, y):
         grad = self.net(y)

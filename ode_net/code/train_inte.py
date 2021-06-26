@@ -193,6 +193,9 @@ if __name__ == "__main__":
         
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
         net_file.write(odenet.__str__())
+       # net_file.write(ODENet.forward().__str__())
+
+    #quit()
 
     # Select optimizer
     print('Using optimizer: {}'.format(settings['optimizer']))
