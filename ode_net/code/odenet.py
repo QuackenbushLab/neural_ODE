@@ -73,7 +73,7 @@ class ODENet(nn.Module):
             else:
                 self.net2 = nn.Sequential()
                 self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
-                self.net2.add_module('activation_0',nn.Sigmoid())
+                self.net2.add_module('activation_0',nn.ReLU())
 
                 #self.net3 = nn.Sequential()
                 #self.net3.add_module('linear_out', nn.Linear(ndim, ndim))
@@ -87,7 +87,7 @@ class ODENet(nn.Module):
 
         for n in self.net2.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('relu'))
         
        # for n in self.net3.modules():
        #     if isinstance(n, nn.Linear):
@@ -104,7 +104,6 @@ class ODENet(nn.Module):
     def forward(self, t, y):
         grad1 = self.net(y)
         grad2 = self.net2(y)
-       # grad3 = self.net3(y)
         if self.log_scale == "log":
             final = torch.exp(grad1-y) + grad2
         else:

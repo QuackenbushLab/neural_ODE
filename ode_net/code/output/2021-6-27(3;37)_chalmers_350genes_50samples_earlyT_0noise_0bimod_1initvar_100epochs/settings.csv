@@ -3,7 +3,7 @@ viz,True
 viz_every_iteration,False
 verbose,True
 method,dopri5
-neurons_per_layer,20
+neurons_per_layer,75
 optimizer,adam
 batch_type,trajectory
 batch_size,400000

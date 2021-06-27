@@ -74,7 +74,7 @@ def validation(odenet, data_handler, method, explicit_time):
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = regulated_loss(predictions, target, t, val = True) #torch.mean((predictions - target) ** 2)
+        loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -86,7 +86,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
         
         # Calculate true mean loss
-        loss = regulated_loss(predictions, target, t) #torch.mean((predictions - target) ** 2)
+        loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
     return loss
 
 '''
@@ -114,7 +114,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
-    loss = regulated_loss(predictions, target, t) #torch.mean((predictions - target) ** 2)
+    loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss
