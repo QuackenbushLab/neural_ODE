@@ -2,6 +2,7 @@
 import sys
 import os
 import argparse
+import inspect
 from datetime import datetime
 import numpy as np
 from tqdm import tqdm
@@ -48,13 +49,18 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
     plt.ylabel("Error (MSE)")
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
         
-'''
-def regulated_loss(predictions, target, time):
-    return(torch.mean((predictions - target) ** 2))
-    t_cost = torch.unsqueeze((9 - torch.mean(time, 1)), 1)
+
+def regulated_loss(predictions, target, time, val = False):
+    #return(torch.mean((predictions - target) ** 2))
+    if val == True:
+        pred_cost = torch.mean(((predictions - target) ** 2)[0], dim = 2)
+        t_cost = torch.unsqueeze(torch.tensor([8, 6.5, 4, 1]), dim = 1)
+        return(torch.mean(pred_cost * t_cost * t_cost))
+
+    t_cost = torch.unsqueeze(9 - torch.mean(time, 1),1)
     pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
     return(torch.mean(pred_cost * t_cost * t_cost)) #the hope is that earlier points will get penalized more
-'''
+
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
@@ -68,7 +74,7 @@ def validation(odenet, data_handler, method, explicit_time):
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = regulated_loss(predictions, target, t, val = True) #torch.mean((predictions - target) ** 2)
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -80,7 +86,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
         
         # Calculate true mean loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = regulated_loss(predictions, target, t) #torch.mean((predictions - target) ** 2)
     return loss
 
 '''
@@ -108,7 +114,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
-    loss = torch.mean((predictions - target) ** 2)
+    loss = regulated_loss(predictions, target, t) #torch.mean((predictions - target) ** 2)
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss
@@ -193,7 +199,8 @@ if __name__ == "__main__":
         
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
         net_file.write(odenet.__str__())
-       # net_file.write(ODENet.forward().__str__())
+        net_file.write('\n\n\n')
+        net_file.write(inspect.getsource(ODENet.forward))
 
     #quit()
 
