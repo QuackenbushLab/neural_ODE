@@ -1,7 +1,0 @@
-ODENet(
-  (net): Sequential(
-    (linear_1): Linear(in_features=68, out_features=20, bias=True)
-    (activation_1): Softplus(beta=1, threshold=20)
-    (linear_out): Linear(in_features=20, out_features=350, bias=True)
-  )
-)
