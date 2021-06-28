@@ -73,7 +73,7 @@ class ODENet(nn.Module):
             else:
                 self.net2 = nn.Sequential()
                 self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
-                self.net2.add_module('activation_0',nn.ReLU())
+                self.net2.add_module('activation_0',nn.Sigmoid())
 
                 #self.net3 = nn.Sequential()
                 #self.net3.add_module('linear_out', nn.Linear(ndim, ndim))
@@ -87,7 +87,7 @@ class ODENet(nn.Module):
 
         for n in self.net2.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('relu'))
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
         
        # for n in self.net3.modules():
        #     if isinstance(n, nn.Linear):
