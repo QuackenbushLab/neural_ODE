@@ -40,8 +40,8 @@ simseeds = sample.int(1E7, 1000)
 #----simulation parameters----
 #simulation parameters
 nsamp = 150 #number of samples
-netSize = 690 #network size of sampled networks
-minTFs = 30 #minimum number of TFs enforced on sampled networks
+netSize = 350 #network size of sampled networks
+minTFs = 15 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
 bionoise = 0 #biological noise standard deviation (superimposed log-normal)
 propbimodal = 0 #proportion of bimodal genes (may be << prop*netSize)
@@ -55,7 +55,7 @@ simseed = simseeds[102]
 #----1: sample network and create simulation----
 set.seed(simseed)
 grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
-grnSmall = grnFull
+#grnSmall = grnFull
 grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
 
 simSmall = new(
@@ -101,7 +101,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_150samples_earlyT_0bimod_1initvar_ANDonly.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_150samples_earlyT_0bimod_1initvar.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
