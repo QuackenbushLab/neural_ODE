@@ -257,7 +257,7 @@ class DataHandler:
     def calculate_trajectory(self, odenet, method, num_val_trajs):
         trajectories = []
         mu0 = self.get_mu0()
-        mu1 = self.get_mu1() #remove later
+       # mu1 = self.get_mu1() #remove later
         if self.val_split == 1:
             all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
         else:

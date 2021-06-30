@@ -64,8 +64,8 @@ class ODENet(nn.Module):
             self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim)) 
             #(outsize = ndim/genes, need to exponentiate)
             
-            self.net_sums = nn.Sequential() #feed exp(net_hill output) into this (insize = neurons)
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim)) 
+           # self.net_sums = nn.Sequential() #feed exp(net_hill output) into this (insize = neurons)
+           # self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim)) 
             #(outsize = ndim/genes, NO need to exponentiate)
 
             self.net_gene_weights = nn.Sequential() #feed net_prods
@@ -82,9 +82,9 @@ class ODENet(nn.Module):
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
-        for n in self.net_sums.modules():
-            if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+     #   for n in self.net_sums.modules():
+      #      if isinstance(n, nn.Linear):
+      #          nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
         for n in self.net_gene_weights.modules():
             if isinstance(n, nn.Linear):
@@ -96,18 +96,19 @@ class ODENet(nn.Module):
         
         self.net_hill.to(device)
         self.net_prods.to(device)
-        self.net_sums.to(device)
+      #  self.net_sums.to(device)
         self.net_gene_weights.to(device)
         
         #self.net3.to(device)
         
     def forward(self, t, y):
         eps = 10**-4
-        grad_hill = self.net_hill(torch.log(y + eps))
+        new_y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
+        grad_hill = self.net_hill(torch.log(new_y)) 
         prods = torch.exp(self.net_prods(grad_hill))
-        sums = self.net_sums(torch.exp(grad_hill))
-        gene_weights = self.net_gene_weights(y)
-        final = gene_weights*(prods + sums - y)
+        #sums = self.net_sums(torch.exp(grad_hill))
+        gene_weights = self.net_gene_weights(new_y)
+        final = gene_weights*(prods - new_y) #+sums
         return(final) 
 
         #final = torch.zeros(y.shape)
@@ -120,8 +121,8 @@ class ODENet(nn.Module):
         ''' Save the model to file '''
         idx = fp.index('.')
         dict_path = fp[:idx] + '_dict' + fp[idx:]
-        torch.save(self.net, fp)
-        torch.save(self.net.state_dict(), dict_path)
+        torch.save(self.net_hill, fp)
+        torch.save(self.net_hill.state_dict(), dict_path)
 
     def load_dict(self, fp):
         ''' Load a model from a dict file '''

@@ -128,7 +128,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_350genes_150samples_earlyT_0bimod_1initvar"
+clean_name = "chalmers_350genes_150samples_earlyT_0bimod_1initvar_ANDonly"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -221,11 +221,6 @@ if __name__ == "__main__":
 
     # Init plot
     if settings['viz']:
-        #if cleaned_file_name.startswith('1d_parabolic'):
-        #    if settings['explicit_time']:
-        #        visualizer = Visualizator1DTimeDependent(data_handler, odenet, settings)
-        #    else:
-        #        visualizer = Visualizator1D(data_handler, odenet, settings)
         visualizer = Visualizator1D(data_handler, odenet, settings)
 
     # Training loop
@@ -251,7 +246,7 @@ if __name__ == "__main__":
             visualizer.plot()
             visualizer.save(img_save_dir, 0)
     start_time = perf_counter()
-
+    #quit()
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
@@ -330,16 +325,16 @@ if __name__ == "__main__":
             if epoch == 1:
                 min_val_loss = val_loss
                 true_loss_of_min_val_model = mu_loss
-                print('Model improved, saving current model')
-                save_model(odenet, output_root_dir, 'best_val_model')
+                print('Model improved, but not saving current model')
+            #    save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_val_loss:
                     consec_epochs_failed = 0
                     min_val_loss = val_loss
                     true_loss_of_min_val_model =  mu_loss
                     #saving true-mean loss of best val model
-                    print('Model improved, saving current model')
-                    save_model(odenet, output_root_dir, 'best_val_model')
+                    print('Model improved, but not saving current model')
+                    #save_model(odenet, output_root_dir, 'best_val_model')
                 else:
                     consec_epochs_failed = consec_epochs_failed + 1
 
