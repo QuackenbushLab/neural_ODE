@@ -56,58 +56,58 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, ndim)
             )
         else: #6 layers
-            self.net_hill = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
-            self.net_hill.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_hill.add_module('activation_1',nn.Softplus())  #(outsize = neurons)
-                
-            self.net_prods = nn.Sequential() #feed net_hill output into this (insize = neurons)
-            self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim)) 
-            #(outsize = ndim/genes, need to exponentiate)
-            
-            self.net_sums = nn.Sequential() #feed exp(net_hill output) into this (insize = neurons)
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim)) 
-            #(outsize = ndim/genes, NO need to exponentiate)
+            self.net = nn.Sequential()
+            if log_scale != "log":
+                self.net.add_module('activation_0',nn.Softsign())
+            self.net.add_module('linear_1', nn.Linear(ndim, neurons))
+            if log_scale == "log":
+                self.net.add_module('activation_1',nn.Softplus())
+            else:
+                self.net.add_module('activation_1',nn.Softsign())
+            self.net.add_module('linear_out', nn.Linear(neurons, ndim))
 
-            self.net_gene_weights = nn.Sequential() #feed net_prods
-            self.net_gene_weights.add_module('linear_out', nn.Linear(ndim, ndim))
-            self.net_gene_weights.add_module('activation_0',nn.Sigmoid())
+            if log_scale == "log":
+                self.net2 = nn.Sequential()
+                self.net2.add_module('activation_0',nn.Sigmoid())
+                self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
+            else:
+                self.net2 = nn.Sequential()
+                self.net2.add_module('linear_out', nn.Linear(ndim, ndim))
+                self.net2.add_module('activation_0',nn.Sigmoid())
+
+                #self.net3 = nn.Sequential()
+                #self.net3.add_module('linear_out', nn.Linear(ndim, ndim))
+                #self.net3.add_module('activation_0',nn.Sigmoid())
 
                 
         # Initialize the layers of the model
-        for n in self.net_hill.modules():
+        for n in self.net.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid')) #IH changed init scheme
 
-        for n in self.net_prods.modules():
+        for n in self.net2.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
-
-        for n in self.net_sums.modules():
-            if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
-
-        for n in self.net_gene_weights.modules():
-            if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))                
         
-      
+       # for n in self.net3.modules():
+       #     if isinstance(n, nn.Linear):
+       #         nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+
+
         #self.net2.linear_out.weight.data.fill_(1) #trying this out
         #self.net2.linear_out.weight.requires_grad = False #trying this out
         
-        self.net_hill.to(device)
-        self.net_prods.to(device)
-        self.net_sums.to(device)
-        self.net_gene_weights.to(device)
-        
+        self.net.to(device)
+        self.net2.to(device)
         #self.net3.to(device)
         
     def forward(self, t, y):
-        eps = 10**-4
-        grad_hill = self.net_hill(torch.log(y + eps))
-        prods = torch.exp(self.net_prods(grad_hill))
-        sums = self.net_sums(torch.exp(grad_hill))
-        gene_weights = self.net_gene_weights(y)
-        final = gene_weights*(prods + sums - y)
+        grad1 = self.net(y)
+        grad2 = self.net2(y)
+        if self.log_scale == "log":
+            final = torch.exp(grad1-y) + grad2
+        else:
+           final = grad2*(grad1 - y)     
         return(final) 
 
         #final = torch.zeros(y.shape)
