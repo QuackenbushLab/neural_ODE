@@ -64,9 +64,17 @@ class ODENet(nn.Module):
             self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim)) 
             #(outsize = ndim/genes, need to exponentiate)
             
+            '''
             self.net_sums = nn.Sequential() #feed exp(net_hill output) into this (insize = neurons)
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim)) 
             #(outsize = ndim/genes, NO need to exponentiate)
+            '''
+
+            self.net_sums = nn.Sequential()
+            self.net_sums.add_module('activation_0',nn.Softsign())
+            self.net_hill.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_sums.add_module('activation_1',nn.Softsign())
+            self.net_hill.add_module('linear_out', nn.Linear(neurons, ndim))
 
             self.net_gene_weights = nn.Sequential() #feed net_prods
             self.net_gene_weights.add_module('linear_out', nn.Linear(ndim, ndim))
@@ -106,7 +114,8 @@ class ODENet(nn.Module):
         y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
         grad_hill = -1*self.net_hill(torch.log(y)) 
         prods = torch.exp(self.net_prods(grad_hill))
-        sums = self.net_sums(torch.exp(grad_hill))
+        sums = self.net_sums(y)
+        #sums = self.net_sums(torch.exp(grad_hill))
         gene_weights = self.net_gene_weights(y)
         final = gene_weights*(sums + prods  - y) 
         return(final) 
