@@ -12,6 +12,12 @@ def expression_maker(val, log_scale):
     elif log_scale == "reciprocal":
         return(np.reciprocal(val+1))    
     else: #i.e. "linear"
+        #eps = 10**-4
+        #if val <= eps: 
+        #    return(eps)
+        #else:
+        #    return(val)
+        #new_y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
         return(val) #- 0.5
 
 
