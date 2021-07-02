@@ -56,25 +56,20 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, ndim)
             )
         else: #6 layers
-            self.net_hill = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
-            self.net_hill.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_hill.add_module('activation_1',nn.Softplus(beta = -1))  #(outsize = neurons)
-                
-            self.net_prods = nn.Sequential() #feed net_hill output into this (insize = neurons)
-            self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim)) 
+            self.net_prods = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_prods.add_module('activation_1',nn.Softplus(beta = -1))  
+            self.net_prods.add_module('linear_out', nn.Linear(neurons, neurons)) 
             #(outsize = ndim/genes, need to exponentiate)
             
-            '''
-            self.net_sums = nn.Sequential() #feed exp(net_hill output) into this (insize = neurons)
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim)) 
-            #(outsize = ndim/genes, NO need to exponentiate)
-            '''
-
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0',nn.Softsign())
             self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
             self.net_sums.add_module('activation_1',nn.Softsign())
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+            self.net_sums.add_module('linear_out', nn.Linear(neurons, neurons))
+
+            self.net_joint = nn.Sequential()
+            self.net_joint.add_module('linear_1', nn.Linear(neurons*2, ndim))
 
             self.net_gene_weights = nn.Sequential() #feed net_prods
             self.net_gene_weights.add_module('linear_out', nn.Linear(ndim, ndim))
@@ -82,10 +77,6 @@ class ODENet(nn.Module):
 
                 
         # Initialize the layers of the model
-        for n in self.net_hill.modules():
-            if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid')) #IH changed init scheme
-
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
@@ -94,17 +85,18 @@ class ODENet(nn.Module):
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
+        for n in self.net_joint.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))        
+
         for n in self.net_gene_weights.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))                
         
       
-        #self.net2.linear_out.weight.data.fill_(1) #trying this out
-        #self.net2.linear_out.weight.requires_grad = False #trying this out
-        
-        self.net_hill.to(device)
         self.net_prods.to(device)
         self.net_sums.to(device)
+        self.net_joint.to(device)
         self.net_gene_weights.to(device)
         
         #self.net3.to(device)
@@ -112,12 +104,11 @@ class ODENet(nn.Module):
     def forward(self, t, y):
         eps = 10**-4
         y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
-        grad_hill = self.net_hill(torch.log(y)) 
-        prods = torch.exp(self.net_prods(grad_hill))
+        prods = torch.exp(self.net_prods(torch.log(y))) 
         sums = self.net_sums(y)
-        #sums = self.net_sums(torch.exp(grad_hill))
+        joint = self.net_joint(torch.cat((prods, sums),1))
         gene_weights = self.net_gene_weights(y)
-        final = gene_weights*(sums + prods  - y) 
+        final = gene_weights*(joint  - y) 
         return(final) 
 
         #final = torch.zeros(y.shape)
