@@ -1,0 +1,31 @@
+ODENet(
+  (net_hill): Sequential(
+    (linear_1): Linear(in_features=350, out_features=75, bias=True)
+    (activation_1): Softplus(beta=1, threshold=20)
+  )
+  (net_prods): Sequential(
+    (linear_out): Linear(in_features=75, out_features=350, bias=True)
+  )
+  (net_sums): Sequential(
+    (activation_0): Softsign()
+    (linear_1): Linear(in_features=350, out_features=75, bias=True)
+    (activation_1): Softsign()
+    (linear_out): Linear(in_features=75, out_features=350, bias=True)
+  )
+  (net_gene_weights): Sequential(
+    (linear_out): Linear(in_features=350, out_features=350, bias=True)
+    (activation_0): Sigmoid()
+  )
+)
+
+
+    def forward(self, t, y):
+        eps = 10**-4
+        y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
+        grad_hill = -1*self.net_hill(torch.log(y)) 
+        prods = torch.exp(self.net_prods(grad_hill))
+        sums = self.net_sums(y)
+        #sums = self.net_sums(torch.exp(grad_hill))
+        gene_weights = self.net_gene_weights(y)
+        final = gene_weights*(sums + prods  - y) 
+        return(final) 

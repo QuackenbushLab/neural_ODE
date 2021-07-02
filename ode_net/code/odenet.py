@@ -58,7 +58,7 @@ class ODENet(nn.Module):
         else: #6 layers
             self.net_hill = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
             self.net_hill.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_hill.add_module('activation_1',nn.Softplus())  #(outsize = neurons)
+            self.net_hill.add_module('activation_1',nn.Softplus(beta = -1))  #(outsize = neurons)
                 
             self.net_prods = nn.Sequential() #feed net_hill output into this (insize = neurons)
             self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim)) 
@@ -72,9 +72,9 @@ class ODENet(nn.Module):
 
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0',nn.Softsign())
-            self.net_hill.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
             self.net_sums.add_module('activation_1',nn.Softsign())
-            self.net_hill.add_module('linear_out', nn.Linear(neurons, ndim))
+            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             self.net_gene_weights = nn.Sequential() #feed net_prods
             self.net_gene_weights.add_module('linear_out', nn.Linear(ndim, ndim))
@@ -112,7 +112,7 @@ class ODENet(nn.Module):
     def forward(self, t, y):
         eps = 10**-4
         y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
-        grad_hill = -1*self.net_hill(torch.log(y)) 
+        grad_hill = self.net_hill(torch.log(y)) 
         prods = torch.exp(self.net_prods(grad_hill))
         sums = self.net_sums(y)
         #sums = self.net_sums(torch.exp(grad_hill))
