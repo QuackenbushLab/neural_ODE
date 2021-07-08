@@ -1,0 +1,18 @@
+ODENet(
+  (net_sums): Sequential(
+    (activation_0): Softsign()
+    (linear_1): Linear(in_features=350, out_features=75, bias=True)
+    (activation_1): Softsign()
+    (linear_out): Linear(in_features=75, out_features=350, bias=True)
+  )
+)
+
+
+    def forward(self, t, y):
+        #eps = 10**-2
+        #y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
+        #prods = torch.exp(self.net_prods(torch.log(y + eps))) 
+        sums = self.net_sums(y)
+        #joint = self.alpha * sums + (1 - self.alpha) * prods
+        final = torch.sigmoid(self.gene_weights)*(sums  - y) 
+        return(final) 

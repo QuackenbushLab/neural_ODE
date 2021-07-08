@@ -75,6 +75,7 @@ def validation(odenet, data_handler, method, explicit_time):
 
         # Calculate validation loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
+        #print(odenet.gene_weights)
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -128,7 +129,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_350genes_150samples_earlyT_0bimod_1initvar"
+clean_name = "chalmers_350genes_50samples_earlyT_0noise_0bimod_1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 

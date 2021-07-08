@@ -69,8 +69,8 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
-            self.gene_weights = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
-
+            self.gene_weights = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
+            
             #self.net_gene_weights = nn.Sequential() #feed net_prods
             #self.net_gene_weights.add_module('linear_out', nn.Linear(ndim, ndim))
             #self.net_gene_weights.add_module('activation_0',nn.Sigmoid())
@@ -104,7 +104,7 @@ class ODENet(nn.Module):
         #prods = torch.exp(self.net_prods(torch.log(y + eps))) 
         sums = self.net_sums(y)
         #joint = self.alpha * sums + (1 - self.alpha) * prods
-        final = self.gene_weights*(sums  - y) 
+        final = torch.sigmoid(self.gene_weights)*(sums  - y) 
         return(final) 
 
         #final = torch.zeros(y.shape)
