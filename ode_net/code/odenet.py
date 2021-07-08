@@ -56,10 +56,13 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, ndim)
             )
         else: #6 layers
-            #self.net_prods = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
-            #self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
-            #self.net_prods.add_module('activation_1',nn.Softplus(beta = -1))  
-            #self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim)) 
+            self.net_prods = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_prods.add_module('activation_1',nn.Softplus(beta = -1))  
+            self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim)) 
+            
+            self.prod_signs  = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
+            
             #(outsize = ndim/genes, need to exponentiate)
             
             self.net_sums = nn.Sequential()
@@ -69,12 +72,9 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
-            self.gene_weights = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
-            
-            #self.net_gene_weights = nn.Sequential() #feed net_prods
-            #self.net_gene_weights.add_module('linear_out', nn.Linear(ndim, ndim))
-            #self.net_gene_weights.add_module('activation_0',nn.Sigmoid())
-
+            #self.gene_weights = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
+            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
+            self.model_weights  = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
                 
         # Initialize the layers of the model
         #for n in self.net_prods.modules():
@@ -90,21 +90,25 @@ class ODENet(nn.Module):
         #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))                
         
       
-        #self.net_prods.to(device)
+        self.net_prods.to(device)
         self.net_sums.to(device)
-        #self.alpha.to(device)
-        self.gene_weights.to(device)
-        #self.net_gene_weights.to(device)
-        
-        #self.net3.to(device)
+        self.gene_multipliers.to(device)
+        self.model_weights.to(device)
+        self.prod_signs.to(device)
+
+       
         
     def forward(self, t, y):
-        #eps = 10**-2
-        #y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
-        #prods = torch.exp(self.net_prods(torch.log(y + eps))) 
+        eps = 10**-4
+        y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
+        prods = torch.exp(self.net_prods(torch.log(y))) 
+        prods_with_signs = prods * torch.tanh(self.prod_signs)
         sums = self.net_sums(y)
-        #joint = self.alpha * sums + (1 - self.alpha) * prods
-        final = torch.sigmoid(self.gene_weights)*(sums  - y) 
+        
+        alpha = torch.sigmoid(self.model_weights)
+        joint = alpha*sums + (1-alpha)*prods_with_signs
+        
+        final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 
         #final = torch.zeros(y.shape)
