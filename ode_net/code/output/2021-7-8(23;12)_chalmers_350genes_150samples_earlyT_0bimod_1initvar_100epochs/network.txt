@@ -1,0 +1,14 @@
+ODENet(
+  (net_sums): Sequential(
+    (activation_0): Softsign()
+    (linear_1): Linear(in_features=350, out_features=35, bias=True)
+    (activation_1): Softsign()
+    (linear_out): Linear(in_features=35, out_features=350, bias=True)
+  )
+)
+
+
+    def forward(self, t, y):
+        sums = self.net_sums(y)
+        final = torch.relu(self.gene_multipliers)*(sums  - y) 
+        return(final) 

@@ -9,10 +9,6 @@ ODENet(
 
 
     def forward(self, t, y):
-        #eps = 10**-2
-        #y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
-        #prods = torch.exp(self.net_prods(torch.log(y + eps))) 
         sums = self.net_sums(y)
-        #joint = self.alpha * sums + (1 - self.alpha) * prods
         final = self.gene_weights*(sums  - y) 
         return(final) 
