@@ -101,8 +101,8 @@ class Visualizator1D(Visualizator):
             upper_lim = 1.3
             lower_lim = 0.4
         else: #i.e. linear 
-            upper_lim = 1.2 #- 0.5
-            lower_lim = -0.2 #- 0.5
+            upper_lim = 1.2 - 0.5
+            lower_lim = -0.2 - 0.5
 
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
