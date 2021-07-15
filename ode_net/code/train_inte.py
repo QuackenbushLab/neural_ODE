@@ -64,13 +64,14 @@ def regulated_loss(predictions, target, time, val = False):
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
+    init_bias_y = data_handler.init_bias_y
     #odenet.eval()
     with torch.no_grad():
         predictions = torch.zeros(data.shape).to(data_handler.device)
         # For now we have to loop through manually, their implementation of odenet can only take fixed time lists.
         for index, (time, batch_point) in enumerate(zip(t, data)):
             # Do prediction
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
@@ -80,11 +81,12 @@ def validation(odenet, data_handler, method, explicit_time):
 
 def true_loss(odenet, data_handler, method):
     data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
+    init_bias_y = data_handler.init_bias_y
     #odenet.eval()
     with torch.no_grad():
         predictions = torch.zeros(data.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t, data)):
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
         
         # Calculate true mean loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
@@ -111,10 +113,11 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr, one_time_drop = 0):
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
+    init_bias_y = data_handler.init_bias_y
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
-        predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+        predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
     loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -129,7 +132,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_690genes_150samples_earlyT_0bimod_1initvar_ANDonly"
+clean_name = "chalmers_350genes_150samples_earlyT_0bimod_1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -183,11 +186,13 @@ if __name__ == "__main__":
                                         noise = settings['noise'],
                                         img_save_dir = img_save_dir,
                                         scale_expression = settings['scale_expression'],
-                                        log_scale = settings['log_scale'])
+                                        log_scale = settings['log_scale'],
+                                        init_bias_y = settings['init_bias_y'])
 
     
     # Initialization
-    odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], log_scale = settings['log_scale'])
+    odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
+                    log_scale = settings['log_scale'], init_bias_y = settings['init_bias_y'])
     odenet.float()
     param_count = sum(p.numel() for p in odenet.parameters() if p.requires_grad)
     param_ratio = round(param_count/ (data_handler.dim)**2, 3)

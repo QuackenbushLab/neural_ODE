@@ -48,6 +48,7 @@ def _convert_arguments(settings):
     converted_settings['lr_range_test'] = settings.getboolean('lr_range_test') 
     converted_settings['scale_expression'] = settings.getfloat('scale_expression')
     converted_settings['log_scale'] = settings['log_scale']
+    converted_settings['init_bias_y'] = settings.getfloat('init_bias_y')
     
     
     

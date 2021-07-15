@@ -18,7 +18,7 @@ import random
 
 class DataHandler:
 
-    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir):
+    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y):
         self.data_np = data_np
         self.data_pt = data_pt
         self.data_np_0noise = data_np_0noise
@@ -36,6 +36,7 @@ class DataHandler:
         self.val_split = val_split
         self.epoch_done = False
         self.img_save_dir = img_save_dir
+        self.init_bias_y = init_bias_y
         #self.noise = noise
 
         self._calc_datasize()
@@ -55,10 +56,10 @@ class DataHandler:
         
 
     @classmethod
-    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0, img_save_dir = "", scale_expression = 1, log_scale = False):
+    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0, img_save_dir = "", scale_expression = 1, log_scale = False, init_bias_y = 0):
         ''' Create a datahandler from a CSV file '''
         data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise, data_pt_0noise = readcsv(fp, device, noise_to_add = noise, scale_expression = scale_expression, log_scale = log_scale)
-        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir)
+        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y)
 
     @classmethod
     def fromgenerator(cls, generator, val_split, device, normalize=False):
@@ -276,7 +277,7 @@ class DataHandler:
                 _y = mu0[j]
             
            # _y = mu1[j] #remove later
-            y = odeint(odenet, _y, self.time_pt[j][0:], method=method)
+            y = odeint(odenet, _y, self.time_pt[j][0:], method=method) + self.init_bias_y
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples

@@ -33,13 +33,14 @@ class Recipro(nn.Module):
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
     
-    def __init__(self, device, ndim, explicit_time=False, neurons=100, log_scale = "linear"):
+    def __init__(self, device, ndim, explicit_time=False, neurons=100, log_scale = "linear", init_bias_y = 0):
         ''' Initialize a new ODE-Net '''
         super(ODENet, self).__init__()
 
         self.ndim = ndim
         self.explicit_time = explicit_time
         self.log_scale = log_scale
+        self.init_bias_y = init_bias_y
         #only use first 68 (i.e. TFs) as NN inputs
         #in general should be num_tf = ndim
         self.num_tf = 73 
@@ -101,7 +102,7 @@ class ODENet(nn.Module):
         #y = torch.nn.functional.threshold(y, threshold = eps, value = eps)
         #prods = torch.exp(self.net_prods(torch.log(y))) 
         #prods_with_signs = prods * torch.tanh(self.prod_signs)
-        sums = self.net_sums(y)
+        sums = self.net_sums(y-self.init_bias_y)
         
         #alpha = torch.sigmoid(self.model_weights)
         #joint =  (1-alpha)*prods + alpha*sums
