@@ -76,7 +76,7 @@ def validation(odenet, data_handler, method, explicit_time):
 
         # Calculate validation loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
-        #print(odenet.gene_weights)
+        #print("alpha =",odenet.alpha)
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
