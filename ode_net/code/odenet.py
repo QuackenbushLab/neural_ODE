@@ -57,23 +57,26 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, ndim)
             )
         else: #6 layers
-            self.net_prods = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
-            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_prods.add_module('activation_1',nn.Sigmoid())  
-            
-            self.net_prods_act = nn.Sequential()
-            self.net_prods_act.add_module('linear_out', nn.Linear(neurons, ndim))
+            self.net_prods_act = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods_act.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_prods_act.add_module('activation_1',nn.LogSigmoid()) 
+            self.net_prods_act.add_module('linear_out', nn.Linear(neurons, ndim)) 
+           
+            self.net_prods_rep = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods_rep.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_prods_rep.add_module('activation_1',nn.Sigmoid())  
+            self.net_prods_rep_2 = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods_rep_2.add_module('linear_out', nn.Linear(neurons, ndim))
+                
 
-            self.net_prods_rep = nn.Sequential()
-            self.net_prods_rep.add_module('linear_out', nn.Linear(neurons, ndim))
-             
-            #self.net_sums = nn.Sequential()
-            #self.net_sums.add_module('activation_0',nn.Softsign())
-            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            #self.net_sums.add_module('activation_1',nn.Softsign())
-            #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
-            #self.alpha = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
+            self.net_sums = nn.Sequential()
+            self.net_sums.add_module('activation_0',nn.Softsign())
+            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_sums.add_module('activation_1',nn.Softsign())
+            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+
+            self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
             #self.model_weights  = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
                 
@@ -86,14 +89,28 @@ class ODENet(nn.Module):
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
+        for n in self.net_prods_act.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+
+        for n in self.net_prods_rep.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+
+        for n in self.net_prods_rep_2.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))        
+
+
         #for n in self.net_gene_weights.modules():
         #    if isinstance(n, nn.Linear):
         #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))                
         
       
-        self.net_prods.to(device)
+        self.net_sums.to(device)
         self.net_prods_act.to(device)
         self.net_prods_rep.to(device)
+        self.net_prods_rep_2.to(device)
         
         #self.net_sums.to(device)
         self.gene_multipliers.to(device)
@@ -105,32 +122,24 @@ class ODENet(nn.Module):
     def forward(self, t, y):
         eps = 10**-4
         y = torch.relu(y) + eps
-        prods_activate = self.net_prods(torch.log(y))
-        prods_reppress = 1 - prods_activate
-        grad_activate = self.net_prods_act(torch.log(prods_activate))
-        grad_repress = self.net_prods_rep(torch.log(prods_reppress))
+        grad_activate = self.net_prods_act(torch.log(y))
+        prods_reppress = torch.log(1-self.net_prods_rep(torch.log(y)))
+        grad_repress = self.net_prods_rep_2(prods_reppress)
         prods = torch.exp(grad_activate + grad_repress)
-        
-        #sums = self.net_sums(y-self.init_bias_y)
+        sums = self.net_sums(y-self.init_bias_y)
         
         #alpha = torch.sigmoid(self.model_weights)
-        #joint =  (1-alpha)*prods + alpha*sums
+        joint =  (1-self.alpha)*prods + self.alpha*sums
 
-        final = torch.relu(self.gene_multipliers)*(prods  - y) 
+        final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
-
-        #final = torch.zeros(y.shape)
-        #grad = self.net(y[...,self.num_tf:]) #subsetting the last dimension [...,0:self.num_tf]
-        #transformed = torch.exp(grad-y[...,self.num_tf:]) + torch.exp(-1*y[...,self.num_tf:]) - 1
-        #final[...,self.num_tf:] = transformed
-
 
     def save(self, fp):
         ''' Save the model to file '''
         idx = fp.index('.')
         dict_path = fp[:idx] + '_dict' + fp[idx:]
-        torch.save(self.net_prods, fp)
-        torch.save(self.net_prods.state_dict(), dict_path)
+        torch.save(self.net_prods_act, fp)
+        torch.save(self.net_prods_act.state_dict(), dict_path)
 
     def load_dict(self, fp):
         ''' Load a model from a dict file '''
