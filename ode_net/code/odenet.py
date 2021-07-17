@@ -57,17 +57,19 @@ class ODENet(nn.Module):
                 nn.Linear(neurons, ndim)
             )
         else: #6 layers
-            #self.net_prods_act = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
-            #self.net_prods_act.add_module('linear_1', nn.Linear(ndim, int(neurons/2)))
-            #self.net_prods_act.add_module('activation_1',nn.LogSigmoid()) 
-            #self.net_prods_act.add_module('linear_out', nn.Linear(int(neurons/2), ndim)) 
+            '''
+            self.net_prods_act = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods_act.add_module('linear_1', nn.Linear(ndim, int(neurons/2)))
+            self.net_prods_act.add_module('activation_1',nn.LogSigmoid()) 
+            self.net_prods_act.add_module('linear_out', nn.Linear(int(neurons/2), ndim)) 
            
-            #self.net_prods_rep = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
-            #self.net_prods_rep.add_module('linear_1', nn.Linear(ndim, int(neurons/2)))
-            #self.net_prods_rep.add_module('activation_1',nn.Sigmoid())  
-            #self.net_prods_rep_2 = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
-            #self.net_prods_rep_2.add_module('linear_out', nn.Linear(int(neurons/2), ndim))
-                
+            self.net_prods_rep = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods_rep.add_module('linear_1', nn.Linear(ndim, int(neurons/2)))
+            self.net_prods_rep.add_module('activation_1',nn.Sigmoid())  
+            self.net_prods_rep_2 = nn.Sequential() #feed log transformed data into this (insize = ndim/genes)
+            self.net_prods_rep_2.add_module('linear_out', nn.Linear(int(neurons/2), ndim))
+            '''    
+            
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
             self.net_sums.add_module('activation_1',nn.Sigmoid())
@@ -89,33 +91,29 @@ class ODENet(nn.Module):
         #    if isinstance(n, nn.Linear):
         #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
-        for n in self.net_sums.modules():
+       # for n in self.net_sums.modules():
+       #     if isinstance(n, nn.Linear):
+       #         nn.init.orthogonal_(n.weight)
+
+        '''
+        for n in self.net_prods_act.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
-        #for n in self.net_prods_act.modules():
-        #    if isinstance(n, nn.Linear):
-        #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+        for n in self.net_prods_rep.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
-        #for n in self.net_prods_rep.modules():
-       #     if isinstance(n, nn.Linear):
-        #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
-
-       # for n in self.net_prods_rep_2.modules():
-        #    if isinstance(n, nn.Linear):
-        #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))        
-
-
-        #for n in self.net_gene_weights.modules():
-        #    if isinstance(n, nn.Linear):
-        #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))                
-        
-      
+        for n in self.net_prods_rep_2.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))        
+        '''
+     
         #self.net_prods_act.to(device)
         #self.net_prods_rep.to(device)
         #self.net_prods_rep_2.to(device)
         
-        #self.net_sums.to(device)
+        self.net_sums.to(device)
         self.gene_multipliers.to(device)
         #self.model_weights.to(device)
         #self.prod_signs.to(device)
@@ -123,13 +121,14 @@ class ODENet(nn.Module):
        
         
     def forward(self, t, y):
-        eps = 10**-4
+        eps = 10**-3
         y = torch.relu(y) + eps
         #grad_activate = self.net_prods_act(torch.log(y))
         #prods_reppress = torch.log(1-self.net_prods_rep(torch.log(y)))
         #grad_repress = self.net_prods_rep_2(prods_reppress)
         #prods = torch.exp(grad_activate + grad_repress)
-        sums = self.net_sums(torch.log(y))
+        ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
+        sums = self.net_sums(ln_y)
         
         #alpha = torch.sigmoid(self.model_weights)
         #joint =  (1-self.alpha)*prods + self.alpha*sums

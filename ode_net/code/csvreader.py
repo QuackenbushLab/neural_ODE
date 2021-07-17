@@ -7,8 +7,11 @@ except ImportError:
     from torchdiffeq import odeint_adjoint as odeint
 
 def expression_maker(val, log_scale):
-    if log_scale == "log": 
-        return(np.log(val+1))
+    if log_scale == "log":
+        eps = 10**-2
+        if val < eps:
+            val = eps 
+        return(np.log(val))
     elif log_scale == "reciprocal":
         return(np.reciprocal(val+1))    
     else: #i.e. "linear"
