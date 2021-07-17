@@ -695,13 +695,13 @@ getAMC <- function(graph, directed = T) {
 randomizeParamsC <- function(graph, type = 'linear', seed) {
   ec50range = c(0.2, 0.8)
   nrange = c(1.39, 6)
-  
   if (type %in% 'linear') {
     ec50range = c(0.5, 0.5)
     nrange = c(1.01, 1.01)
   } else if (type %in% 'linear-like') {
     ec50range = c(0.4, 0.6)
-    nrange = c(1.01, 1.7)
+    nrange = c(1.39, 1.8)
+    #nrange = c(1.01, 1.7)
   } else if (type %in% 'exponential') {
     ec50range = c(0.2, 0.8)
     nrange = c(1.01, 1.7)

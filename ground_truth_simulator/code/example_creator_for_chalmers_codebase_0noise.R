@@ -101,7 +101,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_150samples_earlyT_0bimod_1initvar.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_150samples_earlyT_0bimod_1initvar_nrange.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
