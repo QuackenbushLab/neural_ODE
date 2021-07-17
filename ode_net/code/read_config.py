@@ -41,7 +41,7 @@ def _convert_arguments(settings):
     converted_settings['debug'] = False  
     converted_settings['output_dir'] = "output"
     converted_settings['normalize_data'] = settings.getboolean('normalize_data')  
-    converted_settings['explicit_time'] = settings.getboolean('explicit_time')
+    converted_settings['explicit_time'] = False
     converted_settings['relative_error'] = False
 
     converted_settings['pretrained_model'] = False 
