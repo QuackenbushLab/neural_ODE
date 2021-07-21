@@ -26,7 +26,17 @@ class Recipro(nn.Module):
 
     def forward(self, input):
         ex = torch.reciprocal(input)
-        return(ex)        
+        return(ex)  
+
+class SoftsignMod(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+
+    def forward(self, input):
+        ex = input
+        abs_ex = torch.abs(input)
+        return(ex/(1+abs_ex))  
+
 
 
        
@@ -75,11 +85,20 @@ class ODENet(nn.Module):
             #self.net_sums.add_module('activation_1',nn.Sigmoid())
             #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
-
+            #self.net = nn.Sequential(
+            #    SoftsignMod,
+            #    nn.Linear(ndim + 1, neurons),
+            #    nn.LeakyReLU(),
+            #    nn.Linear(neurons, neurons),
+            ##    nn.LeakyReLU(),
+            #    nn.Linear(neurons, neurons),
+            #    nn.LeakyReLU(),
+            #    nn.Linear(neurons, ndim)
+            #)
             self.net_sums = nn.Sequential()
-            self.net_sums.add_module('activation_0',nn.Softsign())
+            self.net_sums.add_module('activation_0', SoftsignMod())
             self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_sums.add_module('activation_1',nn.Softsign())
+            self.net_sums.add_module('activation_1', SoftsignMod())
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
@@ -93,7 +112,8 @@ class ODENet(nn.Module):
 
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = nn.init.calculate_gain('sigmoid'))
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+                #nn.init.normal_(n.weight, mean = 0, std = 0.1)
                 #nn.init.normal_(n.bias)
         '''
         for n in self.net_prods_act.modules():
