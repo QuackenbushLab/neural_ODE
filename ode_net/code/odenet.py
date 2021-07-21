@@ -31,11 +31,12 @@ class Recipro(nn.Module):
 class SoftsignMod(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
+        #self.shift = shift
 
     def forward(self, input):
-        ex = input
-        abs_ex = torch.abs(input)
-        return(ex/(1+abs_ex))  
+        shifted_input = input - 0.5
+        abs_shifted_input = torch.abs(shifted_input)
+        return(shifted_input/(1+abs_shifted_input))  
 
 
 
