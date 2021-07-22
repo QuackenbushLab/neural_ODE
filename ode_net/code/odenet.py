@@ -38,6 +38,13 @@ class SoftsignMod(nn.Module):
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 
+class SigmoidShifted(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+
+    def forward(self, input):
+        shifted_input = input - 0.5
+        return(torch.sigmoid(shifted_input))  
 
 
        
@@ -81,26 +88,17 @@ class ODENet(nn.Module):
             self.net_prods_rep_2.add_module('linear_out', nn.Linear(int(neurons/2), ndim))
             '''    
             
-            #self.net_sums = nn.Sequential()
-            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            #self.net_sums.add_module('activation_1',nn.Sigmoid())
-            #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
-
-            #self.net = nn.Sequential(
-            #    SoftsignMod,
-            #    nn.Linear(ndim + 1, neurons),
-            #    nn.LeakyReLU(),
-            #    nn.Linear(neurons, neurons),
-            ##    nn.LeakyReLU(),
-            #    nn.Linear(neurons, neurons),
-            #    nn.LeakyReLU(),
-            #    nn.Linear(neurons, ndim)
-            #)
             self.net_sums = nn.Sequential()
-            self.net_sums.add_module('activation_0', SoftsignMod())
             self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_sums.add_module('activation_1', SoftsignMod())
+            self.net_sums.add_module('activation_1',nn.SigmoidShifted())
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+
+          
+            #self.net_sums = nn.Sequential()
+            #self.net_sums.add_module('activation_0', SoftsignMod())
+            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
+            #self.net_sums.add_module('activation_1', SoftsignMod())
+            #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
@@ -142,15 +140,14 @@ class ODENet(nn.Module):
        
         
     def forward(self, t, y):
-        #eps = 10**-3
-        #y = torch.relu(y) + eps
+        eps = 10**-3
+        y = torch.relu(y) + eps
         #grad_activate = self.net_prods_act(torch.log(y))
         #prods_reppress = torch.log(1-self.net_prods_rep(torch.log(y)))
         #grad_repress = self.net_prods_rep_2(prods_reppress)
         #prods = torch.exp(grad_activate + grad_repress)
-        #ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
-        #y_trans = y/(1-0.99*y)
-        sums = self.net_sums(y)
+        ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
+        sums = self.net_sums(ln_y)
         
         #alpha = torch.sigmoid(self.model_weights)
         #joint =  (1-self.alpha)*prods + self.alpha*sums
