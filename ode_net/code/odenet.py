@@ -3,31 +3,6 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
-class Expo(nn.Module):
-    def __init__(self):
-        super().__init__() # init the base class
-
-    def forward(self, input):
-        ex = torch.exp(input)
-        return(ex)
-
-
-class LogX(nn.Module):
-    def __init__(self):
-        super().__init__() # init the base class
-
-    def forward(self, input):
-        ex = torch.log(input)
-        return(ex)
-
-class Recipro(nn.Module):
-    def __init__(self):
-        super().__init__() # init the base class
-
-    def forward(self, input):
-        ex = torch.reciprocal(input)
-        return(ex)  
-
 class SoftsignMod(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
@@ -43,8 +18,17 @@ class SigmoidShifted(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        shifted_input = input + 1 
+        shifted_input = input -0.5 #need to figure out the shift
         return(torch.sigmoid(shifted_input))  
+
+class PseudoSquare(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+        #self.shift = shift
+
+    def forward(self, input):
+        squared = torch.relu(input) + torch.relu(-1* input)
+        return(squared)  
 
 
        
@@ -88,9 +72,17 @@ class ODENet(nn.Module):
             self.net_prods_rep_2.add_module('linear_out', nn.Linear(int(neurons/2), ndim))
             '''    
             
-            self.net_sums = nn.Sequential()
-            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_sums.add_module('activation_1', SigmoidShifted())
+            #self.net_sums = nn.Sequential()
+            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
+            #self.net_sums.add_module('activation_1', SigmoidShifted())
+            #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+
+            self.net_prods = nn.Sequential()
+            self.net_prods.add_module('activation_0', SoftsignMod())
+            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_prods.add_module('activation_1', SoftsignMod())
+            self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
+            self.net_prods.add_module('activation_2', PseudoSquare())
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
           
@@ -109,7 +101,7 @@ class ODENet(nn.Module):
         #    if isinstance(n, nn.Linear):
         #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
-        for n in self.net_sums.modules():
+        for n in self.prods_sums.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
                 #nn.init.normal_(n.weight, mean = 0, std = 0.1)
@@ -132,7 +124,7 @@ class ODENet(nn.Module):
         #self.net_prods_rep.to(device)
         #self.net_prods_rep_2.to(device)
         
-        self.net_sums.to(device)
+        self.net_prods.to(device)
         self.gene_multipliers.to(device)
         #self.model_weights.to(device)
         #self.prod_signs.to(device)
@@ -140,27 +132,27 @@ class ODENet(nn.Module):
        
         
     def forward(self, t, y):
-        eps = 10**-3
-        y = torch.relu(y) + eps
+        #eps = 10**-3
+        #y = torch.relu(y) + eps
         #grad_activate = self.net_prods_act(torch.log(y))
         #prods_reppress = torch.log(1-self.net_prods_rep(torch.log(y)))
         #grad_repress = self.net_prods_rep_2(prods_reppress)
-        #prods = torch.exp(grad_activate + grad_repress)
+        prods = self.net_prods(y)
         #ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
-        sums = self.net_sums(torch.log(y))
+        #sums = self.net_sums(torch.log(y))
         
         #alpha = torch.sigmoid(self.model_weights)
         #joint =  (1-self.alpha)*prods + self.alpha*sums
 
-        final = torch.relu(self.gene_multipliers)*(sums  - y) 
+        final = torch.relu(self.gene_multipliers)*(prods  - y) 
         return(final) 
 
     def save(self, fp):
         ''' Save the model to file '''
         idx = fp.index('.')
         dict_path = fp[:idx] + '_dict' + fp[idx:]
-        torch.save(self.net_sums, fp)
-        torch.save(self.net_sums.state_dict(), dict_path)
+        torch.save(self.net_prods, fp)
+        torch.save(self.net_prods.state_dict(), dict_path)
 
     def load_dict(self, fp):
         ''' Load a model from a dict file '''

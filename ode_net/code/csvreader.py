@@ -8,7 +8,7 @@ except ImportError:
 
 def expression_maker(val, log_scale):
     if log_scale == "log":
-        eps = 10**-2
+        eps = 10**-3
         if val < eps:
             val = eps 
         return(np.log(val))

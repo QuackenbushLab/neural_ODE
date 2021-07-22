@@ -189,7 +189,7 @@ if __name__ == "__main__":
                                         log_scale = settings['log_scale'],
                                         init_bias_y = settings['init_bias_y'])
 
-    
+    exit()
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
                     log_scale = settings['log_scale'], init_bias_y = settings['init_bias_y'])
