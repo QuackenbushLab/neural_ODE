@@ -43,7 +43,7 @@ class SigmoidShifted(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        shifted_input = input - 0.5
+        shifted_input = input + 1 
         return(torch.sigmoid(shifted_input))  
 
 
@@ -90,7 +90,7 @@ class ODENet(nn.Module):
             
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_sums.add_module('activation_1',nn.SigmoidShifted())
+            self.net_sums.add_module('activation_1', SigmoidShifted())
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
           
@@ -146,8 +146,8 @@ class ODENet(nn.Module):
         #prods_reppress = torch.log(1-self.net_prods_rep(torch.log(y)))
         #grad_repress = self.net_prods_rep_2(prods_reppress)
         #prods = torch.exp(grad_activate + grad_repress)
-        ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
-        sums = self.net_sums(ln_y)
+        #ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
+        sums = self.net_sums(torch.log(y))
         
         #alpha = torch.sigmoid(self.model_weights)
         #joint =  (1-self.alpha)*prods + self.alpha*sums
