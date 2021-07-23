@@ -76,7 +76,7 @@ def validation(odenet, data_handler, method, explicit_time):
 
         # Calculate validation loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
-        #print("alpha =",odenet.alpha)
+        print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -198,7 +198,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_train_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -309,7 +309,7 @@ if __name__ == "__main__":
             if train_loss < min_train_loss:
                 min_train_loss = train_loss
                 true_loss_of_min_train_model =  mu_loss
-                save_model(odenet, output_root_dir, 'best_train_model')
+                #save_model(odenet, output_root_dir, 'best_train_model')
         
 
 

@@ -87,20 +87,20 @@ class ODENet(nn.Module):
             self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim))
 
           
-            #self.net_sums = nn.Sequential()
-            #self.net_sums.add_module('activation_0', SoftsignMod())
-            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            #self.net_sums.add_module('activation_1', SoftsignMod())
-            #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+            self.net_sums = nn.Sequential()
+            self.net_sums.add_module('activation_0', SoftsignMod())
+            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_sums.add_module('activation_1', SoftsignMod())
+            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
-            #self.model_weights  = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
+            self.model_weights  = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
                 
         # Initialize the layers of the model
-        #for n in self.net_prods.modules():
-        #    if isinstance(n, nn.Linear):
-        #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+        for n in self.net_sums.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
@@ -127,8 +127,8 @@ class ODENet(nn.Module):
         
         self.net_prods.to(device)
         self.gene_multipliers.to(device)
-        #self.model_weights.to(device)
-        #self.prod_signs.to(device)
+        self.model_weights.to(device)
+        self.sums.to(device)
 
        
         
@@ -140,12 +140,12 @@ class ODENet(nn.Module):
         #grad_repress = self.net_prods_rep_2(prods_reppress)
         prods = self.net_prods(y)
         #ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
-        #sums = self.net_sums(y)
+        sums = self.net_sums(y)
         
-        #alpha = torch.sigmoid(self.model_weights)
-        #joint =  (1-self.alpha)*prods + self.alpha*sums
+        alpha = torch.sigmoid(self.model_weights)
+        joint =  (1-alpha)*prods + alpha*sums
 
-        final = torch.relu(self.gene_multipliers)*(prods  - y) 
+        final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 
     def save(self, fp):
@@ -153,9 +153,15 @@ class ODENet(nn.Module):
         idx = fp.index('.')
         dict_path = fp[:idx] + '_dict' + fp[idx:]
         gene_mult_path = fp[:idx] + '_gene_multipliers' + fp[idx:]
-        torch.save(self.net_prods, fp)
-        torch.save(self.net_prods.state_dict(), dict_path)
+        prod_path =  fp[:idx] + '_prods' + fp[idx:]
+        sum_path = fp[:idx] + '_sums' + fp[idx:]
+        model_weight_path = fp[:idx] + '_model_weights' + fp[idx:]
+        torch.save(self.net_prods, prod_path)
+        torch.save(self.net_sums, sum_path)
         torch.save(self.gene_multipliers, gene_mult_path)
+        torch.save(self.model_weights, model_weight_path)
+        #torch.save(self.net_prods.state_dict(), dict_path)
+        
 
     def load_dict(self, fp):
         ''' Load a model from a dict file '''
@@ -165,9 +171,13 @@ class ODENet(nn.Module):
         ''' Load a model from a file '''
         idx = fp.index('.')
         gene_mult_path = fp[:idx] + '_gene_multipliers' + fp[idx:]
-        self.net_prods = torch.load(fp)
+        prod_path =  fp[:idx] + '_prods' + fp[idx:]
+        sum_path = fp[:idx] + '_sums' + fp[idx:]
+        self.net_prods = torch.load(prod_path)
+        self.net_sums = torch.load(sum_path)
         self.gene_multipliers = torch.load(gene_mult_path)
         self.net_prods.to('cpu')
+        self.net_sums.to('cpu')
         self.gene_multipliers.to('cpu')
 
     def load(self, fp):
