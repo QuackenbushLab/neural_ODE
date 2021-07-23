@@ -330,7 +330,7 @@ if __name__ == "__main__":
             if epoch == 1:
                 min_val_loss = val_loss
                 true_loss_of_min_val_model = mu_loss
-                print('Model improved, but not saving current model')
+                print('Model improved, saving current model')
                 save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_val_loss:
@@ -338,7 +338,7 @@ if __name__ == "__main__":
                     min_val_loss = val_loss
                     true_loss_of_min_val_model =  mu_loss
                     #saving true-mean loss of best val model
-                    print('Model improved, but not saving current model')
+                    print('Model improved, saving current model')
                     save_model(odenet, output_root_dir, 'best_val_model')
                 else:
                     consec_epochs_failed = consec_epochs_failed + 1

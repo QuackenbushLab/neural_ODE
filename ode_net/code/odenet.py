@@ -12,7 +12,7 @@ class SoftsignMod(nn.Module):
         shifted_input = input - 0.5
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
-
+'''
 class SigmoidShifted(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
@@ -20,6 +20,7 @@ class SigmoidShifted(nn.Module):
     def forward(self, input):
         shifted_input = input -0.5 #need to figure out the shift
         return(torch.sigmoid(shifted_input))  
+'''
 
 class PseudoSquare(nn.Module):
     def __init__(self):
@@ -128,7 +129,7 @@ class ODENet(nn.Module):
         self.net_prods.to(device)
         self.gene_multipliers.to(device)
         self.model_weights.to(device)
-        self.sums.to(device)
+        self.net_sums.to(device)
 
        
         
