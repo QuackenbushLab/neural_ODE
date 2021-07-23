@@ -44,7 +44,7 @@ def _convert_arguments(settings):
     converted_settings['explicit_time'] = False
     converted_settings['relative_error'] = False
 
-    converted_settings['pretrained_model'] = False 
+    converted_settings['pretrained_model'] = settings.getboolean('pretrained_model')   
     converted_settings['lr_range_test'] = False 
     converted_settings['scale_expression'] = 1
     converted_settings['log_scale'] = settings['log_scale']

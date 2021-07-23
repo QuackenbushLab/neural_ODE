@@ -198,7 +198,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '{}/_pretrained_best_model/best_train_model.pt'.format(settings['output_dir'])
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_train_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -331,7 +331,7 @@ if __name__ == "__main__":
                 min_val_loss = val_loss
                 true_loss_of_min_val_model = mu_loss
                 print('Model improved, but not saving current model')
-            #    save_model(odenet, output_root_dir, 'best_val_model')
+                save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_val_loss:
                     consec_epochs_failed = 0
@@ -339,7 +339,7 @@ if __name__ == "__main__":
                     true_loss_of_min_val_model =  mu_loss
                     #saving true-mean loss of best val model
                     print('Model improved, but not saving current model')
-                    #save_model(odenet, output_root_dir, 'best_val_model')
+                    save_model(odenet, output_root_dir, 'best_val_model')
                 else:
                     consec_epochs_failed = consec_epochs_failed + 1
 
@@ -427,7 +427,7 @@ if __name__ == "__main__":
     total_time = perf_counter() - start_time
 
     
-    #save_model(odenet, output_root_dir, 'final_model')
+    save_model(odenet, output_root_dir, 'final_model')
 
     print("Saving times")
     #np.savetxt('{}total_time.csv'.format(output_root_dir), [total_time], delimiter=',')

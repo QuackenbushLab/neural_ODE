@@ -1,8 +1,0 @@
-ODENet(
-  (net): Sequential(
-    (activation_0): Softsign()
-    (linear_1): Linear(in_features=690, out_features=50, bias=True)
-    (activation_1): Softsign()
-    (linear_out): Linear(in_features=50, out_features=690, bias=True)
-  )
-)
