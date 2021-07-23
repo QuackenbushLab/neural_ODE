@@ -77,20 +77,20 @@ class ODENet(nn.Module):
             #self.net_sums.add_module('activation_1', SigmoidShifted())
             #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
-            self.net_prods = nn.Sequential()
-            self.net_prods.add_module('activation_0', SoftsignMod())
-            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_prods.add_module('activation_1', SoftsignMod())
-            self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
-            self.net_prods.add_module('activation_2', PseudoSquare())
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+            #self.net_prods = nn.Sequential()
+            #self.net_prods.add_module('activation_0', SoftsignMod())
+            #self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
+            #self.net_prods.add_module('activation_1', SoftsignMod())
+            #self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
+            #self.net_prods.add_module('activation_2', PseudoSquare())
+            #self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim))
 
           
-            #self.net_sums = nn.Sequential()
-            #self.net_sums.add_module('activation_0', SoftsignMod())
-            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            #self.net_sums.add_module('activation_1', SoftsignMod())
-            #self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+            self.net_sums = nn.Sequential()
+            self.net_sums.add_module('activation_0', SoftsignMod())
+            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_sums.add_module('activation_1', SoftsignMod())
+            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
@@ -101,7 +101,7 @@ class ODENet(nn.Module):
         #    if isinstance(n, nn.Linear):
         #        nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
 
-        for n in self.prods_sums.modules():
+        for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
                 #nn.init.normal_(n.weight, mean = 0, std = 0.1)
@@ -124,7 +124,7 @@ class ODENet(nn.Module):
         #self.net_prods_rep.to(device)
         #self.net_prods_rep_2.to(device)
         
-        self.net_prods.to(device)
+        self.net_sums.to(device)
         self.gene_multipliers.to(device)
         #self.model_weights.to(device)
         #self.prod_signs.to(device)
@@ -151,8 +151,8 @@ class ODENet(nn.Module):
         ''' Save the model to file '''
         idx = fp.index('.')
         dict_path = fp[:idx] + '_dict' + fp[idx:]
-        torch.save(self.net_prods, fp)
-        torch.save(self.net_prods.state_dict(), dict_path)
+        torch.save(self.net_sums, fp)
+        torch.save(self.net_sums.state_dict(), dict_path)
 
     def load_dict(self, fp):
         ''' Load a model from a dict file '''
