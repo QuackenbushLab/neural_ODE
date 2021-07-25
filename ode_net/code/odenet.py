@@ -174,9 +174,11 @@ class ODENet(nn.Module):
         gene_mult_path = fp[:idx] + '_gene_multipliers' + fp[idx:]
         prod_path =  fp[:idx] + '_prods' + fp[idx:]
         sum_path = fp[:idx] + '_sums' + fp[idx:]
+        model_weight_path = fp[:idx] + '_model_weights' + fp[idx:]
         self.net_prods = torch.load(prod_path)
         self.net_sums = torch.load(sum_path)
         self.gene_multipliers = torch.load(gene_mult_path)
+        self.model_weights = torch.load(model_weight_path)
         self.net_prods.to('cpu')
         self.net_sums.to('cpu')
         self.gene_multipliers.to('cpu')
