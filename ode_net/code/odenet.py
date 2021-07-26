@@ -182,6 +182,7 @@ class ODENet(nn.Module):
         self.net_prods.to('cpu')
         self.net_sums.to('cpu')
         self.gene_multipliers.to('cpu')
+        self.model_weights.to('cpu')
 
     def load(self, fp):
         ''' General loading from a file '''
