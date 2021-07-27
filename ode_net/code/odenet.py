@@ -134,18 +134,10 @@ class ODENet(nn.Module):
        
         
     def forward(self, t, y):
-        #eps = 10**-3
-        #y = torch.relu(y) + eps
-        #grad_activate = self.net_prods_act(torch.log(y))
-        #prods_reppress = torch.log(1-self.net_prods_rep(torch.log(y)))
-        #grad_repress = self.net_prods_rep_2(prods_reppress)
         prods = self.net_prods(y)
-        #ln_y = -0.693147 + 2*(y-0.5) - 2*(y-0.5)**2 + 2.6667*(y-0.5)**3
         sums = self.net_sums(y)
-        
         alpha = torch.sigmoid(self.model_weights)
         joint =  (1-alpha)*prods + alpha*sums
-
         final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 
