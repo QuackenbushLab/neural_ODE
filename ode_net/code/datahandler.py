@@ -266,7 +266,10 @@ class DataHandler:
                 all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, 7 - num_val_trajs, replace=False))
             else:
                 if self.batch_type == "single":
-                    all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 7, replace=False))
+                    try:
+                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 7, replace=False))
+                    except:
+                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 1, replace=False))   
                 else:
                     all_plotted_samples = sorted(np.random.choice(self.train_set_original, 7, replace=False))
         
