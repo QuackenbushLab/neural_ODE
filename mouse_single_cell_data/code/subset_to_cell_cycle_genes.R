@@ -33,7 +33,11 @@ stages_in_order <- c("early2cell", "mid2cell", "late2cell",
                       "4cell", "8cell", "16cell",
                      "earlyblast","midblast", "lateblast")
 
-stage_pseudo_times <- as.numeric(1:9) #NEED TO FIGURE OUT PSEUDOtimes
+stage_pseudo_times <- c(1,1.5, 2,
+                        2.2, 2.5, 3,
+                        3.2, 4, 4.5) 
+#NEED TO FIGURE OUT PSEUDOtimes
+#using for now: https://www.emouseatlas.org/emap/ema/theiler_stages/StageDefinition/stagedefinition.html#dpc
 
 setcolorder(datamat, neworder= c("embryo","cell","gene", stages_in_order))
 write.csv(datamat, 
