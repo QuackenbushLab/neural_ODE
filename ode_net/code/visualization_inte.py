@@ -70,20 +70,14 @@ class Visualizator1D(Visualizator):
 
     def _set_ax_limits(self):
         data = self.data_handler.data_np
+        #times = self.extrap_timepoints
         times = self.data_handler.time_np
         self.EXTRA_WIDTH_TRAJ = 0.2
         self.EXTRA_WIDTH_DYN = 1
 
-        #self.x_span = (np.min([np.min(traj[:,:,0]) for traj in data]),
-        #               np.max([np.max(traj[:,:,0]) for traj in data]))
-        #self.x_width = self.x_span[1] - self.x_span[0]
-
-        #self.xdot_span = (np.min([np.min(traj[:,:,1]) for traj in data]),
-        #                  np.max([np.max(traj[:,:,1]) for traj in data]))
-        #self.xdot_width = self.xdot_span[1] - self.xdot_span[0]
-
-        self.time_span = (np.min([np.min(time[:]) for time in times]),
-                          np.max([np.max(time[:]) for time in times]))
+        #self.time_span = (np.min([np.min(time[:]) for time in times]),
+        #                  np.max([np.max(time[:]) for time in times]))
+        self.time_span = (1.0, 39.0)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -113,7 +107,7 @@ class Visualizator1D(Visualizator):
          
 
     def visualize(self):
-        self.trajectories, self.all_plotted_samples = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], num_val_trajs = self.sample_plot_val_cutoff)
+        self.trajectories, self.all_plotted_samples, self.extrap_timepoints = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], num_val_trajs = self.sample_plot_val_cutoff)
         self._visualize_trajectories_split()
         #self._visualize_dynamics()
         self._set_ax_limits()
@@ -133,9 +127,10 @@ class Visualizator1D(Visualizator):
                     else:
                         plot_col = "blue"    
                     #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
+                    ax.plot(self.extrap_timepoints, approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1) #times[sample_idx].flatten()[0:]
                     ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), 'ko', alpha=0.2)
-                    ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5)
-                    ax.plot(times[sample_idx].flatten()[0:], approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1)
+                    ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5) #
+                   
                 
                 ax.set_xlabel(r'$t$')
         

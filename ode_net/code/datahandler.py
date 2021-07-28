@@ -256,6 +256,8 @@ class DataHandler:
         return times
 
     def calculate_trajectory(self, odenet, method, num_val_trajs):
+        extrap_time_points = np.array(range(1,40)).astype(float)
+        extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
        # mu1 = self.get_mu1() #remove later
@@ -269,7 +271,7 @@ class DataHandler:
                     try:
                         all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 7, replace=False))
                     except:
-                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 1, replace=False))   
+                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 1, replace=False))   #if only ONE SAMPLE (e.g y5 dataset)
                 else:
                     all_plotted_samples = sorted(np.random.choice(self.train_set_original, 7, replace=False))
         
@@ -280,10 +282,10 @@ class DataHandler:
                 _y = mu0[j]
             
            # _y = mu1[j] #remove later
-            y = odeint(odenet, _y, self.time_pt[j][0:], method=method) + self.init_bias_y
+            y = odeint(odenet, _y,extrap_time_points_pt, method=method) + self.init_bias_y #self.time_pt[j][0:]
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
-        return trajectories, all_plotted_samples
+        return trajectories, all_plotted_samples, extrap_time_points
 
     def _create_validation_set_single(self):
         ''' Create the validation set '''
