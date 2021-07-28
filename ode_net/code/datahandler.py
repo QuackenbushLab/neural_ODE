@@ -282,7 +282,7 @@ class DataHandler:
                 _y = mu0[j]
             
            # _y = mu1[j] #remove later
-            y = odeint(odenet, _y,extrap_time_points_pt, method=method) + self.init_bias_y #self.time_pt[j][0:]
+            y = odeint(odenet, _y,self.time_pt[j][0:], method=method) + self.init_bias_y #extrap_time_points_pt
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples, extrap_time_points
