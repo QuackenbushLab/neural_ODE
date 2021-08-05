@@ -229,7 +229,6 @@ if __name__ == "__main__":
         visualizer = Visualizator1D(data_handler, odenet, settings)
 
     
-    exit()
     # Training loop
     #batch_times = [] 
     epoch_times = []
