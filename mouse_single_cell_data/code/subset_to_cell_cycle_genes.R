@@ -31,7 +31,8 @@ datamat <- melt(subset_data,
           )
 
 #datamat <- datamat[,.(mean_expression = mean(expression)), by = .(embryo, stage, gene)]
-datamat <- datamat[,.(log_median_rpkm = log(median(expression)+0.0001)), by = .(stage, gene)][order(stage),]
+datamat <- datamat[,.(log_median_rpkm = log(median(expression)+0.0001)/10), #scale for -1 to 1
+                   by = .(stage, gene)][order(stage),]
 
 
 datamat <- dcast(datamat, gene ~ stage, value.var = "log_median_rpkm")
@@ -45,7 +46,7 @@ stage_pseudo_times <- c(31.5,39.5, 47,
                         87, 93, 101)  #hours
 
 stage_pseudo_times <- (stage_pseudo_times - min(stage_pseudo_times))
-stage_pseudo_times <- stage_pseudo_times/max(stage_pseudo_times)*10
+#stage_pseudo_times <- stage_pseudo_times/max(stage_pseudo_times)*10
 #start at 0 end at 10
 
 #Embryos at different stages of preimplantation development were collected 
