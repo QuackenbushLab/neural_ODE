@@ -77,7 +77,7 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
-        self.time_span = (0.0, 100.0)
+        self.time_span = (0.0, 150.0)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -95,8 +95,8 @@ class Visualizator1D(Visualizator):
             upper_lim = 1.3
             lower_lim = 0.4
         else: #i.e. linear 
-            upper_lim = 10 #1.2
-            lower_lim = -10 #-0.2
+            upper_lim = 1.5 #1.2
+            lower_lim = -1.5 #-0.2
 
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
