@@ -44,7 +44,9 @@ stage_pseudo_times <- c(31.5,39.5, 47,
                         55, 69, 77,
                         87, 93, 101)  #hours
 
-stage_pseudo_times <- stage_pseudo_times - min(stage_pseudo_times) #start at 0
+stage_pseudo_times <- (stage_pseudo_times - min(stage_pseudo_times))
+stage_pseudo_times <- stage_pseudo_times/max(stage_pseudo_times)*10
+#start at 0 end at 10
 
 #Embryos at different stages of preimplantation development were collected 
 #at defined time periods after hCG administration: 20-24 h after hCG (zygotes), 
