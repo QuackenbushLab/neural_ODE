@@ -132,9 +132,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "y5_384genes_6T"
+clean_name = "mouse_SC_1010genes_1median_sample"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/mouse_single_cell_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         net_file.write('\n\n\n')
         net_file.write(inspect.getsource(ODENet.forward))
 
-    #quit()
+    quit()
 
     # Select optimizer
     print('Using optimizer: {}'.format(settings['optimizer']))
