@@ -257,7 +257,7 @@ class DataHandler:
         return times
 
     def calculate_trajectory(self, odenet, method, num_val_trajs):
-        extrap_time_points = np.array(range(1,100)).astype(float)
+        extrap_time_points = np.array(range(1,150)).astype(float)
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
