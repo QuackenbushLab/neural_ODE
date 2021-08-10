@@ -15,7 +15,7 @@ embryo_cell_combos_to_use <- subset_data[,.N,
                                          by = .(embryo, cell)][!is.na(cell) & N>1, 
                                                                .(embryo, cell)]
 nsamp <- 5
-samp_percentiles <- c(0.2, 0.4, 0.5, 0.6, 0.8)
+samp_percentiles <- c(0.1, 0.3, 0.5, 0.7, 0.9)
 perc_column_names <- paste0("prcntl_",samp_percentiles)
 netSize <- length(cell_cycle_genes_in_dataset)
 
@@ -39,6 +39,8 @@ colnames(datamat) <- c("gene", "stage",  perc_column_names)
 datamat <- melt(datamat, id.vars = c("gene","stage"), 
                 measure.vars = perc_column_names,
                 variable.name = "sample", value.name = "log_rpkm")
+
+datamat[,var(log_rpkm),by = .(gene,stage)][,mean(V1), by = stage][order(V1)]
 
 datamat <- dcast(datamat, sample + gene ~ stage, value.var = "log_rpkm")
 
@@ -82,7 +84,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/mouse_single_cell_data/clean_data/mouse_SC_1010genes_5prcntlsamples.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/mouse_single_cell_data/clean_data/mouse_SC_1010genes_5highvarprcntlsamples.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
