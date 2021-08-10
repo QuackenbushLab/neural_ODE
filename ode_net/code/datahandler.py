@@ -37,6 +37,7 @@ class DataHandler:
         self.epoch_done = False
         self.img_save_dir = img_save_dir
         self.init_bias_y = init_bias_y
+        self.num_trajs_to_plot = 5
         #self.noise = noise
 
         self._calc_datasize()
@@ -256,7 +257,7 @@ class DataHandler:
         return times
 
     def calculate_trajectory(self, odenet, method, num_val_trajs):
-        extrap_time_points = np.array(range(1,150)).astype(float)
+        extrap_time_points = np.array(range(1,100)).astype(float)
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
@@ -265,15 +266,15 @@ class DataHandler:
             all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
         else:
             if num_val_trajs >0 :
-                all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, 7 - num_val_trajs, replace=False))
+                all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot - num_val_trajs, replace=False))
             else:
                 if self.batch_type == "single":
                     try:
-                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 7, replace=False))
+                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), self.num_trajs_to_plot, replace=False))
                     except:
                         all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 1, replace=False))   #if only ONE SAMPLE (e.g y5 dataset)
                 else:
-                    all_plotted_samples = sorted(np.random.choice(self.train_set_original, 7, replace=False))
+                    all_plotted_samples = sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot, replace=False))
         
         for j in all_plotted_samples:
             if odenet.explicit_time:
@@ -339,7 +340,7 @@ class DataHandler:
         
         self.TOT_ROWS = 5
         self.TOT_COLS = 6
-        self.sample_plot_cutoff = 7
+        self.sample_plot_cutoff = self.num_trajs_to_plot
         self.genes_to_viz = sorted(random.sample(range(self.dim),30)) #only plot 30 genes
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=True, sharey=True, subplot_kw={'frameon':True})
         
