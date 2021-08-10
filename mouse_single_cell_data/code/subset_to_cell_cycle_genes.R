@@ -14,7 +14,9 @@ subset_data <- full_data[,(cols_to_subset), with = F]
 embryo_cell_combos_to_use <- subset_data[,.N, 
                                          by = .(embryo, cell)][!is.na(cell) & N>1, 
                                                                .(embryo, cell)]
-nsamp <- 1 
+nsamp <- 5
+samp_percentiles <- c(0.2, 0.4, 0.5, 0.6, 0.8)
+perc_column_names <- paste0("prcntl_",samp_percentiles)
 netSize <- length(cell_cycle_genes_in_dataset)
 
 subset_data <- merge(subset_data,
@@ -30,12 +32,15 @@ datamat <- melt(subset_data,
           value.name = "expression"
           )
 
-#datamat <- datamat[,.(mean_expression = mean(expression)), by = .(embryo, stage, gene)]
-datamat <- datamat[,.(log_median_rpkm = log(median(expression)+0.0001)/10), #scale for -1 to 1
-                   by = .(stage, gene)][order(stage),]
+datamat <- datamat[,  as.list(log(quantile(expression, samp_percentiles)+0.0001)/10), 
+        by = .(gene, stage)]
+colnames(datamat) <- c("gene", "stage",  perc_column_names)
 
+datamat <- melt(datamat, id.vars = c("gene","stage"), 
+                measure.vars = perc_column_names,
+                variable.name = "sample", value.name = "log_rpkm")
 
-datamat <- dcast(datamat, gene ~ stage, value.var = "log_median_rpkm")
+datamat <- dcast(datamat, sample + gene ~ stage, value.var = "log_rpkm")
 
 stages_in_order <- c("early2cell", "mid2cell", "late2cell",
                       "4cell", "8cell", "16cell",
@@ -55,7 +60,7 @@ stage_pseudo_times <- (stage_pseudo_times - min(stage_pseudo_times))
 #54-56 h (4-cell), 68-70 h (8-cell), 76-78 h (16-cell), 86-88 h (early blastocysts),
 #92-94 h (mid blastocysts), and 100-102 h (late blastocysts)
 
-setcolorder(datamat, neworder= c("gene", stages_in_order))
+setcolorder(datamat, neworder= c("sample","gene", stages_in_order))
 write.csv(datamat, 
           "C:/STUDIES/RESEARCH/neural_ODE/mouse_single_cell_data/clean_data/mouse_SC_cell_cycle.csv",
           row.names = F)
@@ -64,10 +69,11 @@ write.csv(datamat,
 #                   by=.(embryo, cell)][is.na(gene), 
 #                                       (stages_in_order) := as.list(stage_pseudo_times)]
 
-datamat <- datamat[, .SD[1:(.N+1)]][is.na(gene), 
+datamat <- datamat[, .SD[1:(.N+1)],
+                   by = .(sample)][is.na(gene), 
                                        (stages_in_order) := as.list(stage_pseudo_times)]
 
-datamat[,c("gene") := NULL]
+datamat[,c("gene","sample") := NULL]
 top_row <- as.list(rep(NA, length(stage_pseudo_times)))
 top_row[[1]] <- netSize
 top_row[[2]] <- nsamp
