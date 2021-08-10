@@ -82,7 +82,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/mouse_single_cell_data/clean_data/mouse_SC_1010genes_1mediansample.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/mouse_single_cell_data/clean_data/mouse_SC_1010genes_5prcntlsamples.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
