@@ -32,8 +32,12 @@ datamat <- melt(subset_data,
           value.name = "expression"
           )
 
-datamat[,distance := sqrt(sum((expression-0)^2)),
+#datamat[,distance := sqrt(sum((expression-0)^2)),
+#        by = .(stage, embryo, cell)]
+
+datamat[,distance := median(expression), #median so that we are robust to outliers
         by = .(stage, embryo, cell)]
+
 
 datamat <- datamat[order(stage, distance)]
 
