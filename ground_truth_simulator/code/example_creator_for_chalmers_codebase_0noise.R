@@ -40,8 +40,8 @@ simseeds = sample.int(1E7, 1000)
 #----simulation parameters----
 #simulation parameters
 nsamp = 150 #number of samples
-netSize = 690 #network size of sampled networks
-minTFs = 30 #minimum number of TFs enforced on sampled networks
+netSize = 350 #network size of sampled networks
+minTFs = 15 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
 bionoise = 0 #biological noise standard deviation (superimposed log-normal)
 propbimodal = 0 #proportion of bimodal genes (may be << prop*netSize)
