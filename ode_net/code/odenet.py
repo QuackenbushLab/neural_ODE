@@ -9,7 +9,7 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = input - 0
+        shifted_input = input - 0.5
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 '''
@@ -82,16 +82,16 @@ class ODENet(nn.Module):
             self.net_prods = nn.Sequential()
             self.net_prods.add_module('activation_0', SoftsignMod())
             self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_prods.add_module('activation_1', SoftsignMod())
-            self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
+            #self.net_prods.add_module('activation_1', SoftsignMod())
+            #self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
             self.net_prods.add_module('activation_2', PseudoSquare())
             self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim))
 
           
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0', SoftsignMod())
-            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_sums.add_module('activation_1', SoftsignMod())
+            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
+            #self.net_sums.add_module('activation_1', SoftsignMod())
             self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
