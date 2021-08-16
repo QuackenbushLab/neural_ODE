@@ -81,18 +81,19 @@ class ODENet(nn.Module):
 
             self.net_prods = nn.Sequential()
             self.net_prods.add_module('activation_0', SoftsignMod())
-            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
+            self.net_prods.add_module('activation_1', PseudoSquare())
+            #self.net_prods.add_module('linear_1', nn.Linear(ndim, ndim))
             #self.net_prods.add_module('activation_1', SoftsignMod())
             #self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
-            self.net_prods.add_module('activation_2', PseudoSquare())
-            self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim))
+            
+            self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim))
 
           
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0', SoftsignMod())
             #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
             #self.net_sums.add_module('activation_1', SoftsignMod())
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+            self.net_sums.add_module('linear_out', nn.Linear(ndim, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
