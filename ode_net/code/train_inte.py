@@ -77,6 +77,8 @@ def validation(odenet, data_handler, method, explicit_time):
         # Calculate validation loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
         print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
+     #   print("diag_sums = ", torch.mean(torch.diagonal(odenet.net_sums.linear_out.weight)))
+     #   print("diag_prods = ", torch.mean(torch.diagonal(odenet.net_prods.linear_out.weight)))
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -219,13 +221,14 @@ if __name__ == "__main__":
         opt = optim.Adagrad(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
     else:
 #       opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+        num_gene = data_handler.dim
         opt = optim.Adam([
-                {'params': odenet.net_sums.linear_out.weight},
-                {'params': odenet.net_sums.linear_out.bias},
+                {'params': odenet.net_sums.linear_out.weight}, #off diagonal elements of net_sums
+              #  {'params': odenet.net_sums.linear_out.bias},
                 {'params': odenet.net_prods.linear_out.weight},
-                {'params': odenet.net_prods.linear_out.bias},
+              # {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.gene_multipliers},
-                {'params': odenet.model_weights, 'lr': 10*settings['init_lr']}
+                {'params': odenet.model_weights, 'lr': 5*settings['init_lr']}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
