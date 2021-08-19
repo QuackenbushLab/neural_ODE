@@ -225,7 +225,7 @@ if __name__ == "__main__":
                 {'params': odenet.net_prods.linear_out.weight},
                 {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.gene_multipliers},
-                {'params': odenet.model_weights, 'lr': 5*settings['init_lr']}
+                {'params': odenet.model_weights, 'lr': 10*settings['init_lr']}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
