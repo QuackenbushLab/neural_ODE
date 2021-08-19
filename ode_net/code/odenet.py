@@ -9,7 +9,7 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = input - 0.5
+        shifted_input = input - 0.5 
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 '''
@@ -96,8 +96,9 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(ndim, ndim))
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
-            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
-            self.model_weights  = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
+            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
+            self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-2, requires_grad= True) 
+            print("alpha =",torch.mean(torch.sigmoid(self.model_weights)))    
                 
         # Initialize the layers of the model
         for n in self.net_sums.modules():

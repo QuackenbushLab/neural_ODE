@@ -218,11 +218,27 @@ if __name__ == "__main__":
     elif settings['optimizer'] == 'adagrad':
         opt = optim.Adagrad(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
     else:
-        opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+#       opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+        opt = optim.Adam([
+                {'params': odenet.net_sums.linear_out.weight},
+                {'params': odenet.net_sums.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+                {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.gene_multipliers},
+                {'params': odenet.model_weights, 'lr': 5*settings['init_lr']}
+            ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
     factor=0.9, patience=3, threshold=1e-04, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
+
+    '''
+    odenet.net_sums.linear_out.weight.requires_grad_(False)
+    odenet.net_sums.linear_out.bias.requires_grad_(False)
+    odenet.net_prods.linear_out.weight.requires_grad_(False)
+    odenet.net_prods.linear_out.bias.requires_grad_(False)
+    odenet.gene_multipliers.requires_grad_(False)
+    '''
 
     # Init plot
     if settings['viz']:
