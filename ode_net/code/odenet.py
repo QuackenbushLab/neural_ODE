@@ -130,7 +130,7 @@ class ODENet(nn.Module):
         #print("diag_prods = ", torch.mean(torch.diagonal(self.net_prods.linear_out.weight)))
             
         
-        print("hello")
+        #print("hello")
 
         #creating masks and register the hooks
         mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
@@ -165,10 +165,10 @@ class ODENet(nn.Module):
        
         
     def forward(self, t, y):
-        prods = self.net_prods(y)
         sums = self.net_sums(y)
+        prods_part = torch.pow(sums, exponent = 2) - self.net_prods(y) #products are basically squared sums minus sum of squares
         alpha = torch.sigmoid(self.model_weights)
-        joint =  (1-alpha)*prods + alpha*sums
+        joint =  (1-alpha)*prods_part + alpha*sums
         final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 
