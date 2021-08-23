@@ -3,13 +3,24 @@ import torch.nn as nn
 import sys
 #torch.set_num_threads(36)
 
+def off_diag_init(m):
+    if isinstance(m, nn.Linear):
+        with torch.no_grad():
+            m.weight.copy_(torch.triu(m.weight, diagonal = 1) + torch.tril(m.weight, diagonal = -1))
+
+def get_zero_grad_hook(mask):
+    def hook(grad):
+        return grad * mask
+    return hook    
+       
+
 class SoftsignMod(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = input - 0
+        shifted_input = input - 0.5 
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 '''
@@ -22,6 +33,7 @@ class SigmoidShifted(nn.Module):
         return(torch.sigmoid(shifted_input))  
 '''
 
+
 class PseudoSquare(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
@@ -33,9 +45,9 @@ class PseudoSquare(nn.Module):
         return(squared)  
 
 
-       
 class ODENet(nn.Module):
     ''' ODE-Net class implementation '''
+
     
     def __init__(self, device, ndim, explicit_time=False, neurons=100, log_scale = "linear", init_bias_y = 0):
         ''' Initialize a new ODE-Net '''
@@ -81,22 +93,25 @@ class ODENet(nn.Module):
 
             self.net_prods = nn.Sequential()
             self.net_prods.add_module('activation_0', SoftsignMod())
-            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_prods.add_module('activation_1', SoftsignMod())
-            self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
-            self.net_prods.add_module('activation_2', PseudoSquare())
-            self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim))
-
+            self.net_prods.add_module('activation_1', PseudoSquare())
+            #self.net_prods.add_module('linear_1', nn.Linear(ndim, ndim))
+            #self.net_prods.add_module('activation_1', SoftsignMod())
+            #self.net_prods.add_module('linear_2', nn.Linear(neurons, neurons))
+            
+            self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim, bias = False))
+            #self.net_prods.linear_out.weight.fill_diagonal_(0)
           
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0', SoftsignMod())
-            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
-            self.net_sums.add_module('activation_1', SoftsignMod())
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim))
+            #self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons))
+            #self.net_sums.add_module('activation_1', SoftsignMod())
+            self.net_sums.add_module('linear_out', nn.Linear(ndim, ndim, bias = False))
+            #self.net_sums.linear_out.weight.fill_diagonal_(0)
 
             #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
-            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim), requires_grad= True)
-            self.model_weights  = nn.Parameter(4*(torch.rand(1,ndim)-0.5), requires_grad= True)
+            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
+            self.model_weights  = nn.Parameter(torch.zeros(1,ndim), requires_grad= True) 
+            print("alpha =",torch.mean(torch.sigmoid(self.model_weights)))    
                 
         # Initialize the layers of the model
         for n in self.net_sums.modules():
@@ -108,6 +123,22 @@ class ODENet(nn.Module):
                 nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
                 #nn.init.normal_(n.weight, mean = 0.01, std = 0.1)
                 #nn.init.normal_(n.bias)
+        
+        self.net_prods.apply(off_diag_init)
+        self.net_sums.apply(off_diag_init)
+        #print("diag_sums = ", torch.mean(torch.diagonal(self.net_sums.linear_out.weight)))
+        #print("diag_prods = ", torch.mean(torch.diagonal(self.net_prods.linear_out.weight)))
+            
+        
+        #print("hello")
+
+        #creating masks and register the hooks
+        mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
+        mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
+        
+        self.net_prods.linear_out.weight.register_hook(get_zero_grad_hook(mask_prods))
+        self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
+
         '''
         for n in self.net_prods_act.modules():
             if isinstance(n, nn.Linear):
@@ -134,10 +165,10 @@ class ODENet(nn.Module):
        
         
     def forward(self, t, y):
-        prods = self.net_prods(y)
         sums = self.net_sums(y)
+        prods_part = torch.pow(sums, exponent = 2) - self.net_prods(y) #products are basically squared sums minus sum of squares
         alpha = torch.sigmoid(self.model_weights)
-        joint =  (1-alpha)*prods + alpha*sums
+        joint =  (1-alpha)*prods_part + alpha*sums
         final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 

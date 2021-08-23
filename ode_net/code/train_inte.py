@@ -77,6 +77,8 @@ def validation(odenet, data_handler, method, explicit_time):
         # Calculate validation loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
         print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
+     #   print("diag_sums = ", torch.mean(torch.diagonal(odenet.net_sums.linear_out.weight)))
+     #   print("diag_prods = ", torch.mean(torch.diagonal(odenet.net_prods.linear_out.weight)))
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -132,9 +134,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "mouse_SC_1010genes_5cellordersamples"
+clean_name = "chalmers_350genes_150samples_earlyT_0bimod_1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/mouse_single_cell_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -218,11 +220,28 @@ if __name__ == "__main__":
     elif settings['optimizer'] == 'adagrad':
         opt = optim.Adagrad(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
     else:
-        opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+#       opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+        num_gene = data_handler.dim
+        opt = optim.Adam([
+                {'params': odenet.net_sums.linear_out.weight}, #off diagonal elements of net_sums
+              #  {'params': odenet.net_sums.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+              # {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.gene_multipliers},
+                {'params': odenet.model_weights, 'lr': 5*settings['init_lr']}
+            ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
     factor=0.9, patience=3, threshold=1e-04, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
+
+    '''
+    odenet.net_sums.linear_out.weight.requires_grad_(False)
+    odenet.net_sums.linear_out.bias.requires_grad_(False)
+    odenet.net_prods.linear_out.weight.requires_grad_(False)
+    odenet.net_prods.linear_out.bias.requires_grad_(False)
+    odenet.gene_multipliers.requires_grad_(False)
+    '''
 
     # Init plot
     if settings['viz']:
