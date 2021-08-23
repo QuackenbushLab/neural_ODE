@@ -54,8 +54,8 @@ simseed = simseeds[102]
 
 #----1: sample network and create simulation----
 set.seed(simseed)
-#grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
-grnSmall = grnFull
+grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
+#grnSmall = grnFull
 grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
 
 simSmall = new(
