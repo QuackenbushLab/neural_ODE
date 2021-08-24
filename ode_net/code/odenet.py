@@ -12,7 +12,7 @@ def get_zero_grad_hook(mask):
     def hook(grad):
         return grad * mask
     return hook    
-       
+
 
 class SoftsignMod(nn.Module):
     def __init__(self):
@@ -116,14 +116,14 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+                #nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+                nn.init.sparse_(n.weight,  sparsity=0.8, sd = 0.05)    
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
-                #nn.init.normal_(n.weight, mean = 0.01, std = 0.1)
-                #nn.init.normal_(n.bias)
-        
+                #nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+                nn.init.sparse_(n.weight,  sparsity=0.8, sd = 0.05) 
+
         self.net_prods.apply(off_diag_init)
         self.net_sums.apply(off_diag_init)
         #print("diag_sums = ", torch.mean(torch.diagonal(self.net_sums.linear_out.weight)))
@@ -166,9 +166,10 @@ class ODENet(nn.Module):
         
     def forward(self, t, y):
         sums = self.net_sums(y)
-        prods_part = torch.pow(sums, exponent = 2) - self.net_prods(y) #products are basically squared sums minus sum of squares
+        prods = self.net_prods(y)
+        #prods_part = torch.pow(sums, exponent = 2) - self.net_prods(y) #products are basically squared sums minus sum of squares
         alpha = torch.sigmoid(self.model_weights)
-        joint =  (1-alpha)*prods_part + alpha*sums
+        joint =  (1-alpha)*prods + alpha*sums
         final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 

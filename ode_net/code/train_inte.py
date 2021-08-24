@@ -77,8 +77,8 @@ def validation(odenet, data_handler, method, explicit_time):
         # Calculate validation loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
         print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
-     #   print("diag_sums = ", torch.mean(torch.diagonal(odenet.net_sums.linear_out.weight)))
-     #   print("diag_prods = ", torch.mean(torch.diagonal(odenet.net_prods.linear_out.weight)))
+        #print("diag_sums = ", torch.mean(torch.diagonal(odenet.net_sums.linear_out.weight)))
+        #print("diag_prods = ", torch.mean(torch.diagonal(odenet.net_prods.linear_out.weight)))
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -227,9 +227,10 @@ if __name__ == "__main__":
               #  {'params': odenet.net_sums.linear_out.bias},
                 {'params': odenet.net_prods.linear_out.weight},
               # {'params': odenet.net_prods.linear_out.bias},
-                {'params': odenet.gene_multipliers},
-                {'params': odenet.model_weights, 'lr': 5*settings['init_lr']}
+                {'params': odenet.gene_multipliers, 'weight_decay': 0},
+                {'params': odenet.model_weights, 'lr': 5*settings['init_lr'], 'weight_decay': 0}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
     factor=0.9, patience=3, threshold=1e-04, 
@@ -285,7 +286,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 100
+    epochs_to_fail_to_terminate = 10
     all_lrs_used = []
 
     for epoch in range(1, tot_epochs + 1):
