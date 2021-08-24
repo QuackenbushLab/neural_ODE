@@ -1,0 +1,16 @@
+ODENet(
+  (net_sums): Sequential(
+    (activation_0): SoftsignMod()
+    (linear_out): Linear(in_features=350, out_features=350, bias=False)
+  )
+)
+
+
+    def forward(self, t, y):
+        sums = self.net_sums(y)
+        #prods = self.net_prods(y)
+        #prods_part = torch.pow(sums, exponent = 2) - self.net_prods(y) #products are basically squared sums minus sum of squares
+        #alpha = torch.sigmoid(self.model_weights)
+        #joint =  (1-alpha)*prods + alpha*sums
+        final = torch.relu(self.gene_multipliers)*(sums  - y) 
+        return(final) 
