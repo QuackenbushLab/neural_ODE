@@ -71,7 +71,7 @@ def validation(odenet, data_handler, method, explicit_time):
         # For now we have to loop through manually, their implementation of odenet can only take fixed time lists.
         for index, (time, batch_point) in enumerate(zip(t, data)):
             # Do prediction
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
@@ -223,10 +223,10 @@ if __name__ == "__main__":
 #       opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
         num_gene = data_handler.dim
         opt = optim.Adam([
-                {'params': odenet.net_prods.linear_out.weight}, #off diagonal elements of net_sums
+              #  {'params': odenet.net_sums.linear_out.weight}, 
               #  {'params': odenet.net_sums.linear_out.bias},
-              #  {'params': odenet.net_prods.linear_out.weight},
-              # {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+                {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.gene_multipliers, 'weight_decay': 0},
               #  {'params': odenet.model_weights, 'lr': 5*settings['init_lr'], 'weight_decay': 0}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
@@ -288,6 +288,8 @@ if __name__ == "__main__":
     consec_epochs_failed = 0
     epochs_to_fail_to_terminate = 10
     all_lrs_used = []
+
+    #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()

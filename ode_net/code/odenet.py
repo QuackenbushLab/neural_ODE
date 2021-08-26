@@ -4,7 +4,7 @@ import sys
 #torch.set_num_threads(36)
 
 def off_diag_init(m):
-    if isinstance(m, nn.Linear):
+    if isinstance(m, nn.Linear) or isinstance(m, LogSigProdLayer):
         with torch.no_grad():
             m.weight.copy_(torch.triu(m.weight, diagonal = 1) + torch.tril(m.weight, diagonal = -1))
 
@@ -13,6 +13,25 @@ def get_zero_grad_hook(mask):
         return grad * mask
     return hook    
 
+class LogSigProdLayer(nn.Module):
+    def __init__(self, in_channels, out_channels): 
+        super(LogSigProdLayer, self).__init__() 
+        w_sparsity = 0.95
+        weight_init = 1+torch.randn(in_channels, out_channels)*0.1
+        weight_init = torch.nn.functional.dropout(weight_init, p=w_sparsity, inplace= False, training = True) * (1-w_sparsity)
+        self.weight = nn.Parameter(weight_init, requires_grad=True)
+        self.bias = nn.Parameter(torch.randn(out_channels) + 17, requires_grad=True)  #adding a bias
+        print("Using in-channels to initialize bias terms")
+
+    def forward(self, x): 
+        eps = 10**-3
+        x = torch.nn.functional.relu(x) + eps
+        log_diag_x = torch.diag_embed(torch.log(torch.squeeze(x)))
+        full_mult_mat = torch.matmul(log_diag_x, self.weight)
+        log_sig_mat = torch.nn.functional.logsigmoid(full_mult_mat) - torch.log(torch.zeros(1)+0.5) #to cancel out effect of zeroes
+        summed_by_column = torch.matmul(torch.ones(x.shape), log_sig_mat)
+        y = (summed_by_column + self.bias)/1000
+        return y
 
 class SoftsignMod(nn.Module):
     def __init__(self):
@@ -77,8 +96,9 @@ class ODENet(nn.Module):
         else: #6 layers
            
             self.net_prods = nn.Sequential()
-            self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
-            self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim, bias = True))
+            #self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
+            #self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim))
+            self.net_prods.add_module('linear_out', LogSigProdLayer(ndim, ndim))
           
             #self.net_sums = nn.Sequential()
             #self.net_sums.add_module('activation_0', SoftsignMod())
@@ -99,7 +119,7 @@ class ODENet(nn.Module):
             if isinstance(n, nn.Linear):
                 #nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
-
+               
         self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
         #print("diag_sums = ", torch.mean(torch.diagonal(self.net_sums.linear_out.weight)))
