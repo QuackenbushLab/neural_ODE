@@ -96,24 +96,23 @@ class ODENet(nn.Module):
         else: #6 layers
            
             self.net_prods = nn.Sequential()
-            #self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
-            #self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim))
-            self.net_prods.add_module('linear_out', LogSigProdLayer(ndim, ndim))
+            self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
+            self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim, bias = True))
+            #self.net_prods.add_module('linear_out', LogSigProdLayer(ndim, ndim))
           
-            #self.net_sums = nn.Sequential()
-            #self.net_sums.add_module('activation_0', SoftsignMod())
-            #self.net_sums.add_module('linear_out', nn.Linear(ndim, ndim, bias = False))
+            self.net_sums = nn.Sequential()
+            self.net_sums.add_module('activation_0', SoftsignMod())
+            self.net_sums.add_module('linear_out', nn.Linear(ndim, ndim, bias = True))
           
-            #self.alpha = nn.Parameter(torch.rand(1,1), requires_grad= True)
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
-            #self.model_weights  = nn.Parameter(torch.zeros(1,ndim), requires_grad= True) 
-            #print("alpha =",torch.mean(torch.sigmoid(self.model_weights)))    
+            self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
+            print("alpha =",torch.mean(torch.sigmoid(self.model_weights)))    
                 
         # Initialize the layers of the model
-        #for n in self.net_sums.modules():
-        #    if isinstance(n, nn.Linear):
-        #        #nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
-        #        nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
+        for n in self.net_sums.modules():
+            if isinstance(n, nn.Linear):
+                #nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
@@ -121,7 +120,7 @@ class ODENet(nn.Module):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
                
         self.net_prods.apply(off_diag_init)
-        #self.net_sums.apply(off_diag_init)
+        self.net_sums.apply(off_diag_init)
         #print("diag_sums = ", torch.mean(torch.diagonal(self.net_sums.linear_out.weight)))
         #print("diag_prods = ", torch.mean(torch.diagonal(self.net_prods.linear_out.weight)))
             
@@ -129,26 +128,25 @@ class ODENet(nn.Module):
       
         #creating masks and register the hooks
         mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
-        #mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
+        mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
         
         self.net_prods.linear_out.weight.register_hook(get_zero_grad_hook(mask_prods))
-        #self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
+        self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
 
         
         self.net_prods.to(device)
         self.gene_multipliers.to(device)
-        #self.model_weights.to(device)
-        #self.net_sums.to(device)
+        self.model_weights.to(device)
+        self.net_sums.to(device)
 
        
         
     def forward(self, t, y):
-        #sums = self.net_sums(y)
-        prods = self.net_prods(y)
-        #prods_part = torch.pow(sums, exponent = 2) - self.net_prods(y) #products are basically squared sums minus sum of squares
-        #alpha = torch.sigmoid(self.model_weights)
-        #joint =  (1-alpha)*prods + alpha*sums
-        final = torch.relu(self.gene_multipliers)*(torch.exp(prods)  - y) 
+        sums = self.net_sums(y)
+        prods = torch.exp(self.net_prods(y))
+        alpha = torch.sigmoid(self.model_weights)
+        joint =  (1-alpha)*prods + alpha*sums
+        final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 
     def save(self, fp):
@@ -160,9 +158,9 @@ class ODENet(nn.Module):
         sum_path = fp[:idx] + '_sums' + fp[idx:]
         model_weight_path = fp[:idx] + '_model_weights' + fp[idx:]
         torch.save(self.net_prods, prod_path)
-        #torch.save(self.net_sums, sum_path)
+        torch.save(self.net_sums, sum_path)
         torch.save(self.gene_multipliers, gene_mult_path)
-        #torch.save(self.model_weights, model_weight_path)
+        torch.save(self.model_weights, model_weight_path)
         
 
     def load_dict(self, fp):
