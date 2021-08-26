@@ -223,7 +223,7 @@ if __name__ == "__main__":
 #       opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
         num_gene = data_handler.dim
         opt = optim.Adam([
-                {'params': odenet.net_sums.linear_out.weight}, #off diagonal elements of net_sums
+                {'params': odenet.net_prods.linear_out.weight}, #off diagonal elements of net_sums
               #  {'params': odenet.net_sums.linear_out.bias},
               #  {'params': odenet.net_prods.linear_out.weight},
               # {'params': odenet.net_prods.linear_out.bias},
