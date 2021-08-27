@@ -22,7 +22,7 @@ class LogSigProdLayer(nn.Module):
         weight_init = torch.nn.functional.dropout(weight_init, p=w_sparsity, inplace= False, training = True) * (1-w_sparsity)
         self.weight = nn.Parameter(weight_init, requires_grad=True)
         self.bias = nn.Parameter(torch.randn(out_channels) + 17, requires_grad=True)  #adding a bias
-        print("Using in-channels to initialize bias terms")
+        #print("Using in-channels to initialize bias terms")
 
     def forward(self, x): 
         eps = 10**-3
