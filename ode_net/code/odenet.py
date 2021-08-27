@@ -48,7 +48,7 @@ class LogShiftedSoftSignMod(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        shifted_input = input -0.5 #need to figure out the shift
+        shifted_input =  torch.nn.functional.relu(input) -0.5 #need to figure out the shift
         abs_shifted_input = torch.abs(shifted_input)
         soft_sign_mod = shifted_input/(1+abs_shifted_input)
         return(torch.log1p(soft_sign_mod))  
@@ -97,7 +97,7 @@ class ODENet(nn.Module):
            
             self.net_prods = nn.Sequential()
             self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
-            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons, bias = False))
+            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons, bias = False))
             self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim, bias = True))
             #self.net_prods.add_module('linear_out', LogSigProdLayer(ndim, ndim))
           
