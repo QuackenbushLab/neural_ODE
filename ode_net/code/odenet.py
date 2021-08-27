@@ -13,6 +13,7 @@ def get_zero_grad_hook(mask):
         return grad * mask
     return hook    
 
+
 class LogSigProdLayer(nn.Module):
     def __init__(self, in_channels, out_channels): 
         super(LogSigProdLayer, self).__init__() 
@@ -48,7 +49,7 @@ class LogShiftedSoftSignMod(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        shifted_input =  torch.nn.functional.relu(input) -0.5 #need to figure out the shift
+        shifted_input =  input -0.5 #need to figure out the shift
         abs_shifted_input = torch.abs(shifted_input)
         soft_sign_mod = shifted_input/(1+abs_shifted_input)
         return(torch.log1p(soft_sign_mod))  
@@ -97,14 +98,11 @@ class ODENet(nn.Module):
            
             self.net_prods = nn.Sequential()
             self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
-            self.net_prods.add_module('linear_1', nn.Linear(ndim, neurons, bias = False))
-            self.net_prods.add_module('linear_out', nn.Linear(neurons, ndim, bias = True))
-            #self.net_prods.add_module('linear_out', LogSigProdLayer(ndim, ndim))
-          
+            self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim, bias = True))
+            
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0', SoftsignMod())
-            self.net_sums.add_module('linear_1', nn.Linear(ndim, neurons, bias = False))
-            self.net_sums.add_module('linear_out', nn.Linear(neurons, ndim, bias = True))
+            self.net_sums.add_module('linear_out', nn.Linear(ndim, ndim, bias = True))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
@@ -113,24 +111,22 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                #nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                #nn.init.orthogonal_(n.weight,  gain = nn.init.calculate_gain('sigmoid'))
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
                
-        #self.net_prods.apply(off_diag_init)
-        #self.net_sums.apply(off_diag_init)
+        self.net_prods.apply(off_diag_init)
+        self.net_sums.apply(off_diag_init)
         
       
         #creating masks and register the hooks
-        #mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
-        #mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
+        mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
+        mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
         
-        #self.net_prods.linear_out.weight.register_hook(get_zero_grad_hook(mask_prods))
-        #self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
+        self.net_prods.linear_out.weight.register_hook(get_zero_grad_hook(mask_prods))
+        self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
 
         
         self.net_prods.to(device)
