@@ -76,7 +76,7 @@ def validation(odenet, data_handler, method, explicit_time):
 
         # Calculate validation loss
         loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
-        print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
+        #print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
         #print("diag_sums = ", torch.mean(torch.diagonal(odenet.net_sums.linear_out.weight)))
         #print("diag_prods = ", torch.mean(torch.diagonal(odenet.net_prods.linear_out.weight)))
     return [loss, n_val]
@@ -227,8 +227,9 @@ if __name__ == "__main__":
                 {'params': odenet.net_sums.linear_out.bias},
                 {'params': odenet.net_prods.linear_out.weight},
                 {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.net_alpha_combine.linear_out.weight},
                 {'params': odenet.gene_multipliers, 'weight_decay': 0},
-                {'params': odenet.model_weights, 'lr': 5*settings['init_lr'], 'weight_decay': 0}
+             #   {'params': odenet.model_weights, 'lr': 5*settings['init_lr'], 'weight_decay': 0}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
 

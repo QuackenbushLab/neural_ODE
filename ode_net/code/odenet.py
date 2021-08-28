@@ -98,15 +98,18 @@ class ODENet(nn.Module):
            
             self.net_prods = nn.Sequential()
             self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
-            self.net_prods.add_module('linear_out', nn.Linear(ndim, ndim, bias = True))
+            self.net_prods.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
             
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0', SoftsignMod())
-            self.net_sums.add_module('linear_out', nn.Linear(ndim, ndim, bias = True))
+            self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
+
+            self.net_alpha_combine = nn.Sequential()
+            self.net_alpha_combine.add_module('linear_out', nn.Linear(2*neurons, ndim, bias = False))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
-            self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
-            print("alpha =",torch.mean(torch.sigmoid(self.model_weights)))    
+            #self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
+            #print("alpha =",torch.mean(torch.sigmoid(self.model_weights)))    
                 
         # Initialize the layers of the model
         for n in self.net_sums.modules():
@@ -116,46 +119,54 @@ class ODENet(nn.Module):
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
+
+        for n in self.net_prods.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
                
-        self.net_prods.apply(off_diag_init)
-        self.net_sums.apply(off_diag_init)
+        #self.net_prods.apply(off_diag_init)
+        #self.net_sums.apply(off_diag_init)
         
       
         #creating masks and register the hooks
-        mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
-        mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
+        #mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
+        #mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
         
-        self.net_prods.linear_out.weight.register_hook(get_zero_grad_hook(mask_prods))
-        self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
+        #self.net_prods.linear_out.weight.register_hook(get_zero_grad_hook(mask_prods))
+        #self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
 
         
         self.net_prods.to(device)
         self.gene_multipliers.to(device)
-        self.model_weights.to(device)
+        #self.model_weights.to(device)
         self.net_sums.to(device)
-
+        self.net_alpha_combine.to(device)
        
         
     def forward(self, t, y):
         sums = self.net_sums(y)
         prods = torch.exp(self.net_prods(y))
-        alpha = torch.sigmoid(self.model_weights)
-        joint =  (1-alpha)*prods + alpha*sums
+        sums_prods_concat = torch.cat((sums, prods), dim= - 1)
+        joint = self.net_alpha_combine(sums_prods_concat)
+        #alpha = torch.sigmoid(self.model_weights)
+        #joint =  (1-alpha)*prods + alpha*sums
         final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 
     def save(self, fp):
         ''' Save the model to file '''
         idx = fp.index('.')
-        dict_path = fp[:idx] + '_dict' + fp[idx:]
+        alpha_comb_path = fp[:idx] + '_alpha_comb' + fp[idx:]
         gene_mult_path = fp[:idx] + '_gene_multipliers' + fp[idx:]
+        
         prod_path =  fp[:idx] + '_prods' + fp[idx:]
         sum_path = fp[:idx] + '_sums' + fp[idx:]
-        model_weight_path = fp[:idx] + '_model_weights' + fp[idx:]
+        #model_weight_path = fp[:idx] + '_model_weights' + fp[idx:]
         torch.save(self.net_prods, prod_path)
         torch.save(self.net_sums, sum_path)
+        torch.save(self.net_alpha_combine, alpha_comb_path)
         torch.save(self.gene_multipliers, gene_mult_path)
-        torch.save(self.model_weights, model_weight_path)
+        #torch.save(self.model_weights, model_weight_path)
         
 
     def load_dict(self, fp):
