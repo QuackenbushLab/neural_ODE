@@ -34,6 +34,16 @@ class LogSigProdLayer(nn.Module):
         y = (summed_by_column + self.bias)/1000
         return y
 
+class SoftMaxLinear(nn.Module):
+    def __init__(self, in_channels, out_channels): 
+        super(SoftMaxLinear, self).__init__() 
+        self.weight = nn.Parameter(torch.randn(in_channels, out_channels), requires_grad=True)
+        
+    def forward(self, x): 
+        soft_max_weight = torch.nn.functional.softmax(self.weight, dim = 0)
+        y = torch.matmul(x, soft_max_weight)
+        return y 
+
 class SoftsignMod(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
@@ -53,18 +63,6 @@ class LogShiftedSoftSignMod(nn.Module):
         abs_shifted_input = torch.abs(shifted_input)
         soft_sign_mod = shifted_input/(1+abs_shifted_input)
         return(torch.log1p(soft_sign_mod))  
-
-
-class PseudoSquare(nn.Module):
-    def __init__(self):
-        super().__init__() # init the base class
-        #self.shift = shift
-
-    def forward(self, input):
-        squared = input*input 
-        #squared = torch.relu(1/2 * input) + torch.relu(-1/2 * input) + torch.relu(input - 1/2) + torch.relu(-1*input - 1/2) #approx
-        return(squared)  
-
 
 
 class ODENet(nn.Module):
@@ -98,14 +96,14 @@ class ODENet(nn.Module):
            
             self.net_prods = nn.Sequential()
             self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
-            self.net_prods.add_module('linear_out', nn.Linear(ndim, neurons, bias = False))
+            self.net_prods.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
             
             self.net_sums = nn.Sequential()
             self.net_sums.add_module('activation_0', SoftsignMod())
-            self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = False))
+            self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
-            self.net_alpha_combine.add_module('linear_out', nn.Linear(2*neurons, ndim, bias = False))
+            self.net_alpha_combine.add_module('linear_out', SoftMaxLinear(2*neurons, ndim))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
@@ -120,9 +118,9 @@ class ODENet(nn.Module):
             if isinstance(n, nn.Linear):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
 
-        for n in self.net_alpha_combine.modules():
-            if isinstance(n, nn.Linear):
-                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
+        #for n in self.net_alpha_combine.modules():
+        #    if isinstance(n, nn.Linear) or isinstance(n, SoftMaxLinear):
+        #        nn.init.sparse_(n.weight,  sparsity=0.95, std = 1) 
                
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
