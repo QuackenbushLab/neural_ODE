@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import sys
+
+from torch.nn.init import calculate_gain
 #torch.set_num_threads(36)
 
 def off_diag_init(m):
@@ -37,7 +39,7 @@ class LogSigProdLayer(nn.Module):
 class SoftMaxLinear(nn.Module):
     def __init__(self, in_channels, out_channels): 
         super(SoftMaxLinear, self).__init__() 
-        self.weight = nn.Parameter(torch.randn(in_channels, out_channels), requires_grad=True)
+        self.weight = nn.Parameter(torch.rand(in_channels, out_channels), requires_grad=True)
         
     def forward(self, x): 
         soft_max_weight = torch.nn.functional.softmax(self.weight, dim = 0)
@@ -95,7 +97,7 @@ class ODENet(nn.Module):
         else: #6 layers
            
             self.net_prods = nn.Sequential()
-            self.net_prods.add_module('activation_0', LogShiftedSoftSignMod())
+            self.net_prods.add_module('activation_0',  LogShiftedSoftSignMod()) #
             self.net_prods.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
             
             self.net_sums = nn.Sequential()
@@ -112,11 +114,12 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid")) 
 
         #for n in self.net_alpha_combine.modules():
         #    if isinstance(n, nn.Linear) or isinstance(n, SoftMaxLinear):
@@ -177,15 +180,15 @@ class ODENet(nn.Module):
         gene_mult_path = fp[:idx] + '_gene_multipliers' + fp[idx:]
         prod_path =  fp[:idx] + '_prods' + fp[idx:]
         sum_path = fp[:idx] + '_sums' + fp[idx:]
-        model_weight_path = fp[:idx] + '_model_weights' + fp[idx:]
+        alpha_comb_path = fp[:idx] + '_alpha_comb' + fp[idx:]
         self.net_prods = torch.load(prod_path)
         self.net_sums = torch.load(sum_path)
         self.gene_multipliers = torch.load(gene_mult_path)
-        self.model_weights = torch.load(model_weight_path)
+        self.net_alpha_combine = torch.load(alpha_comb_path)
         self.net_prods.to('cpu')
         self.net_sums.to('cpu')
         self.gene_multipliers.to('cpu')
-        self.model_weights.to('cpu')
+        self.net_alpha_combine.to('cpu')
 
     def load(self, fp):
         ''' General loading from a file '''
