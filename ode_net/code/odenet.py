@@ -39,7 +39,7 @@ class LogSigProdLayer(nn.Module):
 class SoftMaxLinear(nn.Module):
     def __init__(self, in_channels, out_channels): 
         super(SoftMaxLinear, self).__init__() 
-        self.weight = nn.Parameter(torch.rand(in_channels, out_channels), requires_grad=True)
+        self.weight = nn.Parameter(torch.ones(in_channels, out_channels), requires_grad=True)
         
     def forward(self, x): 
         soft_max_weight = torch.nn.functional.softmax(self.weight, dim = 0)
@@ -184,7 +184,7 @@ class ODENet(nn.Module):
         self.net_prods = torch.load(prod_path)
         self.net_sums = torch.load(sum_path)
         self.gene_multipliers = torch.load(gene_mult_path)
-        self.net_alpha_combine = torch.load(alpha_comb_path)
+        #self.net_alpha_combine = torch.load(alpha_comb_path)
         self.net_prods.to('cpu')
         self.net_sums.to('cpu')
         self.gene_multipliers.to('cpu')
