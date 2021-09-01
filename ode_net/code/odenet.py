@@ -184,7 +184,8 @@ class ODENet(nn.Module):
         self.net_prods = torch.load(prod_path)
         self.net_sums = torch.load(sum_path)
         self.gene_multipliers = torch.load(gene_mult_path)
-        #self.net_alpha_combine = torch.load(alpha_comb_path)
+        self.net_alpha_combine = torch.load(alpha_comb_path)
+        
         self.net_prods.to('cpu')
         self.net_sums.to('cpu')
         self.gene_multipliers.to('cpu')
