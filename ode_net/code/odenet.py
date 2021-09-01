@@ -105,7 +105,7 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
-            self.net_alpha_combine.add_module('linear_out', SoftMaxLinear(2*neurons, ndim))
+            self.net_alpha_combine.add_module('linear_out', nn.Linear(2*neurons, ndim, bias = False))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
@@ -114,17 +114,17 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
+                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid")) 
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
 
-        #for n in self.net_alpha_combine.modules():
-        #    if isinstance(n, nn.Linear) or isinstance(n, SoftMaxLinear):
-        #        nn.init.sparse_(n.weight,  sparsity=0.95, std = 1) 
-               
+        for n in self.net_alpha_combine.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
         
