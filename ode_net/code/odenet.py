@@ -39,7 +39,7 @@ class LogSigProdLayer(nn.Module):
 class SoftMaxLinear(nn.Module):
     def __init__(self, in_channels, out_channels): 
         super(SoftMaxLinear, self).__init__() 
-        self.weight = nn.Parameter(torch.randn(in_channels, out_channels), requires_grad=True)
+        self.weight = nn.Parameter(torch.rand(in_channels, out_channels)-0.5, requires_grad=True)
         
     def forward(self, x): 
         soft_max_weight = torch.nn.functional.softmax(self.weight, dim = 0)

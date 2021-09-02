@@ -11,7 +11,7 @@ batch_time,99999
 batch_time_frac,99999
 dec_lr,False
 dec_lr_factor,99999.0
-init_lr,0.0001
+init_lr,0.001
 weight_decay,0.0
 cpu,True
 val_split,0.02
@@ -24,7 +24,7 @@ output_dir,output
 normalize_data,False
 explicit_time,False
 relative_error,False
-pretrained_model,True
+pretrained_model,False
 lr_range_test,False
 scale_expression,1
 log_scale,linear
