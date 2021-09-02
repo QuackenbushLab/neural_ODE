@@ -27,11 +27,11 @@ import matplotlib.pyplot as plt
 
 torch.set_num_threads(4) #CHANGE THIS!
     
-sums_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-1(14;0)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_100epochs/best_val_model_sums.pt')
-prods_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-1(14;0)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_100epochs/best_val_model_prods.pt')
-alpha_comb = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-1(14;0)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_100epochs/best_val_model_alpha_comb.pt')
+sums_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-2(17;37)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_10epochs/best_val_model_sums.pt')
+prods_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-2(17;37)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_10epochs/best_val_model_prods.pt')
+alpha_comb = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-2(17;37)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_10epochs/best_val_model_alpha_comb.pt')
 #alpha = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model_model_weights.pt')
-gene_mult = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-1(14;0)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_100epochs/best_val_model_gene_multipliers.pt')
+gene_mult = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/2021-9-2(17;37)_chalmers_350genes_150samples_earlyT_0bimod_1initvar_10epochs/best_val_model_gene_multipliers.pt')
 
 Wo_sums = np.transpose(sums_model.linear_out.weight.detach().numpy())
 Bo_sums = np.transpose(sums_model.linear_out.bias.detach().numpy())

@@ -119,7 +119,8 @@ class ODENet(nn.Module):
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)    
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
+                torch.nn.init.normal_(n.bias, mean=2, std=1.0)    #try this out
 
         for n in self.net_alpha_combine.modules():
             if isinstance(n, nn.Linear):
