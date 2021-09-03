@@ -33,7 +33,7 @@ class LogSigProdLayer(nn.Module):
         full_mult_mat = torch.matmul(log_diag_x, self.weight)
         log_sig_mat = torch.nn.functional.logsigmoid(full_mult_mat) - torch.log(torch.zeros(1)+0.5) #to cancel out effect of zeroes
         summed_by_column = torch.matmul(torch.ones(x.shape), log_sig_mat)
-        y = (summed_by_column + self.bias)/1000
+        y = (summed_by_column + self.bias)/10000
         return y
 
 class SigmoidLinear(nn.Module):
