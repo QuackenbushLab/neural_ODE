@@ -38,11 +38,11 @@ class LogSigProdLayer(nn.Module):
 
 class SigmoidLinear(nn.Module):
     def __init__(self, in_channels, out_channels): 
-        super(SoftMaxLinear, self).__init__() 
-        self.weight = nn.Parameter(torch.rand(in_channels, out_channels)-0.5, requires_grad=True)
+        super(SigmoidLinear, self).__init__() 
+        self.weight = nn.Parameter(torch.rand(in_channels, out_channels)-2, requires_grad=True)
         
     def forward(self, x): 
-        soft_max_weight = torch.nn.functional.sigmoid(self.weight)
+        soft_max_weight = torch.sigmoid(self.weight)
         y = torch.matmul(x, soft_max_weight)
         return y 
 
@@ -122,9 +122,9 @@ class ODENet(nn.Module):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
                 #torch.nn.init.normal_(n.bias, mean=2, std=1.0)    #try this out
 
-        for n in self.net_alpha_combine.modules():
-            if isinstance(n, nn.Linear) or isinstance(n, SigmoidLinear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+        #for n in self.net_alpha_combine.modules():
+        #    if isinstance(n, nn.Linear) or isinstance(n, SigmoidLinear):
+        #        nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
                 
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
