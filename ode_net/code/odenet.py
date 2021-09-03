@@ -36,13 +36,13 @@ class LogSigProdLayer(nn.Module):
         y = (summed_by_column + self.bias)/1000
         return y
 
-class SoftMaxLinear(nn.Module):
+class SigmoidLinear(nn.Module):
     def __init__(self, in_channels, out_channels): 
         super(SoftMaxLinear, self).__init__() 
         self.weight = nn.Parameter(torch.rand(in_channels, out_channels)-0.5, requires_grad=True)
         
     def forward(self, x): 
-        soft_max_weight = torch.nn.functional.softmax(self.weight, dim = 0)
+        soft_max_weight = torch.nn.functional.sigmoid(self.weight)
         y = torch.matmul(x, soft_max_weight)
         return y 
 
@@ -105,7 +105,7 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
-            self.net_alpha_combine.add_module('linear_out', nn.Linear(2*neurons, ndim, bias = False))
+            self.net_alpha_combine.add_module('linear_out', SigmoidLinear(2*neurons, ndim))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
@@ -120,10 +120,10 @@ class ODENet(nn.Module):
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
-                torch.nn.init.normal_(n.bias, mean=2, std=1.0)    #try this out
+                #torch.nn.init.normal_(n.bias, mean=2, std=1.0)    #try this out
 
         for n in self.net_alpha_combine.modules():
-            if isinstance(n, nn.Linear):
+            if isinstance(n, nn.Linear) or isinstance(n, SigmoidLinear):
                 nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
                 
         #self.net_prods.apply(off_diag_init)
