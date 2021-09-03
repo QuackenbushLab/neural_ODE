@@ -105,7 +105,7 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
-            self.net_alpha_combine.add_module('linear_out', SigmoidLinear(2*neurons, ndim))
+            self.net_alpha_combine.add_module('linear_out', nn.Linear(2*neurons, ndim, bias = False))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
@@ -122,9 +122,9 @@ class ODENet(nn.Module):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
                 #torch.nn.init.normal_(n.bias, mean=2, std=1.0)    #try this out
 
-        #for n in self.net_alpha_combine.modules():
-        #    if isinstance(n, nn.Linear) or isinstance(n, SigmoidLinear):
-        #        nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+        for n in self.net_alpha_combine.modules():
+            if isinstance(n, nn.Linear):
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
                 
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
