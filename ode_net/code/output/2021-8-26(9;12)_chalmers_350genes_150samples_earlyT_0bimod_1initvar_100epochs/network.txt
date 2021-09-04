@@ -9,7 +9,6 @@ ODENet(
   )
 )
 
-
     def forward(self, t, y):
         sums = self.net_sums(y)
         prods = torch.exp(self.net_prods(y))
