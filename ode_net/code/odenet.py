@@ -36,13 +36,13 @@ class LogSigProdLayer(nn.Module):
         y = (summed_by_column + self.bias)/10000
         return y
 
-class SigmoidLinear(nn.Module):
+class SoftMaxLinear(nn.Module):
     def __init__(self, in_channels, out_channels): 
-        super(SigmoidLinear, self).__init__() 
-        self.weight = nn.Parameter(torch.rand(in_channels, out_channels)-2, requires_grad=True)
+        super(SoftMaxLinear, self).__init__() 
+        self.weight = nn.Parameter(torch.rand(in_channels, out_channels), requires_grad=True)
         
     def forward(self, x): 
-        soft_max_weight = torch.sigmoid(self.weight)
+        soft_max_weight = torch.nn.functional.softmax(self.weight, dim = 0)
         y = torch.matmul(x, soft_max_weight)
         return y 
 
@@ -105,7 +105,7 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
-            self.net_alpha_combine.add_module('linear_out', nn.Linear(2*neurons, ndim, bias = False))
+            self.net_alpha_combine.add_module('linear_out',nn.Linear(2*neurons, ndim, bias = True))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
