@@ -27,21 +27,9 @@ torch.set_num_threads(8) #since we are on c5.2xlarge
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target, n_val = data_handler.get_validation_set()
-    #print("validation was called, you sure?")
-    #print(data)
-    #print(data.shape)
+    init_bias_y = data_handler.init_bias_y
+    #odenet.eval()
     with torch.no_grad():
-        if explicit_time:
-            if data_handler.batch_type == 'batch_time':
-                data = torch.cat((data, t[:,0:-1].reshape((t[:,0:-1].shape[0], t[:,0:-1].shape[1], 1))), 2)
-            else:
-                data = torch.cat((data, t[:,0].reshape((t[:,0].shape[0], 1, 1))), 2)
-
-            if data_handler.batch_type == 'batch_time':
-                target = torch.cat((target, t[:,1::].reshape((t[:,1::].shape[0], t[:,1::].shape[1], 1))), 2)
-            else:
-                target = torch.cat((target, t[:,1].reshape((t[:,1].shape[0], 1, 1))), 2)
-        
         predictions = torch.zeros(data.shape).to(data_handler.device)
         # For now we have to loop through manually, their implementation of odenet can only take fixed time lists.
         for index, (time, batch_point) in enumerate(zip(t, data)):
@@ -50,18 +38,23 @@ def validation(odenet, data_handler, method, explicit_time):
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
+        #print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
+        #print("diag_sums = ", torch.mean(torch.diagonal(odenet.net_sums.linear_out.weight)))
+        #print("diag_prods = ", torch.mean(torch.diagonal(odenet.net_prods.linear_out.weight)))
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
     data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
+    init_bias_y = data_handler.init_bias_y
+    #odenet.eval()
     with torch.no_grad():
         predictions = torch.zeros(data.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t, data)):
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
         
         # Calculate true mean loss
-        loss = torch.mean((predictions - target) ** 2)
+        loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
     return loss
 
 
@@ -74,7 +67,7 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name = "chalmers_150genes_15samples_10T_0noise_0pt1initvar"
+clean_name = "chalmers_690genes_150samples_earlyT_0bimod_1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -131,7 +124,7 @@ if __name__ == "__main__":
     #print(data_handler.dim)
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
-    pretrained_model_file = 'output/_pretrained_best_model/best_train_model.pt'
+    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
     odenet.load(pretrained_model_file)
     
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
