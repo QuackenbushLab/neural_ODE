@@ -39,7 +39,7 @@ simseeds = sample.int(1E7, 1000)
 
 #----simulation parameters----
 #simulation parameters
-nsamp = 150 #number of samples
+nsamp = 1 #number of samples
 netSize = 350 #network size of sampled networks
 minTFs = 15 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
@@ -84,6 +84,7 @@ datamat = simu_list$emat
 edgepropmat = get_edge_params(grnSmall@edgeset)
 ode_system_function = getODEFunc_modified(grnSmall)
 
+gene_names <- setdiff(colnames(datamat), c("sample","time"))
 
 cols_to_transpose <- setdiff(names(datamat),c("sample","time"))
 time_cols <- paste("time",time_stamps,sep = "_")
@@ -115,6 +116,11 @@ write.csv(edgepropmat,
 write.csv(ode_system_function, 
           "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/ode_system_functions.csv", 
           row.names = F)
+
+write.csv(gene_names, 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/gene_names.csv", 
+          row.names = F)
+
 
 
 
