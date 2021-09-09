@@ -25,8 +25,8 @@ def _convert_arguments(settings):
     converted_settings['batch_time'] = 99999
     converted_settings['batch_time_frac'] = 99999
 
-    converted_settings['dec_lr'] = settings.getboolean('dec_lr')
-    converted_settings['dec_lr_factor'] = settings.getfloat('dec_lr_factor')
+    converted_settings['dec_lr'] = False
+    converted_settings['dec_lr_factor'] = 999.00
     converted_settings['init_lr'] = settings.getfloat('init_lr')
     converted_settings['weight_decay'] = settings.getfloat('weight_decay')
 
