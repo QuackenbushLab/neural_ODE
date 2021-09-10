@@ -23,4 +23,5 @@ ODENet(
         final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 
-SHIFT = -0.5
+
+shift = 0
