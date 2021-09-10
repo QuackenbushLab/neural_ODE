@@ -63,19 +63,32 @@ def regulated_loss(predictions, target, time, val = False):
 '''
 
 def validation(odenet, data_handler, method, explicit_time):
-    data, t, target, n_val = data_handler.get_validation_set()
+    data, t, target_full, n_val = data_handler.get_validation_set()
+
     init_bias_y = data_handler.init_bias_y
     #odenet.eval()
     with torch.no_grad():
-        predictions = torch.zeros(data.shape).to(data_handler.device)
+        predictions = []
+        targets = []
         # For now we have to loop through manually, their implementation of odenet can only take fixed time lists.
-        for index, (time, batch_point) in enumerate(zip(t, data)):
+        for index, (time, batch_point, target_point) in enumerate(zip(t, data, target_full)):
+            #IH: 9/10/2021 - added these to handle unequal time availability 
+            #comment these out when not requiring nan-value checking
+            not_nan_idx = [i for i in range(len(time)) if not torch.isnan(time[i])]
+            time = time[not_nan_idx]
+            not_nan_idx.pop()
+            batch_point = batch_point[not_nan_idx]
+            target_point = target_point[not_nan_idx]
             # Do prediction
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] #IH comment
+            predictions.append(odeint(odenet, batch_point, time, method=method)[1])
+            targets.append(target_point) #IH comment
             #predictions[index, :, :] = odeint(odenet, batch_point[0], time, method=method)[1:]
 
         # Calculate validation loss
-        loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t, val = True)
+        predictions = torch.cat(predictions, dim = 0).to(data_handler.device) #IH addition
+        targets = torch.cat(targets, dim = 0).to(data_handler.device) 
+        loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
+        
         #print("alpha =",torch.mean(torch.sigmoid(odenet.model_weights)))
         #print("diag_sums = ", torch.mean(torch.diagonal(odenet.net_sums.linear_out.weight)))
         #print("diag_prods = ", torch.mean(torch.diagonal(odenet.net_prods.linear_out.weight)))
@@ -290,7 +303,8 @@ if __name__ == "__main__":
     epochs_to_fail_to_terminate = 10
     all_lrs_used = []
 
-    #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
+    validation(odenet, data_handler, settings['method'], settings['explicit_time'])
+    #true_loss(odenet, data_handler, settings['method'])
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
