@@ -32,7 +32,8 @@ def readcsv(fp, device, noise_to_add, scale_expression, log_scale):
         reader = csv.reader(f, delimiter=',')
         rows = []
         for r in reader:
-            rows.append(r)
+            with_NA_strings = [float(string) if string != "" else float("NaN") for string in r]
+            rows.append(with_NA_strings)
         dim = int(rows[0][0])
         ntraj = int(rows[0][1])
         data = rows[1:]

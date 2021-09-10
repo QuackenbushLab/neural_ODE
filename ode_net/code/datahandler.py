@@ -138,6 +138,14 @@ class DataHandler:
             t.append(torch.tensor([self.time_pt[indx][i], self.time_pt[indx][i+1]]))
         t = torch.stack(t)
         target = self.data_pt[indx][1::].to(self.device)
+
+        #IH: 9/10/2021 - added these to handle unequal time availability 
+        not_nan_idx = [i for i in range(len(t)) if not torch.isnan(t[i]).any().item()]
+        batch = batch[not_nan_idx]
+        t = t[not_nan_idx]
+        target = t[not_nan_idx]
+
+
         return batch, t, target
 
     def _get_batch_time(self, batch_size):
@@ -257,7 +265,7 @@ class DataHandler:
         return times
 
     def calculate_trajectory(self, odenet, method, num_val_trajs):
-        extrap_time_points = np.array(range(1,100)).astype(float)
+        extrap_time_points = np.array(range(1,30)).astype(float)
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
@@ -312,9 +320,9 @@ class DataHandler:
                 self.val_data.append(self.data_pt[i][0:-1]) 
                 self.val_target.append(self.data_pt[i][1::])
                 self.val_t.append(self.time_pt[i])
-            self.val_data = torch.stack(self.val_data).to(self.device) #IH addition
-            self.val_target = torch.stack(self.val_target).to(self.device) #IH addition
-            self.val_t = torch.stack(self.val_t).to(self.device) #IH addition
+            self.val_data = torch.stack(self.val_data, dim = 0).to(self.device) #IH addition
+            self.val_target = torch.stack(self.val_target, dim = 0).to(self.device) #IH addition
+            self.val_t = torch.stack(self.val_t, dim = 0).to(self.device) #IH addition
 
     def _create_validation_set_time(self):
         ''' Create the validation set '''
