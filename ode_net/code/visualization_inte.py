@@ -49,7 +49,7 @@ class Visualizator1D(Visualizator):
                 self.sample_plot_val_cutoff = self.data_handler.n_val
 
         self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
-        self.genes_to_viz[0:9] = [47,6,2,0,39,27,55,48,66,68]
+        #self.genes_to_viz[0:9] = [47,6,2,0,39,27,55,48,66,68]
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
@@ -78,7 +78,7 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
-        self.time_span = (0.0, 30.0)
+        self.time_span = (0.0, 100.0)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -96,8 +96,8 @@ class Visualizator1D(Visualizator):
             upper_lim = 1.3
             lower_lim = 0.4
         else: #i.e. linear 
-            upper_lim = 8 #1.2
-            lower_lim = -8 #-0.2
+            upper_lim = 3 #1.2
+            lower_lim = -3 #-0.2
 
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
