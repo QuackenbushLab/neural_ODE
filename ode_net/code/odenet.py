@@ -108,18 +108,17 @@ class ODENet(nn.Module):
             self.net_alpha_combine.add_module('linear_out',nn.Linear(2*neurons, ndim, bias = False))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
-            #self.model_weights  = nn.Parameter(torch.zeros(1,ndim)-3, requires_grad= True) 
-            #print("alpha =",torch.mean(torch.sigmoid(self.model_weights)))    
+            #self.minus_effect_factor = nn.Parameter(torch.zeros(1)+3, requires_grad= False) 
                 
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
                 #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                nn.init.sparse_(n.weight,  sparsity=0.98, std = 1)   #0.05  
+                nn.init.sparse_(n.weight,  sparsity=0.98, std = 0.05)   #0.05  
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                nn.init.sparse_(n.weight,  sparsity=0.98, std = 1) #0.05
+                nn.init.sparse_(n.weight,  sparsity=0.98, std = 0.05) #0.05
                 #torch.nn.init.normal_(n.bias, mean=2, std=1.0)    #try this out
 
         for n in self.net_alpha_combine.modules():
@@ -143,6 +142,7 @@ class ODENet(nn.Module):
         #self.model_weights.to(device)
         self.net_sums.to(device)
         self.net_alpha_combine.to(device)
+        #self.minus_effect_factor.to(device)
        
         
     def forward(self, t, y):
@@ -152,7 +152,8 @@ class ODENet(nn.Module):
         joint = self.net_alpha_combine(sums_prods_concat)
         #alpha = torch.sigmoid(self.model_weights)
         #joint =  (1-alpha)*prods + alpha*sums
-        final = torch.relu(self.gene_multipliers)*(joint  - y) 
+        final = torch.relu(self.gene_multipliers)*(joint - y ) #joint  - y 
+        #final = torch.relu(self.gene_multipliers)*(joint - y ) #joint  - y 
         return(final) 
 
     def save(self, fp):
