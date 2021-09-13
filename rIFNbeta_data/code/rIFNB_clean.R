@@ -1,5 +1,6 @@
 library(data.table)
 library(zoo)
+library(ggplot2)
 
 my_LOCF <- function(vec){
   new_vec <- na.locf(vec, na.rm = FALSE) #LOCF
@@ -65,6 +66,11 @@ full_data_melt <- merge(full_data_melt, time_fake_gene,
 
 full_data_melt[, avail_time := paste("avail",1:.N, sep = "_"), 
                by = .(pid, response_status, gene)]
+
+ggplot(full_data_melt[gene %in% c("BAX","CASPASE_1", "TYK2","STAT6")], 
+       aes(x = time, y = log_med_exp)) + 
+  geom_line(aes(group = pid, col = pid)) + 
+  facet_grid(gene~ response_status)
 
 datamat <- dcast(full_data_melt,
                                pid + response_status + gene ~ avail_time,
