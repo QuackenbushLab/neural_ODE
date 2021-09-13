@@ -52,20 +52,19 @@ full_data_melt[,
 
 full_data_melt[, log_med_exp := log(expression_LOCF) - 
                  median(log(expression_LOCF), na.rm = T)]
+
+
+
 full_data_melt[log_med_exp <= -8, log_med_exp := -8] #truncate small values
 full_data_melt[is.na(log_med_exp)]
 
 # let's to perc_change stuff
 full_data_melt[,time := time - time[1], by = pid]
 
-full_data_melt[,log_exp_LOCF_perc_change := 
-                 (log_med_exp - log_med_exp[1]),
-               by = .(pid, response_status, gene)]
 
 
 
 hist(full_data_melt$log_med_exp)
-hist(full_data_melt$log_exp_LOCF_perc_change)
 
 
 
@@ -82,7 +81,7 @@ full_data_melt[, avail_time := paste("avail",1:.N, sep = "_"),
                by = .(pid, response_status, gene)]
 
 ggplot(full_data_melt[gene %in% c("BAX","CASPASE_1", "TYK2","STAT6")], 
-       aes(x = time, y = log_exp_LOCF_perc_change)) + 
+       aes(x = time, y = log_med_exp)) + 
   geom_line(aes(group = pid, col = pid)) + 
   facet_grid(gene~ response_status)
 

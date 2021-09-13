@@ -74,7 +74,7 @@ ggplot(full_data_melt[gene %in% c("BAX","CASPASE_1", "TYK2","STAT6")],
 
 datamat <- dcast(full_data_melt,
                                pid + response_status + gene ~ avail_time,
-                               value.var = "log_med_exp")
+                               valu2e.var = "log_med_exp")
 
 #datamat <- datamat[, .SD[1:(.N+1)], 
 #                   by=.(embryo, cell)][is.na(gene), 
@@ -83,14 +83,32 @@ datamat <- dcast(full_data_melt,
 num_time <- 7
 num_genes <- length(unique(datamat$gene)) - 1
 num_traj <- length(unique(datamat$pid))
+num_traj_good <- datamat[response_status == "good", length(unique(pid))]
+num_traj_bad <- datamat[response_status == "bad", length(unique(pid))]
+
+
+datamat_good <- datamat[response_status == "good"]
+datamat_bad <- datamat[response_status == "bad"]
 
 datamat[,c("pid","response_status","gene") := NULL]
-
 top_row <- as.list(rep(NA, num_time))
 top_row[[1]] <- num_genes
 top_row[[2]] <- num_traj
-
 datamat <- rbind(top_row, datamat)
+
+datamat_good[,c("pid","response_status","gene") := NULL]
+top_row <- as.list(rep(NA, num_time))
+top_row[[1]] <- num_genes
+top_row[[2]] <- num_traj_good
+datamat_good <- rbind(top_row, datamat_good)
+
+datamat_bad[,c("pid","response_status","gene") := NULL]
+top_row <- as.list(rep(NA, num_time))
+top_row[[1]] <- num_genes
+top_row[[2]] <- num_traj_bad
+datamat_bad <- rbind(top_row, datamat_bad)
+
+
 
 write.csv(patient_conditions,
           "C:/STUDIES/RESEARCH/neural_ODE/rIFNbeta_data/clean_data/patient_conditions.csv",
@@ -102,3 +120,18 @@ write.table( datamat,
              row.names = FALSE,
              col.names = FALSE,
              na = "")
+
+write.table( datamat_good,
+             "C:/STUDIES/RESEARCH/neural_ODE/rIFNbeta_data/clean_data/rIFNbeta_70genes_33samples_good.csv", 
+             sep=",",
+             row.names = FALSE,
+             col.names = FALSE,
+             na = "")
+
+write.table( datamat_bad,
+             "C:/STUDIES/RESEARCH/neural_ODE/rIFNbeta_data/clean_data/rIFNbeta_70genes_20samples_bad.csv", 
+             sep=",",
+             row.names = FALSE,
+             col.names = FALSE,
+             na = "")
+
