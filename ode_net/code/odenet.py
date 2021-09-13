@@ -108,7 +108,7 @@ class ODENet(nn.Module):
             self.net_alpha_combine.add_module('linear_out',nn.Linear(2*neurons, ndim, bias = False))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
-            self.minus_effect_factor = nn.Parameter(torch.zeros(1)+3, requires_grad= False) 
+            #self.minus_effect_factor = nn.Parameter(torch.zeros(1)+3, requires_grad= False) 
                 
         # Initialize the layers of the model
         for n in self.net_sums.modules():
@@ -142,7 +142,7 @@ class ODENet(nn.Module):
         #self.model_weights.to(device)
         self.net_sums.to(device)
         self.net_alpha_combine.to(device)
-        self.minus_effect_factor.to(device)
+        #self.minus_effect_factor.to(device)
        
         
     def forward(self, t, y):

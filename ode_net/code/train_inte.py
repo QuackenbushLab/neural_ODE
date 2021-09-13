@@ -89,7 +89,7 @@ def validation(odenet, data_handler, method, explicit_time):
         targets = torch.cat(targets, dim = 0).to(data_handler.device) 
         loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
         
-        print("minus_term_factor =", torch.sigmoid(odenet.minus_effect_factor))
+        #print("minus_term_factor =", torch.sigmoid(odenet.minus_effect_factor))
         
     return [loss, n_val]
 
