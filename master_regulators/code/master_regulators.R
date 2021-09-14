@@ -1,7 +1,11 @@
 library(data.table)
-library(ggplot2)
+#library(ggplot2)
 
-chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators/model_to_test"
+run_sims = T
+
+chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/model_to_test"
+write_directory <- "/home/ubuntu/neural_ODE/master_regulators/score_outputs/scores_to_score.csv"
+
 
 wo_prods <- fread(paste(chief_directory,"wo_prods.csv", sep = "/"))
 bo_prods <- fread(paste(chief_directory,"bo_prods.csv", sep = "/"))
@@ -42,36 +46,48 @@ my_neural_ode <- function(t, y, parms = NULL,...){
 
   
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 1
+num_iter <- 10
 pert_level <- 0.50
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
 
-
-for (iter in 1:num_iter){
-  baseline_init_val <- runif(num_genes, min = 0, max = 1)
-  names(baseline_init_val) <- genes_in_dataset
-  unpert_soln <- deSolve::ode(y = baseline_init_val, 
-                              times = times_to_project, 
-                       func = my_neural_ode)
-  
-  for (gene_counter in 1:num_genes){
-    gene <- genes_in_dataset[gene_counter]
-    print(paste("gene",gene_counter, "in iter", iter))
-    pert_init_cond <- copy(baseline_init_val)
-    pert_init_cond[gene] <- ifelse(runif(1) > 0.5, 
-                                   pert_init_cond[gene] * (1 + pert_level),
-                                   pert_init_cond[gene] * (1 - pert_level))
-    this_genes_pert_soln <- deSolve::ode(y = pert_init_cond, 
-                                         times = times_to_project, 
-                                         func = my_neural_ode)
+if (run_sims == T){
+  for (iter in 1:num_iter){
+    baseline_init_val <- runif(num_genes, min = 0, max = 1)
+    names(baseline_init_val) <- genes_in_dataset
+    unpert_soln <- deSolve::ode(y = baseline_init_val, 
+                                times = times_to_project, 
+                        func = my_neural_ode)
+    
+    for (gene_counter in 1:num_genes){
+      gene <- genes_in_dataset[gene_counter]
+      print(paste("gene",gene_counter, "in iter", iter))
+      pert_init_cond <- copy(baseline_init_val)
+      pert_init_cond[gene] <- ifelse(runif(1) > 0.5, 
+                                    pert_init_cond[gene] * (1 + pert_level),
+                                    pert_init_cond[gene] * (1 - pert_level))
+      this_genes_pert_soln <- deSolve::ode(y = pert_init_cond, 
+                                          times = times_to_project, 
+                                          func = my_neural_ode)
+      
+      
+      this_gene_score <- mean(abs(this_genes_pert_soln[,genes_in_dataset] - 
+                                    unpert_soln[,genes_in_dataset]))
+      score_matrix[gene, iter] <- this_gene_score
+    }
     
     
-    this_gene_score <- mean(abs(this_genes_pert_soln[,genes_in_dataset] - 
-                                  unpert_soln[,genes_in_dataset]))
-    score_matrix[gene, iter] <- this_gene_score
   }
-  
-  
+
+  #score_matrix <- data.table(score_matrix)
+  print("saving results now...")
+  write.csv(score_matrix, write_directory, row.names = T)
+
 }
+
+
+print("top-most influential genes (2 SDs away) are:")
+score_summary <- data.table(gene = genes_in_dataset,pert_score = rowMeans(score_matrix))
+score_sd <- score_summary[, sd(pert_score)]
+print(score_summary[pert_score > 2*score_sd,][order(-pert_score)])
 
