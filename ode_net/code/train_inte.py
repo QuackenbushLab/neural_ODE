@@ -299,7 +299,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 10
+    epochs_to_fail_to_terminate = 20
     all_lrs_used = []
 
     #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
