@@ -67,9 +67,9 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name = "y5_384genes_perturbation_init_vals"
+clean_name = "yeast_perturbation_inits_extreme"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/perturbation_analysis/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ode_net/code/perturbation_analysis/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -79,10 +79,10 @@ if __name__ == "__main__":
     sys.setrecursionlimit(3000)
     print('Loading settings from file {}'.format(args.settings))
     settings = read_arguments_from_file(args.settings)
-    cleaned_file_name = "val_only_"+clean_name
+    cleaned_file_name = "perturb_"+clean_name
     save_file_name = _build_save_file_name(cleaned_file_name, settings['epochs'])
 
-    output_root_dir = '{}/{}/'.format(settings['output_dir'], save_file_name)
+    output_root_dir = '{}/{}/'.format('/home/ubuntu/neural_ODE/ode_net/code/perturbation_analysis/output', save_file_name)
 
     img_save_dir = '{}img/'.format(output_root_dir)
     #intermediate_models_dir = '{}intermediate_models/'.format(output_root_dir)
@@ -142,10 +142,7 @@ if __name__ == "__main__":
             visualizer.plot()
             visualizer.save(img_save_dir, 0)
     
-    val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    #print(val_loss_list)
-    print("Validation loss {:.5E}, using {} points".format(val_loss_list[0], val_loss_list[1]))
-    np.savetxt('{}val_loss.csv'.format(output_root_dir), [val_loss_list[0]], delimiter=',')
+    
     print("DONE!")
 
   
