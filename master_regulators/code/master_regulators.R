@@ -4,8 +4,8 @@ library(matrixStats)
 
 run_sims = F
 
-chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
-#chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
+#chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
+chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
 write_directory <- paste(chief_directory,"score_outputs/scores_to_save_avoid0.csv", sep = "/")
 img_directory <- paste(chief_directory,"plots/inflential_genes_avoid0.png", sep = "/")
 
@@ -36,6 +36,8 @@ true_nums <- merge(true_outgoing, true_incoming,
 true_nums[is.na(true_out), true_out := 0 ]
 true_nums[is.na(true_inc), true_inc := 0 ]
 
+harmonic_cent <- fread(paste(chief_directory,"model_to_test/gene_centralities.csv", sep = "/"))
+
 
 soft_sign_mod <- function(x){
   shift_x <- x - 0.5
@@ -65,7 +67,7 @@ my_neural_ode <- function(t, y, parms = NULL,...){
 
   
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 50
+num_iter <- 100
 pert_level <- 0.50
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
@@ -113,21 +115,30 @@ if (run_sims == T){
 print("")
 print("top-most influential genes (2 SDs away) are:")
 score_summary <- data.table(gene = genes_in_dataset, pert_score = rowMedians(as.matrix(score_matrix)))
+score_summary[,input_gene := grepl("_input",gene)]
+score_summary[, gene_short:= gsub("_input","",gene)]
+score_summary <- merge(score_summary, 
+                       true_nums, 
+                       by.x = "gene_short", 
+                       by.y = "reg")
+score_summary <-merge(score_summary,
+                      harmonic_cent, 
+                      by.x = "gene_short",
+                      by.y = "gene")
+
 score_sd <- score_summary[, sd(pert_score)]
 genes_to_print <- score_summary[pert_score > 2*score_sd,][order(-pert_score), gene]
-print(score_summary[gene %in% genes_to_print,][order(-pert_score), ])
+print(score_summary[gene %in% genes_to_print,
+                    .(gene, pert_score, 
+                      harmonic_cent = out_cent,
+                      out_degree = true_out)][order(-pert_score), ])
 
 print("")
 print("influence breakdown by input gene:")
-score_summary[,input_gene := grepl("_input",gene)]
-score_summary[, gene:= gsub("_input","",gene)]
-score_summary <- merge(score_summary, 
-                       true_nums, 
-                       by.x = "gene", 
-                       by.y = "reg")
 score_summary[,.(mean_score = mean(pert_score),
                  sd_score = sd(pert_score),
-                 cor_pert_true_out =  cor(true_out, pert_score)), 
+                 corr_out_degree =  cor(true_out, pert_score, method = "pearson"),
+                 corr_harmonic_cent = cor(out_cent, pert_score, method = "pearson")), 
               by = input_gene]
 
 print("")
@@ -139,6 +150,10 @@ boxplot_data <- melt(boxplot_data, id.vars = "gene",
                      measure.vars =  paste("V",1:num_iter, sep = ""),
                      variable.name = "sim_iter",
                      value.name = "perturb_score")
+
+#boxplot_data[,perturb_score_norm := 
+#               (perturb_score)/sd(perturb_score),
+#             by = sim_iter]
 
 
 png(filename=img_directory)
