@@ -5,8 +5,8 @@ run_sims = F
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_old.png", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_old_with0.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_old_with0.png", sep = "/")
 
 
 
@@ -64,7 +64,7 @@ my_neural_ode <- function(t, y, parms = NULL,...){
 
   
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 40
+num_iter <- 50
 pert_level <- 0.50
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
