@@ -1,12 +1,13 @@
 library(data.table)
 library(ggplot2)
+library(matrixStats)
 
 run_sims = F
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_old_with0.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_old_with0.png", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_avoid0.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_avoid0.png", sep = "/")
 
 
 
@@ -111,7 +112,7 @@ if (run_sims == T){
 
 print("")
 print("top-most influential genes (2 SDs away) are:")
-score_summary <- data.table(gene = genes_in_dataset,pert_score = rowMeans(score_matrix))
+score_summary <- data.table(gene = genes_in_dataset, pert_score = rowMedians(as.matrix(score_matrix)))
 score_sd <- score_summary[, sd(pert_score)]
 genes_to_print <- score_summary[pert_score > 2*score_sd,][order(-pert_score), gene]
 print(score_summary[gene %in% genes_to_print,][order(-pert_score), ])
