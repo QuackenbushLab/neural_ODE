@@ -1,12 +1,12 @@
 library(data.table)
 library(ggplot2)
 
-run_sims = T
+run_sims = F
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_avoid0.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_avoid0.png", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_old.png", sep = "/")
 
 
 
@@ -64,7 +64,7 @@ my_neural_ode <- function(t, y, parms = NULL,...){
 
   
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 50
+num_iter <- 40
 pert_level <- 0.50
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
@@ -79,7 +79,7 @@ if (run_sims == T){
     
     for (gene_counter in 1:num_genes){
       gene <- genes_in_dataset[gene_counter]
-      print(paste("gene",gene_counter, "in iter", iter))
+      print(paste("gene",gene_counter, "in iter", iter, "of", num_iter))
       pert_init_cond <- copy(baseline_init_val)
       pert_init_cond[gene] <- ifelse(runif(1) > 0.5, 
                                     pert_init_cond[gene] * (1 + pert_level),
