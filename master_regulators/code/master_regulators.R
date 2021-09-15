@@ -1,12 +1,12 @@
 library(data.table)
 library(ggplot2)
 
-run_sims = F
+run_sims = T
 
-#chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
-chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes.png", sep = "/")
+chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
+#chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_avoid0.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_avoid0.png", sep = "/")
 
 
 
@@ -20,6 +20,21 @@ gene_names <- fread(paste(chief_directory,"model_to_test/gene_names.csv", sep = 
 
 num_genes <- dim(wo_prods)[1]
 genes_in_dataset <- gene_names$x
+
+
+true_edges <- fread(paste(chief_directory,"model_to_test/edge_properties.csv", sep = "/"))
+true_edges[activation == T, activation_sym := "activating"]
+true_edges[activation == F, activation_sym := "repressive"]
+setnames(true_edges, 
+         old = c("from","to"),
+         new = c("reg","aff"))
+true_outgoing <- true_edges[, .(true_out = .N), by = reg]
+true_incoming <- true_edges[, .(true_inc = .N), by = aff]
+true_nums <- merge(true_outgoing, true_incoming, 
+                   by.x = "reg", by.y = "aff", all = T)
+true_nums[is.na(true_out), true_out := 0 ]
+true_nums[is.na(true_inc), true_inc := 0 ]
+
 
 soft_sign_mod <- function(x){
   shift_x <- x - 0.5
@@ -49,7 +64,7 @@ my_neural_ode <- function(t, y, parms = NULL,...){
 
   
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 10
+num_iter <- 50
 pert_level <- 0.50
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
@@ -74,8 +89,9 @@ if (run_sims == T){
                                           func = my_neural_ode)
       
       
-      this_gene_score <- 10^4 * mean(abs(this_genes_pert_soln[,genes_in_dataset] - 
-                                    unpert_soln[,genes_in_dataset]))
+      this_gene_score <- 10^4 * mean(abs(this_genes_pert_soln[-1,genes_in_dataset] - 
+                                    unpert_soln[-1,genes_in_dataset])) 
+                                    #don't consider artifically perturbed init values (t = 0)!
       score_matrix[gene, iter] <- this_gene_score
     }
     
@@ -103,10 +119,15 @@ print(score_summary[gene %in% genes_to_print,][order(-pert_score), ])
 print("")
 print("influence breakdown by input gene:")
 score_summary[,input_gene := grepl("_input",gene)]
+score_summary[, gene:= gsub("_input","",gene)]
+score_summary <- merge(score_summary, 
+                       true_nums, 
+                       by.x = "gene", 
+                       by.y = "reg")
 score_summary[,.(mean_score = mean(pert_score),
-                 sd_score = sd(pert_score)), 
+                 sd_score = sd(pert_score),
+                 cor_pert_true_out =  cor(true_out, pert_score)), 
               by = input_gene]
-
 
 print("")
 print("Making influence plots")
