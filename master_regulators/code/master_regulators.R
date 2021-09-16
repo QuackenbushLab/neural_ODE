@@ -2,13 +2,13 @@ library(data.table)
 library(ggplot2)
 library(matrixStats)
 
-run_sims = T
+run_sims = F
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_nonself1.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_nonself1.png", sep = "/")
-img_directory_2 <- paste(chief_directory,"plots/central_metrics_nonself1.png", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_nonself4.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_nonself4.png", sep = "/")
+img_directory_2 <- paste(chief_directory,"plots/central_metrics_nonself4.png", sep = "/")
 
 
 times_to_project <- seq(0,10, by = 2)  
@@ -77,7 +77,7 @@ colnames(score_matrix) <- paste("V",1:num_iter, sep = "")
 if (run_sims == T){
   print("Running perturbations...")
   for (iter in 1:num_iter){
-    baseline_init_val <- runif(num_genes, min = 0.35, max = 0.65)
+    baseline_init_val <- runif(num_genes, min = 0.1, max = 0.9)
     names(baseline_init_val) <- genes_in_dataset
     unpert_soln <- deSolve::ode(y = baseline_init_val, 
                                 times = times_to_project, 
