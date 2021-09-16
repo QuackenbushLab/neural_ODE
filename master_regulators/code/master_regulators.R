@@ -6,11 +6,13 @@ run_sims = T
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_norm_score.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_norm_score.png", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_nonself1.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_nonself1.png", sep = "/")
+img_directory_2 <- paste(chief_directory,"plots/central_metrics_nonself1.png", sep = "/")
+
 
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 5
+num_iter <- 25
 pert_level <- 0.50
 
 wo_prods <- fread(paste(chief_directory,"model_to_test/wo_prods.csv", sep = "/"))
@@ -70,11 +72,12 @@ my_neural_ode <- function(t, y, parms = NULL,...){
   
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
+colnames(score_matrix) <- paste("V",1:num_iter, sep = "")
 
 if (run_sims == T){
   print("Running perturbations...")
   for (iter in 1:num_iter){
-    baseline_init_val <- runif(num_genes, min = 0, max = 1)
+    baseline_init_val <- runif(num_genes, min = 0.35, max = 0.65)
     names(baseline_init_val) <- genes_in_dataset
     unpert_soln <- deSolve::ode(y = baseline_init_val, 
                                 times = times_to_project, 
@@ -92,11 +95,11 @@ if (run_sims == T){
                                           times = times_to_project, 
                                           func = my_neural_ode)
       
-      
-      this_gene_score <- 10^4 * mean(abs(this_genes_pert_soln[-1,genes_in_dataset] - 
-                                    unpert_soln[-1,genes_in_dataset]))
+      genes_to_consider <- setdiff(genes_in_dataset, gene) #ignore the perturbed gene itself
+      this_gene_score <- 10^4 * mean(abs(this_genes_pert_soln[-1,genes_to_consider] - 
+                                    unpert_soln[-1,genes_to_consider]))
                                     #don't consider artifically perturbed init values (t = 0)!
-      score_matrix[gene, iter] <- this_gene_score/this_gene_curr_val  #normalize by gene unperturbed val 
+      score_matrix[gene, iter] <- this_gene_score 
     }
     
     
@@ -127,19 +130,25 @@ score_summary <-merge(score_summary,
                       by.x = "gene_short",
                       by.y = "gene")
 
+setnames(score_summary, old = c("out_cent","true_out"),
+                new = c("harmonic_cent", "out_degree"))
+score_summary$out_degree <- as.numeric(score_summary$out_degree)
+
 score_sd <- score_summary[, sd(pert_score)]
 genes_to_print <- score_summary[pert_score > 2*score_sd,][order(-pert_score), gene]
 print(score_summary[gene %in% genes_to_print,
                     .(gene, pert_score, 
-                      harmonic_cent = out_cent,
-                      out_degree = true_out)][order(-pert_score), ])
+                      harmonic_cent,
+                      out_degree,
+                      ivi_cent)][order(-pert_score), ])
 
 print("")
 print("influence breakdown by input gene:")
 score_summary[,.(mean_score = mean(pert_score),
                  sd_score = sd(pert_score),
-                 corr_out_degree =  cor(true_out, pert_score, method = "pearson"),
-                 corr_harmonic_cent = cor(out_cent, pert_score, method = "pearson")), 
+                 corr_out_degree =  cor(out_degree, pert_score, method = "pearson"),
+                 corr_harmonic_cent = cor(harmonic_cent, pert_score, method = "pearson"),
+                 corr_ivi_cent = cor(ivi_cent, pert_score, method = "pearson")), 
               by = input_gene]
 
 print("")
@@ -167,4 +176,19 @@ ggplot(boxplot_data, aes(x = factor(gene,
   xlab("most influential genes")
 dev.off()
   
-  
+
+scatterplot_data <- melt(score_summary, 
+                          id.vars = c("gene","input_gene","pert_score"),
+                          measure.vars = c("harmonic_cent","out_degree","ivi_cent"),
+                          variable.name = "true_metric", value.name = "true_metric_val")
+
+png(filename=img_directory_2)
+ggplot(scatterplot_data, aes(y = pert_score, x = true_metric_val)) + 
+  geom_point(col = "red") +
+  theme_bw() + 
+  facet_grid(input_gene~true_metric,  scales = "free") 
+dev.off()
+
+print("")
+print("DONE!")
+
