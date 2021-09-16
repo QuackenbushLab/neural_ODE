@@ -6,13 +6,13 @@ run_sims = F
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_nonself4.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_nonself4.png", sep = "/")
-img_directory_2 <- paste(chief_directory,"plots/central_metrics_nonself4.png", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_nonself.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_nonself.png", sep = "/")
+img_directory_2 <- paste(chief_directory,"plots/central_metrics_nonself.png", sep = "/")
 
 
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 25
+num_iter <- 100
 pert_level <- 0.50
 
 wo_prods <- fread(paste(chief_directory,"model_to_test/wo_prods.csv", sep = "/"))
@@ -152,7 +152,7 @@ score_summary[,.(mean_score = mean(pert_score),
               by = input_gene]
 
 print("")
-print("Making influence plots")
+print(paste("Making influence plots using all", num_iter, "iterations"))
 boxplot_data <- score_matrix[genes_to_print,]
 boxplot_data$gene <- row.names(boxplot_data)
 boxplot_data <- data.table(boxplot_data)
