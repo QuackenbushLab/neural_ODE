@@ -2,6 +2,7 @@ library(data.table)
 library(ggplot2)
 library(igraph)
 library(CINNA)
+library(influential)
 
 
 #chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
@@ -25,13 +26,21 @@ h_cent_in_out <- harmonic_centrality(G_true,
                                   mode = "all",
                                   weights = NULL)
 
+ivi_cent <- ivi(graph = G_true, 
+                       weights = NULL, 
+                        directed = TRUE, 
+                       mode = "out", d = 3)
+
 
 all(names(h_cent_in_out) == names(h_cent_out))
+all(names(h_cent_in_out) == names(ivi_cent))
+
 
 
 D_cent <- data.table(gene = names(h_cent_in_out), 
                      out_cent = h_cent_out,
-                     out_in_cent = h_cent_in_out)
+                     out_in_cent = h_cent_in_out,
+                     ivi_cent = ivi_cent)
 
 write.csv(D_cent, 
           "C:/STUDIES/RESEARCH/neural_ODE/master_regulators/model_to_test/gene_centralities.csv",
