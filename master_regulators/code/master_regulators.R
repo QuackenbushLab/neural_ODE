@@ -2,14 +2,16 @@ library(data.table)
 library(ggplot2)
 library(matrixStats)
 
-run_sims = F
+run_sims = T
 
-#chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
-chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_avoid0.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_avoid0.png", sep = "/")
+chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
+#chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_norm_score.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_norm_score.png", sep = "/")
 
-
+times_to_project <- seq(0,10, by = 2)  
+num_iter <- 5
+pert_level <- 0.50
 
 wo_prods <- fread(paste(chief_directory,"model_to_test/wo_prods.csv", sep = "/"))
 bo_prods <- fread(paste(chief_directory,"model_to_test/bo_prods.csv", sep = "/"))
@@ -66,13 +68,11 @@ my_neural_ode <- function(t, y, parms = NULL,...){
 }
 
   
-times_to_project <- seq(0,10, by = 2)  
-num_iter <- 100
-pert_level <- 0.50
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
 
 if (run_sims == T){
+  print("Running perturbations...")
   for (iter in 1:num_iter){
     baseline_init_val <- runif(num_genes, min = 0, max = 1)
     names(baseline_init_val) <- genes_in_dataset
@@ -84,18 +84,19 @@ if (run_sims == T){
       gene <- genes_in_dataset[gene_counter]
       print(paste("gene",gene_counter, "in iter", iter, "of", num_iter))
       pert_init_cond <- copy(baseline_init_val)
+      this_gene_curr_val <- pert_init_cond[gene]
       pert_init_cond[gene] <- ifelse(runif(1) > 0.5, 
-                                    pert_init_cond[gene] * (1 + pert_level),
-                                    pert_init_cond[gene] * (1 - pert_level))
+                                    this_gene_curr_val * (1 + pert_level), #perturb up
+                                    this_gene_curr_val * (1 - pert_level)) #perturb down
       this_genes_pert_soln <- deSolve::ode(y = pert_init_cond, 
                                           times = times_to_project, 
                                           func = my_neural_ode)
       
       
       this_gene_score <- 10^4 * mean(abs(this_genes_pert_soln[-1,genes_in_dataset] - 
-                                    unpert_soln[-1,genes_in_dataset])) 
+                                    unpert_soln[-1,genes_in_dataset]))
                                     #don't consider artifically perturbed init values (t = 0)!
-      score_matrix[gene, iter] <- this_gene_score
+      score_matrix[gene, iter] <- this_gene_score/this_gene_curr_val  #normalize by gene unperturbed val 
     }
     
     
