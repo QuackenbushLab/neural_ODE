@@ -3,17 +3,17 @@ library(ggplot2)
 library(matrixStats)
 #library(ggpubr)
 
-run_sims = T
+run_sims = F
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_destination1.csv", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_destination.csv", sep = "/")
 img_directory <- paste(chief_directory,"plots/inflential_genes_destination.png", sep = "/")
 img_directory_2 <- paste(chief_directory,"plots/central_metrics_destination.png", sep = "/")
 
 
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 15
+num_iter <- 60
 pert_level <- 0.50
 
 wo_prods <- fread(paste(chief_directory,"model_to_test/wo_prods.csv", sep = "/"))
@@ -101,9 +101,9 @@ if (run_sims == T){
       genes_to_consider <- setdiff(genes_in_dataset, gene) #ignore the perturbed gene itself
       delta_mat <- abs(this_genes_pert_soln[-1,genes_to_consider] - 
                                     unpert_soln[-1,genes_to_consider])
-      #print(delta_mat)
       times_considered <- c(2,4,6,8,10)
-      weights_considered <- (1/times_considered)^2
+      #weights_considered <- (1*times_considered)^2
+      weights_considered <- rep(1, length(times_considered))
       this_gene_score <- 10^4 * mean(diag(weights_considered) %*% delta_mat)
                                     #don't consider artifically perturbed init values (t = 0)!
       #print(this_gene_score)
