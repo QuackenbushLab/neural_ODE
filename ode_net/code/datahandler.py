@@ -37,7 +37,7 @@ class DataHandler:
         self.epoch_done = False
         self.img_save_dir = img_save_dir
         self.init_bias_y = init_bias_y
-        self.num_trajs_to_plot = 1
+        self.num_trajs_to_plot = 7
         #self.noise = noise
 
         self._calc_datasize()
@@ -275,7 +275,7 @@ class DataHandler:
         return times
 
     def calculate_trajectory(self, odenet, method, num_val_trajs):
-        extrap_time_points = np.array(range(1,100)).astype(float)
+        extrap_time_points = np.array(range(0,11)).astype(float)
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
