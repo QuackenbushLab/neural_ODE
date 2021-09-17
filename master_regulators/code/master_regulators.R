@@ -41,6 +41,8 @@ true_nums[is.na(true_out), true_out := 0 ]
 true_nums[is.na(true_inc), true_inc := 0 ]
 
 harmonic_cent <- fread(paste(chief_directory,"model_to_test/gene_centralities.csv", sep = "/"))
+true_influence <- fread(paste(chief_directory,"model_to_test/true_influences.csv", sep = "/"))
+
 
 
 soft_sign_mod <- function(x){
@@ -130,8 +132,14 @@ score_summary <-merge(score_summary,
                       by.x = "gene_short",
                       by.y = "gene")
 
-setnames(score_summary, old = c("out_cent","true_out"),
-                new = c("harmonic_cent", "out_degree"))
+ score_summary <-merge(score_summary,
+                      true_influences, 
+                      by.x = "gene_short",
+                      by.y = "gene")                     
+
+
+setnames(score_summary, old = c("out_cent","true_out","true_pert_median"),
+                new = c("true_harmonic_cent", "true_out_degree", "true_influence"))
 score_summary$out_degree <- as.numeric(score_summary$out_degree)
 
 score_sd <- score_summary[, sd(pert_score)]
@@ -140,15 +148,17 @@ print(score_summary[gene %in% genes_to_print,
                     .(gene, pert_score, 
                       harmonic_cent,
                       out_degree,
-                      ivi_cent)][order(-pert_score), ])
+                      ivi_cent,
+                      true_influence)][order(-pert_score), ])
 
 print("")
 print("influence breakdown by input gene:")
 score_summary[,.(mean_score = mean(pert_score),
                  sd_score = sd(pert_score),
-                 corr_out_degree =  cor(out_degree, pert_score, method = "pearson"),
-                 corr_harmonic_cent = cor(harmonic_cent, pert_score, method = "pearson"),
-                 corr_ivi_cent = cor(ivi_cent, pert_score, method = "pearson")), 
+                 corr_out_degree =  cor(true_out_degree, pert_score, method = "pearson"),
+                 corr_harmonic_cent = cor(true_harmonic_cent, pert_score, method = "pearson"),
+                 corr_ivi_cent = cor(true_ivi_cent, pert_score, method = "pearson"),
+                 corr_true_influence = cor(true_influence, pert_score, method = "pearson")), 
               by = input_gene]
 
 print("")
@@ -179,7 +189,7 @@ dev.off()
 
 scatterplot_data <- melt(score_summary, 
                           id.vars = c("gene","input_gene","pert_score"),
-                          measure.vars = c("harmonic_cent","out_degree","ivi_cent"),
+                          measure.vars = c("true_harmonic_cent","true_out_degree","true_ivi_cent", "true_influence"),
                           variable.name = "true_metric", value.name = "true_metric_val")
 
 png(filename=img_directory_2)

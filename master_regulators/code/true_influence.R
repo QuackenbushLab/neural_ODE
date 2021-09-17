@@ -5,7 +5,7 @@ library(matrixStats)
 source("/home/ubuntu/neural_ODE/master_regulators/code/my_true_ode.R")
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
-write_directory <- paste(chief_directory,"model_to_test/true_influences.csv", sep = "/")
+write_directory <- paste(chief_directory,"model_to_test/true_influences_all_vals.csv", sep = "/")
 
 runSim = FALSE
 times_to_project <- seq(0,10, by = 2)  
@@ -84,8 +84,12 @@ if (runSim ==T){
 
 #score_matrix <- data.table(score_matrix)
 
-score_summary <- data.table(gene = genes_in_dataset, pert_score = rowMedians(as.matrix(score_matrix)))
-print(score_summary[order(-pert_score), ][1:10])
+score_summary <- data.table(gene = genes_in_dataset, 
+                            true_pert_median = rowMedians(as.matrix(score_matrix[,-1]), na.rm = T),
+                            true_pert_mean = rowMeans(as.matrix(score_matrix[,-1]), na.rm = T))
 
+print(score_summary[order(-true_pert_median), ][1:20])
+#print(score_summary[order(-true_pert_mean), ][1:20])
+write.csv(score_summary, paste(chief_directory,"model_to_test/true_influences.csv", sep = "/"), row.names = F)
 
 
