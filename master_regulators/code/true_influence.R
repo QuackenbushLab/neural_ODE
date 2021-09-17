@@ -5,11 +5,11 @@ library(matrixStats)
 source("/home/ubuntu/neural_ODE/master_regulators/code/my_true_ode.R")
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
-write_directory <- paste(chief_directory,"model_to_test/true_influences.csv", sep = "/")
+write_directory <- paste(chief_directory,"model_to_test/true_influences4.csv", sep = "/")
 
 
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 3
+num_iter <- 15
 pert_level <- 0.50
 
 gene_names <- fread(paste(chief_directory,"model_to_test/gene_names.csv", sep = "/"))
