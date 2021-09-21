@@ -52,8 +52,8 @@ class Visualizator1D(Visualizator):
         #self.genes_to_viz[0:9] = [47,6,2,0,39,27,55,48,66,68]
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
-        #self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
-        self.legend_traj = [Line2D([0], [0], color='blue', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], marker='o', color='grey', label='Observed data', markerfacecolor='red', markersize=5)]
+        self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
+        #self.legend_traj = [Line2D([0], [0], color='blue', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], marker='o', color='grey', label='Observed data', markerfacecolor='red', markersize=5)]
         
         self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=3)
 
@@ -78,9 +78,9 @@ class Visualizator1D(Visualizator):
         self.EXTRA_WIDTH_TRAJ = 0.2
         self.EXTRA_WIDTH_DYN = 1
 
-        #self.time_span = (np.min([np.min(time[:]) for time in times]),
-        #                  np.max([np.max(time[:]) for time in times]))
-        self.time_span = (0.0, 11.0)
+        self.time_span = (np.min([np.min(time[:]) for time in times]),
+                          np.max([np.max(time[:]) for time in times]))
+        #self.time_span = (0.0, 11.0)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -126,13 +126,13 @@ class Visualizator1D(Visualizator):
                 ax.cla()
                 for sample_idx, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, data_np_to_plot, data_np_0noise_to_plot)):
                     if self.data_handler.n_val > 0 and sample_idx < self.sample_plot_val_cutoff:
-                        plot_col = "blue"
+                        plot_col = "red"
                     else:
                         plot_col = "blue"    
                     #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
-                    ax.plot(self.extrap_timepoints , approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1) #  # times[sample_idx].flatten()[0:]
+                    ax.plot(times[sample_idx].flatten()[0:] , approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1) #  #  self.extrap_timepoints
                     ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), 'ko', alpha=0.2)
-                    #ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5) #
+                    ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5) #
                    
                 
                 ax.set_xlabel(r'$t$')
