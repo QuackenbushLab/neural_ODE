@@ -5,8 +5,8 @@ verbose,True
 method,dopri5
 neurons_per_layer,50
 optimizer,adam
-batch_type,trajectory
-batch_size,33333
+batch_type,single
+batch_size,49
 batch_time,99999
 batch_time_frac,99999
 dec_lr,False
@@ -24,7 +24,7 @@ output_dir,output
 normalize_data,False
 explicit_time,False
 relative_error,False
-pretrained_model,False
+pretrained_model,True
 lr_range_test,False
 scale_expression,1.0
 log_scale,linear
