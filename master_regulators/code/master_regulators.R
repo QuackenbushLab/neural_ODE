@@ -138,14 +138,14 @@ score_summary <-merge(score_summary,
                       by.x = "gene_short",
                       by.y = "gene")
 
- score_summary <- merge(score_summary,
+score_summary <- merge(score_summary,
                       true_influences, 
                       by.x = "gene_short",
                       by.y = "gene")                     
 
 
-setnames(score_summary, old = c("out_cent","true_out","true_pert_median", "ivi_cent"),
-                new = c("true_harmonic_cent", "true_out_degree", "true_influence", "true_ivi_cent"))
+setnames(score_summary, old = c("out_cent","true_out","true_pert_median", "ivi_cent", "infer_cent"),
+                new = c("true_harmonic_cent", "true_out_degree", "true_influence", "true_ivi_cent","inferred_harmonic_cent"))
 
 score_summary$true_out_degree <- as.numeric(score_summary$true_out_degree)
 
@@ -154,6 +154,7 @@ genes_to_print <- score_summary[pert_score > 2*score_sd,][order(-pert_score), ge
 print(score_summary[gene %in% genes_to_print,
                     .(gene, pert_score, 
                       true_harmonic_cent,
+                      inferred_harmonic_cent,
                    #   true_out_degree,
                       true_ivi_cent,
                       true_influence)][order(-pert_score), ])
@@ -172,9 +173,14 @@ print("influence breakdown by input gene:")
 score_summary[,.(mean_score = mean(pert_score),
                  sd_score = sd(pert_score),
                 # corr_out_degree =  cor(true_out_degree, pert_score, method = "pearson"),
-                 corr_harmonic_cent = cor(true_harmonic_cent, pert_score, method = "pearson"),
-                 corr_ivi_cent = cor(true_ivi_cent, pert_score, method = "pearson"),
-                 corr_true_influence = cor(true_influence, pert_score, method = "pearson")), 
+                # corr_harmonic_cent = cor(true_harmonic_cent, pert_score, method = "pearson"),
+                corr_infharmcent_and_truinf = cor(inferred_harmonic_cent, true_influence, method = "pearson"),
+                #corr_ivi_cent = cor(true_ivi_cent, pert_score, method = "pearson"),
+                corr_pert_score_and_truinf = cor(true_influence, pert_score, method = "pearson"),
+                corr_pert_score_and_infharmcent = cor(inferred_harmonic_cent, pert_score, method = "pearson"),
+                corr_truinf_and_truharmcent = cor(true_harmonic_cent, true_influence, method = "pearson")
+                ), 
+              
               by = input_gene]
 
 
@@ -205,21 +211,21 @@ dev.off()
   
 
 scatterplot_data <- melt(score_summary, 
-                          id.vars = c("gene","input_gene","pert_score"),
-                          measure.vars = c("true_harmonic_cent","true_ivi_cent", "true_influence"),
-                          variable.name = "true_metric", value.name = "true_metric_val")
+                          id.vars = c("gene","input_gene","true_influence"),
+                          measure.vars = c("inferred_harmonic_cent","pert_score"),
+                          variable.name = "inferred_metric", value.name = "inferred_metric_val")
 
 png(filename=img_directory_2, height = 6, width = 6, units = "in", res = 1200)
-ggplot(scatterplot_data, aes(x = pert_score, y = true_metric_val)) + 
+ggplot(scatterplot_data, aes(x = true_influence, y = inferred_metric_val)) + 
   geom_point(col = "red") +
   #geom_smooth(method = "lm", se = FALSE, col = "black") + 
   theme_bw() + 
-  facet_grid(factor(true_metric, 
-                    levels = c("true_influence", "true_harmonic_cent", "true_ivi_cent"),
-                    labels = c("Influence", "Harmonic centrality", "IVI (Salvaty 2020)")) ~., 
+  facet_grid(factor(inferred_metric, 
+                    levels = c("inferred_harmonic_cent", "pert_score"),
+                    labels = c("Inferred harmonic centrality", "Inferred pert score (expensive)")) ~., 
                      scales = "free") +
-  xlab("Perturbation score from model") + 
-  ylab("True metrics from ground truth GRN")
+  xlab("True influence from ground-truth GRN") + 
+  ylab("Inferred metrics from model")
 dev.off()
 
 print("")
