@@ -5,8 +5,8 @@ library(matrixStats)
 
 run_sims = F
 
-chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
-#chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
+#chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
+chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
 write_directory <- paste(chief_directory,"score_outputs/scores_to_save_destination.csv", sep = "/")
 img_directory <- paste(chief_directory,"plots/inflential_genes_destination.png", sep = "/")
 img_directory_2 <- paste(chief_directory,"plots/central_metrics_destination.png", sep = "/")
@@ -224,4 +224,5 @@ dev.off()
 
 print("")
 print("DONE!")
+
 
