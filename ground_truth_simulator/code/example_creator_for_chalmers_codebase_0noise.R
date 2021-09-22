@@ -58,15 +58,17 @@ set.seed(simseed)
 #grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
 #grnSmall = grnFull
 
+grnSmall = copy(grnFull)
+grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
 
 if(edge_removal == T){
   #make target network
   grnSmall = copy(grnFull)
   
   #remove 7 edges
-  idx_to_remove <- sample(1:length(grnSmall@edgeset),7, replace = F) 
-  edges_to_remove <- matrix(NA, nrow = 7, ncol = 4)
-  for(i in 1: 7){
+  idx_to_remove <- c("MSN4->TPS1", "GLN3->FUR4", "UME6->GAL1")
+  edges_to_remove <- matrix(NA, nrow = 3, ncol = 4)
+  for(i in 1: 3){
     idx <- idx_to_remove[i]
     this_edge <- grnSmall@edgeset[idx]
     this_from <- this_edge[[1]]@from
@@ -79,29 +81,29 @@ if(edge_removal == T){
   }
   
   #alter effect sign in 5 other edges
-  edges_to_switch <- matrix(NA, nrow = 7, ncol = 4)
-  idx_to_switch <- sample(setdiff(1:length(grnSmall@edgeset),
-                                  idx_to_remove),
-                          5,
-                          replace = F) 
+  #edges_to_switch <- matrix(NA, nrow = 7, ncol = 4)
+  #idx_to_switch <- sample(setdiff(1:length(grnSmall@edgeset),
+  #                                idx_to_remove),
+  #                        5,
+  #                        replace = F) 
   
-  for(i in 1:5){
-    idx <- idx_to_switch[i]
-    this_edge <- grnSmall@edgeset[idx]
-    this_from <- this_edge[[1]]@from
-    this_to <- this_edge[[1]]@to
-    this_act <- this_edge[[1]]@activation
-    this_new <- !this_act
-    edges_to_switch[i, ] <- c(this_from, this_to, this_act, this_new)
-    print(paste("switching", this_from,"to",this_to,
-                "from", this_act,"to", this_new))
-    grnSmall@edgeset[idx][[1]]@activation <- this_new
-    
-  }
+  #for(i in 1:5){
+  #  idx <- idx_to_switch[i]
+  #  this_edge <- grnSmall@edgeset[idx]
+  #  this_from <- this_edge[[1]]@from
+  #  this_to <- this_edge[[1]]@to
+  #  this_act <- this_edge[[1]]@activation
+  #  this_new <- !this_act
+  #  edges_to_switch[i, ] <- c(this_from, this_to, this_act, this_new)
+  #  print(paste("switching", this_from,"to",this_to,
+  #             "from", this_act,"to", this_new))
+  #  grnSmall@edgeset[idx][[1]]@activation <- this_new
+  
+  #}
   
   print(paste("num edges left:", length(grnSmall@edgeset)))
   
-  edges_altered <- rbind(edges_to_remove, edges_to_switch)
+  edges_altered <- edges_to_remove
   edges_altered <- edges_altered[!is.na(edges_altered[,1]),]
   
   colnames(edges_altered) <- c("from","to","act_orig","act_new")
@@ -111,7 +113,8 @@ if(edge_removal == T){
   
 }
 
-grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
+
+
 
 simSmall = new(
     'SimulationGRN',

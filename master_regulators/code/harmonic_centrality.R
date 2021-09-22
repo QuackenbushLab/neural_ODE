@@ -37,7 +37,8 @@ all(names(h_cent_in_out) == names(ivi_cent))
 
 
 inferred_edges <- fread(paste(chief_directory,"model_to_test/model_param_based_effs.csv", sep = "/"))
-inferred_edges_main <- inferred_edges[abs_effect > 2*cutoff]
+inferred_edges <- inferred_edges[order(reg, -abs_effect)]
+inferred_edges_main <- inferred_edges[,.SD[1:100], by = reg][abs_effect > cutoff]
 inferred_edges_main[,.N]
 
 G_inferred <- graph_from_data_frame(inferred_edges_main, 
@@ -60,7 +61,7 @@ D_cent <- merge(D_cent, D_inferred, by = "gene", all.x = T)
 D_cent[is.na(infer_cent), infer_cent := 0 ]
 
 
-#D_cent[,plot(out_cent, infer_cent)]
+D_cent[,plot(out_cent, infer_cent)]
 #D_cent[,cor(out_cent, infer_cent)]
 
 write.csv(D_cent, 
