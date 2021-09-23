@@ -123,7 +123,8 @@ class ODENet(nn.Module):
 
         for n in self.net_alpha_combine.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                torch.nn.init.normal_(n.weight, mean=0, std=0.05)    #try this out
+                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
                 
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
