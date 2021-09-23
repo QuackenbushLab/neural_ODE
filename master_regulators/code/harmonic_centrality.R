@@ -36,9 +36,12 @@ all(names(h_cent_in_out) == names(ivi_cent))
 
 
 
-inferred_edges <- fread(paste(chief_directory,"model_to_test/model_param_based_effs.csv", sep = "/"))
-inferred_edges <- inferred_edges[order(reg, -abs_effect)]
-inferred_edges_main <- inferred_edges[,.SD[1:100], by = reg][abs_effect > cutoff]
+inferred_edges <- fread(paste(chief_directory,"model_to_test/model_param_based_effs_new.csv", sep = "/"))
+inferred_edges[, prop_effect := abs_effect/sum(abs_effect), by = aff]
+
+prop_cut_off <- as.numeric(inferred_edges[, quantile(prop_effect, 0.99, na.rm = T)])
+#prop_cut_off <-  0.008392754
+inferred_edges_main <- inferred_edges[prop_effect > prop_cut_off]
 inferred_edges_main[,.N]
 
 G_inferred <- graph_from_data_frame(inferred_edges_main, 
@@ -47,7 +50,8 @@ G_inferred <- graph_from_data_frame(inferred_edges_main,
 
 h_cent_inferred <- harmonic_centrality(G_inferred,
                                   mode = "out",
-                                  weights = NULL)
+                                  weights = 1/inferred_edges_main$prop_effect)
+sort(print(h_cent_inferred))
 
 D_inferred <- data.table(gene = names(h_cent_inferred), 
                          infer_cent = h_cent_inferred)
@@ -62,7 +66,7 @@ D_cent[is.na(infer_cent), infer_cent := 0 ]
 
 
 D_cent[,plot(out_cent, infer_cent)]
-#D_cent[,cor(out_cent, infer_cent)]
+D_cent[,cor(out_cent, infer_cent, method = "pearson")]
 
 write.csv(D_cent, 
           "C:/STUDIES/RESEARCH/neural_ODE/master_regulators/model_to_test/gene_centralities.csv",

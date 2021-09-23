@@ -179,8 +179,7 @@ score_summary[,.(mean_score = mean(pert_score),
                 corr_pert_score_and_truinf = cor(true_influence, pert_score, method = "pearson"),
                 corr_pert_score_and_infharmcent = cor(inferred_harmonic_cent, pert_score, method = "pearson"),
                 corr_truinf_and_truharmcent = cor(true_harmonic_cent, true_influence, method = "pearson")
-                ), 
-              
+                ),
               by = input_gene]
 
 
@@ -222,7 +221,7 @@ ggplot(scatterplot_data, aes(x = true_influence, y = inferred_metric_val)) +
   theme_bw() + 
   facet_grid(factor(inferred_metric, 
                     levels = c("inferred_harmonic_cent", "pert_score"),
-                    labels = c("Inferred harmonic centrality", "Inferred pert score (expensive)")) ~., 
+                    labels = c("Inferred harmonic centrality (cheap)", "Inferred influence (expensive)")) ~., 
                      scales = "free") +
   xlab("True influence from ground-truth GRN") + 
   ylab("Inferred metrics from model")
