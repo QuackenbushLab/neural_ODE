@@ -103,7 +103,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
         
         # Calculate true mean loss
-        loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
+        loss =  torch.mean(torch.abs((predictions - target)/target)) #regulated_loss(predictions, target, t)
     return loss
 
 '''
@@ -146,7 +146,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "chalmers_690genes_target_150samples_earlyT_0bimod_1initvar"
+clean_name = "chalmers_350genes_150samples_earlyT_0bimod_1initvar"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
@@ -237,8 +237,8 @@ if __name__ == "__main__":
         opt = optim.Adam([
                 {'params': odenet.net_sums.linear_out.weight}, 
                 {'params': odenet.net_sums.linear_out.bias},
-                {'params': odenet.net_prods.linear_out.weight},
-                {'params': odenet.net_prods.linear_out.bias},
+                #{'params': odenet.net_prods.linear_out.weight},
+                #{'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
                 {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']},
                 #{'params': odenet.minus_effect_factor, 'lr': 5*settings['init_lr']}
@@ -385,7 +385,7 @@ if __name__ == "__main__":
             scheduler.step(val_loss)
 
         print("Overall training loss {:.5E}".format(train_loss))
-        print("True mu loss {:.5E}".format(mu_loss))
+        print("True mu loss {:.2%}".format(mu_loss))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):

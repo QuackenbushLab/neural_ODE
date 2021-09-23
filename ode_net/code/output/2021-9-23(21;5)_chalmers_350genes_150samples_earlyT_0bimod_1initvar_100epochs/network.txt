@@ -1,0 +1,16 @@
+ODENet(
+  (net_sums): Sequential(
+    (activation_0): SoftsignMod()
+    (linear_out): Linear(in_features=350, out_features=80, bias=True)
+  )
+  (net_alpha_combine): Sequential(
+    (linear_out): Linear(in_features=80, out_features=350, bias=False)
+  )
+)
+
+
+    def forward(self, t, y):
+        sums = self.net_sums(y)
+        joint = self.net_alpha_combine(sums)
+        final = torch.relu(self.gene_multipliers)*(joint - y ) #joint  - y 
+        return(final) 
