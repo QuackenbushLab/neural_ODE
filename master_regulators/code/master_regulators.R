@@ -5,8 +5,8 @@ library(matrixStats)
 
 run_sims = F
 
-#chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
-chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
+chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
+#chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
 write_directory <- paste(chief_directory,"score_outputs/scores_to_save_nonself.csv", sep = "/")
 img_directory <- paste(chief_directory,"plots/inflential_genes_nonself.png", sep = "/")
 img_directory_2 <- paste(chief_directory,"plots/central_metrics_nonself.png", sep = "/")
@@ -179,8 +179,7 @@ score_summary[,.(mean_score = mean(pert_score),
                 corr_pert_score_and_truinf = cor(true_influence, pert_score, method = "pearson"),
                 corr_pert_score_and_infharmcent = cor(inferred_harmonic_cent, pert_score, method = "pearson"),
                 corr_truinf_and_truharmcent = cor(true_harmonic_cent, true_influence, method = "pearson")
-                ),
-              by = input_gene]
+                )] #,by = input_gene
 
 
 print("")
