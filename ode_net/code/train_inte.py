@@ -24,7 +24,7 @@ from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
-torch.set_num_threads(8) #CHANGE THIS!
+#torch.set_num_threads(8) #CHANGE THIS!
 
 def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.figure()
@@ -240,7 +240,7 @@ if __name__ == "__main__":
                 #{'params': odenet.net_prods.linear_out.weight},
                 #{'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
-                {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']},
+                {'params': odenet.gene_multipliers,'lr': 5*settings['init_lr']},
                 #{'params': odenet.minus_effect_factor, 'lr': 5*settings['init_lr']}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 20
+    epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
     #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
