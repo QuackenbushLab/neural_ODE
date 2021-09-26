@@ -103,7 +103,7 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
         
         # Calculate true mean loss
-        loss =  torch.mean(torch.abs((predictions - target)/target)) #regulated_loss(predictions, target, t)
+        loss =  [torch.mean(torch.abs((predictions - target)/target)),torch.mean((predictions - target) ** 2)] #regulated_loss(predictions, target, t)
     return loss
 
 '''
@@ -337,7 +337,7 @@ if __name__ == "__main__":
 
         mu_loss = true_loss(odenet, data_handler, settings['method'])
         #mu_loss = train_loss
-        true_mean_losses.append(mu_loss)
+        true_mean_losses.append(mu_loss[1])
         all_lrs_used.append(opt.param_groups[0]['lr'])
         
         if epoch == 1:
@@ -345,7 +345,7 @@ if __name__ == "__main__":
         else:
             if train_loss < min_train_loss:
                 min_train_loss = train_loss
-                true_loss_of_min_train_model =  mu_loss
+                true_loss_of_min_train_model =  mu_loss[1]
                 #save_model(odenet, output_root_dir, 'best_train_model')
         
 
@@ -366,14 +366,14 @@ if __name__ == "__main__":
             validation_loss.append(val_loss)
             if epoch == 1:
                 min_val_loss = val_loss
-                true_loss_of_min_val_model = mu_loss
+                true_loss_of_min_val_model = mu_loss[1]
                 print('Model improved, saving current model')
                 save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_val_loss:
                     consec_epochs_failed = 0
                     min_val_loss = val_loss
-                    true_loss_of_min_val_model =  mu_loss
+                    true_loss_of_min_val_model =  mu_loss[1]
                     #saving true-mean loss of best val model
                     print('Model improved, saving current model')
                     save_model(odenet, output_root_dir, 'best_val_model')
@@ -385,7 +385,9 @@ if __name__ == "__main__":
             scheduler.step(val_loss)
 
         print("Overall training loss {:.5E}".format(train_loss))
-        print("True mu loss {:.2%}".format(mu_loss))
+
+        print("True mu loss (absolute) {:.5E}".format(mu_loss[1]))
+        print("True mu loss (%) {:.2%}".format(mu_loss[0]))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
