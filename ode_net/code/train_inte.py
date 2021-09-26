@@ -24,7 +24,7 @@ from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
-#torch.set_num_threads(8) #CHANGE THIS!
+torch.set_num_threads(4) #CHANGE THIS!
 
 def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.figure()
@@ -237,8 +237,8 @@ if __name__ == "__main__":
         opt = optim.Adam([
                 {'params': odenet.net_sums.linear_out.weight}, 
                 {'params': odenet.net_sums.linear_out.bias},
-                #{'params': odenet.net_prods.linear_out.weight},
-                #{'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+                {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
                 {'params': odenet.gene_multipliers,'lr': 5*settings['init_lr']},
                 #{'params': odenet.minus_effect_factor, 'lr': 5*settings['init_lr']}
