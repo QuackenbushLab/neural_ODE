@@ -179,8 +179,7 @@ score_summary[,.(mean_score = mean(pert_score),
                 corr_pert_score_and_truinf = cor(true_influence, pert_score, method = "pearson"),
                 corr_pert_score_and_infharmcent = cor(inferred_harmonic_cent, pert_score, method = "pearson"),
                 corr_truinf_and_truharmcent = cor(true_harmonic_cent, true_influence, method = "pearson")
-                ),
-              by = input_gene]
+                )] #,by = input_gene
 
 
 print("")

@@ -40,8 +40,8 @@ simseeds = sample.int(1E7, 1000)
 #----simulation parameters----
 #simulation parameters
 nsamp = 150 #number of samples
-netSize = 690 #network size of sampled networks
-minTFs = 30 #minimum number of TFs enforced on sampled networks
+netSize = 350 #network size of sampled networks
+minTFs = 15 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
 bionoise = 0 #biological noise standard deviation (superimposed log-normal)
 propbimodal = 0 #proportion of bimodal genes (may be << prop*netSize)
@@ -55,18 +55,18 @@ simseed = simseeds[102]
 
 #----1: sample network and create simulation----
 set.seed(simseed)
-#grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
+grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
 #grnSmall = grnFull
 
-grnSmall = copy(grnFull)
+#grnSmall = copy(grnFull)
 grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
 
 if(edge_removal == T){
   #make target network
-  grnSmall = copy(grnFull)
+  #grnSmall = copy(grnFull)
   
   #remove 7 edges
-  idx_to_remove <- c("MSN4->TPS1", "GLN3->FUR4", "UME6->GAL1")
+  idx_to_remove <- c("REB1->SIN3", "GLN3->FUR4", "UME6->GAL1")
   edges_to_remove <- matrix(NA, nrow = 3, ncol = 4)
   for(i in 1: 3){
     idx <- idx_to_remove[i]
@@ -108,7 +108,7 @@ if(edge_removal == T){
   
   colnames(edges_altered) <- c("from","to","act_orig","act_new")
   write.csv(edges_altered,
-            "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690_edges_altered.csv",
+            "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350_edges_altered.csv",
             row.names = F)
   
 }
@@ -161,18 +161,18 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_target_150samples_earlyT_0bimod_1initvar.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_target_150samples_earlyT_0bimod_1initvar.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
 
 write.csv(edgepropmat, 
-          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties_chalmers_690_target.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties_chalmers_350_target.csv", 
           row.names = F)
 
 write.csv(ode_system_function, 
-          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/ode_system_functions_chalmers_690_target.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/ode_system_functions_chalmers_350_target.csv", 
           row.names = F)
 
 write.csv(gene_names, 
