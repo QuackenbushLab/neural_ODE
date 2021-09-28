@@ -39,7 +39,7 @@ simseeds = sample.int(1E7, 1000)
 
 #----simulation parameters----
 #simulation parameters
-nsamp = 150 #number of samples
+nsamp = 3 #number of samples
 netSize = 350 #network size of sampled networks
 minTFs = 15 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
@@ -58,15 +58,13 @@ set.seed(simseed)
 grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
 #grnSmall = grnFull
 
-#grnSmall = copy(grnFull)
-grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
 
 if(edge_removal == T){
   #make target network
   #grnSmall = copy(grnFull)
   
   #remove 7 edges
-  idx_to_remove <- c("REB1->SIN3", "GLN3->FUR4", "UME6->GAL1")
+  idx_to_remove <- c( "REB1->SIN3", "GLN3->FUR4","UME6->GAL1") #
   edges_to_remove <- matrix(NA, nrow = 3, ncol = 4)
   for(i in 1: 3){
     idx <- idx_to_remove[i]
@@ -113,7 +111,8 @@ if(edge_removal == T){
   
 }
 
-
+#grnSmall = copy(grnFull)
+grnSmall = randomizeParams(grnSmall, 'linear-like', simseed)
 
 
 simSmall = new(
@@ -176,7 +175,7 @@ write.csv(ode_system_function,
           row.names = F)
 
 write.csv(gene_names, 
-          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/gene_names_chalmers_690_target.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/gene_names_chalmers_350_target.csv", 
           row.names = F)
 
 
