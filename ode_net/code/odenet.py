@@ -22,7 +22,7 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = input - 0.5 
+        shifted_input = input 
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 
@@ -31,7 +31,7 @@ class LogShiftedSoftSignMod(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        shifted_input =  input - 0.5 
+        shifted_input =  input 
         abs_shifted_input = torch.abs(shifted_input)
         soft_sign_mod = shifted_input/(1+abs_shifted_input)
         return(torch.log1p(soft_sign_mod))  
@@ -75,7 +75,7 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
-            self.net_alpha_combine.add_module('linear_out',nn.Linear(2*neurons, ndim, bias = False))
+            self.net_alpha_combine.add_module('linear_out',nn.Linear(neurons, ndim, bias = False))
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.minus_effect_factor = nn.Parameter(torch.zeros(1)+3, requires_grad= False) 
@@ -83,18 +83,18 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                nn.init.sparse_(n.weight,  sparsity=0.98, std = 0.05)   #0.05  
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)   #0.05  
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                nn.init.sparse_(n.weight,  sparsity=0.98, std = 0.05) #0.05
-                #torch.nn.init.normal_(n.bias, mean=2, std=1.0)    #try this out
-
+                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) #0.05
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                
         for n in self.net_alpha_combine.modules():
             if isinstance(n, nn.Linear):
                 nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                #nn.init.sparse_(n.weight,  sparsity=0.98, std = 0.05)
+                #nn.init.sparse_(n.weight,  sparsity=0.995, std = 0.05)
                 
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
@@ -118,10 +118,17 @@ class ODENet(nn.Module):
         
     def forward(self, t, y):
         sums = self.net_sums(y)
-        prods = torch.exp(self.net_prods(y))
-        sums_prods_concat = torch.cat((sums, prods), dim= - 1)
-        joint = self.net_alpha_combine(sums_prods_concat)
+        #prods_part = self.net_prods(y)
+        #if torch.any(torch.isnan(prods_part)):
+        #    print("we got prods problems!")
+        #    print(torch.topk(y, 20, largest = False))
+        #prods = torch.exp(prods_part)
+        #sums_prods_concat = torch.cat((sums, prods), dim= - 1)
+        #joint = self.net_alpha_combine(sums_prods_concat)
+        #joint_relu = torch.relu(joint + 5) - 5
+        joint = self.net_alpha_combine(sums)
         final = torch.relu(self.gene_multipliers)*(joint - y ) 
+        #final = joint - y
         return(final) 
 
     def save(self, fp):
