@@ -50,24 +50,24 @@ full_data <- melt(full_data,
                   variable.name = "experiment",
                   value.name = "exprs_ratio")
 
-small_data <-  merge(full_data, 
-                     expression_cols_DF[sample_id %in% samples_to_keep_small &  
-                                          as.numeric(time) %in% c(0,5,10,15,20,30,45,90),],
-                     by.x = "experiment", by.y = "full_name", all.y = T)
 
 full_data <- merge(full_data, 
                    expression_cols_DF[sample_id %in% samples_to_keep &  
                                         as.numeric(time) %in% c(0,5,10,15,20,30,45,90),],
                    by.x = "experiment", by.y = "full_name", all.y = T)
 
+samples_to_keep_small <- full_data[reg_changed != GENE, 
+          .(mean_expr = mean(abs(exprs_ratio))),
+          by = .(sample_id, GENE)][,.(perc_non_zero_genes = sum(mean_expr != 0)/.N),
+                                   by = sample_id][order(-perc_non_zero_genes)][1:20,sample_id]
+
 
 full_data[, .N, by = sample_id][order(-N)] #makes sense 6175 gene * 8 t = 49400 per sample
 full_data[, experiment := NULL]
 setcolorder(full_data, c("sample_id", "reg_changed", "GENE", "time", "exprs_ratio"))
 
+small_data <- full_data[sample_id %in% samples_to_keep_small]
 small_data[, .N, by = sample_id][order(-N)] #makes sense 6175 gene * 8 t = 49400 per sample
-small_data[, experiment := NULL]
-setcolorder(small_data, c("sample_id", "reg_changed", "GENE", "time", "exprs_ratio"))
 
 
 datamat <- dcast(full_data,
@@ -111,18 +111,19 @@ datamat_small <- datamat_small[, .SD[1:(.N+1)],
                                                  (time_points) := as.list(time_vals)]
 
 datamat_small[,c("sample_id","reg_changed","GENE") := NULL]
-datamat_small_no0 <- copy(datamat_small)
+datamat_small_no05 <- copy(datamat_small)
 top_row <- as.list(rep(NA, length(time_vals)))
 top_row[[1]] <- length(all_genes)
 top_row[[2]] <- length(samples_to_keep_small)
 datamat_small <- rbind(top_row, datamat_small)
 
 
-datamat_small_no0[, time_0 := NULL]
-top_row <- as.list(rep(NA, length(time_vals) - 1))
+datamat_small_no05[, time_0 := NULL]
+datamat_small_no05[, time_5 := NULL]
+top_row <- as.list(rep(NA, length(time_vals) - 2))
 top_row[[1]] <- length(all_genes)
 top_row[[2]] <- length(samples_to_keep_small)
-datamat_small_no0 <- rbind(top_row, datamat_small_no0)
+datamat_small_no05<- rbind(top_row, datamat_small_no05)
 
 
 write.table( datamat,
@@ -139,11 +140,10 @@ write.table( datamat_small,
              col.names = FALSE,
              na = "")
 
-write.table( datamat_small_no0,
-             "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/clean_data/calico_6175genes_20samples_7T.csv", 
+write.table( datamat_small_no05,
+             "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/clean_data/calico_6175genes_20highvarsamples_6T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
-
 
