@@ -245,7 +245,7 @@ class DataHandler:
         return [tensor[0] for tensor in self.data_pt_0noise]
     
     def get_mu1(self):
-        return [tensor[3] for tensor in self.data_pt_0noise]
+        return [tensor[2] for tensor in self.data_pt_0noise]
     
     def get_true_mu_set(self):
         all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
@@ -301,7 +301,7 @@ class DataHandler:
                 _y = mu0[j]
             
             _y = mu1[j] #remove later
-            y = odeint(odenet, _y, self.time_pt[j][3:] , method=method) + self.init_bias_y #  extrap_time_points_pt
+            y = odeint(odenet, _y, self.time_pt[j][2:] , method=method) + self.init_bias_y #  extrap_time_points_pt
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples, extrap_time_points

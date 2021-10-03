@@ -88,13 +88,13 @@ class ODENet(nn.Module):
 
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
-                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) #0.05
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) #0.05
+                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
                 
         for n in self.net_alpha_combine.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                #nn.init.sparse_(n.weight,  sparsity=0.995, std = 0.05)
+                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
                 
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
@@ -127,7 +127,7 @@ class ODENet(nn.Module):
         #joint = self.net_alpha_combine(sums_prods_concat)
         #joint_relu = torch.relu(joint + 5) - 5
         joint = self.net_alpha_combine(sums)
-        final = torch.relu(self.gene_multipliers)*(joint - y ) 
+        final = torch.relu(self.gene_multipliers)*(joint ) 
         #final = joint - y
         return(final) 
 
