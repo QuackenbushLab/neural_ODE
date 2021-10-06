@@ -245,7 +245,7 @@ class DataHandler:
         return [tensor[0] for tensor in self.data_pt_0noise]
     
     def get_mu1(self):
-        return [tensor[1] for tensor in self.data_pt_0noise]
+        return [tensor[2] for tensor in self.data_pt_0noise]
     
     def get_true_mu_set(self):
         all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
@@ -279,7 +279,7 @@ class DataHandler:
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
-       # mu1 = self.get_mu1() #remove later
+        mu1 = self.get_mu1() #remove later
         if self.val_split == 1:
             all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
         else:
@@ -300,8 +300,8 @@ class DataHandler:
             else:
                 _y = mu0[j]
             
-           # _y = mu1[j] #remove later
-            y = odeint(odenet, _y, self.time_pt[j][0:] , method=method) + self.init_bias_y #  extrap_time_points_pt
+            _y = mu1[j] #remove later
+            y = odeint(odenet, _y, self.time_pt[j][2:] , method=method) + self.init_bias_y #  extrap_time_points_pt
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples, extrap_time_points
