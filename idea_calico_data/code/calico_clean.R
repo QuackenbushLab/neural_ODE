@@ -78,7 +78,7 @@ small_data[, .N, by = sample_id][order(-N)] #makes sense 6175 gene * 8 t = 49400
 high_var_data <- full_data[reg_changed %in%  regs_with_exprs_data &
                              GENE %in% genes_to_keep_most_var,,]
 high_var_data[, .N, by = sample_id][order(-N)] #makes sense 6175 gene * 8 t = 49400 per sample
-most_var_samp <- high_var_data[, sd(exprs_ratio), by = sample_id][order(-V1)][1, sample_id] #makes sense 6175 gene * 8 t = 49400 per sample
+most_var_samp <- high_var_data[, sd(exprs_ratio), by = sample_id][order(-V1)][1:3, sample_id] #makes sense 6175 gene * 8 t = 49400 per sample
 
 
 datamat <- dcast(full_data,
@@ -93,9 +93,13 @@ datamat_high_var <- dcast(high_var_data,
                           sample_id + reg_changed + GENE ~ time,
                           value.var = "exprs_ratio")
 
-datamat_high_var_1samp <- dcast(high_var_data[sample_id == most_var_samp],
+datamat_high_var_1samp <- dcast(high_var_data[sample_id == most_var_samp[1]],
                           sample_id + reg_changed + GENE ~ time,
                           value.var = "exprs_ratio")
+
+datamat_high_var_3samp <- dcast(high_var_data[sample_id %in% most_var_samp[1:3]],
+                                sample_id + reg_changed + GENE ~ time,
+                                value.var = "exprs_ratio")
 
 
 
@@ -114,6 +118,12 @@ setnames(datamat_high_var,
 )
 
 setnames(datamat_high_var_1samp, 
+         old = c("0.0", "05.0","10.0","15.0","20.0",
+                 "30.0","45.0","90.0"),
+         new = time_points
+)
+
+setnames(datamat_high_var_3samp, 
          old = c("0.0", "05.0","10.0","15.0","20.0",
                  "30.0","45.0","90.0"),
          new = time_points
@@ -161,6 +171,18 @@ top_row[[1]] <- length(genes_to_keep_most_var)
 top_row[[2]] <- 1
 datamat_high_var_1samp <- rbind(top_row, datamat_high_var_1samp)
 
+
+
+datamat_high_var_3samp <- datamat_high_var_3samp[, .SD[1:(.N+1)], 
+                                                 by=.(sample_id, reg_changed)][is.na(GENE), 
+                                                                               (time_points) := as.list(time_vals)]
+datamat_high_var_3samp[,c("sample_id","reg_changed","GENE") := NULL]
+datamat_high_var_3samp[, c("time_0", "time_5"):= NULL]
+
+top_row <- as.list(rep(NA, length(time_vals)-2))
+top_row[[1]] <- length(genes_to_keep_most_var)
+top_row[[2]] <- 3
+datamat_high_var_3samp <- rbind(top_row, datamat_high_var_3samp)
 
 
 datamat_small <- datamat_small[, .SD[1:(.N+1)], 
@@ -218,3 +240,9 @@ write.table( datamat_high_var_1samp,
              col.names = FALSE,
              na = "")
 
+write.table( datamat_high_var_3samp,
+             "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/clean_data/calico_1135highvargenes_3samples_6T.csv", 
+             sep=",",
+             row.names = FALSE,
+             col.names = FALSE,
+             na = "")
