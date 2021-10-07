@@ -77,7 +77,12 @@ class ODENet(nn.Module):
             self.net_alpha_combine = nn.Sequential()
             self.net_alpha_combine.add_module('linear_out',nn.Linear(neurons, ndim, bias = False))
           
-            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
+            self.gene_multipliers = nn.Sequential()
+            self.gene_multipliers.add_module('linear_1', nn.Linear(ndim, neurons, bias = False))
+            self.gene_multipliers.add_module('linear_out', nn.Linear(neurons, ndim, bias = False))
+            self.gene_multipliers.add_module('activation_out', nn.ReLU())
+  
+            #self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.gene_taus = nn.Parameter(torch.randn(1,ndim, requires_grad= True))
             #print("tau_mean =", torch.mean(torch.sigmoid(self.gene_taus)))
             
@@ -121,6 +126,7 @@ class ODENet(nn.Module):
         
     def forward(self, t, y):
         sums = self.net_sums(y)
+        gene_mult = self.gene_multipliers(y)
         #prods_part = self.net_prods(y)
         #if torch.any(torch.isnan(prods_part)):
         #    print("we got prods problems!")
@@ -130,7 +136,7 @@ class ODENet(nn.Module):
         #joint = self.net_alpha_combine(sums_prods_concat)
         #joint_relu = torch.relu(joint + 5) - 5
         joint = self.net_alpha_combine(sums)
-        final = torch.relu(self.gene_multipliers)*(joint) 
+        final = gene_mult*(joint) 
         #final = joint #- y  #- y*torch.sigmoid(self.gene_taus)
         return(final) 
 
@@ -161,12 +167,12 @@ class ODENet(nn.Module):
         prod_path =  fp[:idx] + '_prods' + fp[idx:]
         sum_path = fp[:idx] + '_sums' + fp[idx:]
         alpha_comb_path = fp[:idx] + '_alpha_comb' + fp[idx:]
-        self.net_prods = torch.load(prod_path)
+        #self.net_prods = torch.load(prod_path)
         self.net_sums = torch.load(sum_path)
         self.gene_multipliers = torch.load(gene_mult_path)
         self.net_alpha_combine = torch.load(alpha_comb_path)
         
-        self.net_prods.to('cpu')
+        #self.net_prods.to('cpu')
         self.net_sums.to('cpu')
         self.gene_multipliers.to('cpu')
         self.net_alpha_combine.to('cpu')
