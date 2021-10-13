@@ -37,7 +37,7 @@ class DataHandler:
         self.epoch_done = False
         self.img_save_dir = img_save_dir
         self.init_bias_y = init_bias_y
-        self.num_trajs_to_plot = 7
+        self.num_trajs_to_plot = 3#7
         #self.noise = noise
 
         self._calc_datasize()
@@ -275,6 +275,8 @@ class DataHandler:
         return times
 
     def calculate_trajectory(self, odenet, method, num_val_trajs):
+        #print(self.val_set_indx)
+        #print(num_val_trajs)
         extrap_time_points = np.array(range(0,11)).astype(float)
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
@@ -290,7 +292,7 @@ class DataHandler:
                     try:
                         all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), self.num_trajs_to_plot, replace=False))
                     except:
-                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 1, replace=False))   #if only ONE SAMPLE (e.g y5 dataset)
+                        all_plotted_samples = sorted(list(set([x[0] for x in self.train_set_original])))   #if very few samplesE (e.g y5 dataset, calico)
                 else:
                     all_plotted_samples = sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot, replace=False))
         

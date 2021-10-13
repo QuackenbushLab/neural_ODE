@@ -22,7 +22,7 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = torch.exp(input) -1
+        shifted_input = torch.exp(input -10)
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 
@@ -71,29 +71,36 @@ class ODENet(nn.Module):
             #self.net_prods.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
             
             self.net_sums = nn.Sequential()
-            self.net_sums.add_module('activation_0', nn.Sigmoid())
+            self.net_sums.add_module('activation_0', SoftsignMod())
             self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
             self.net_alpha_combine.add_module('linear_out',nn.Linear(neurons, ndim, bias = False))
           
-            self.gene_multipliers = nn.Sequential()
-            self.gene_multipliers.add_module('linear_1', nn.Linear(ndim, neurons, bias = False))
-            self.gene_multipliers.add_module('linear_out', nn.Linear(neurons, ndim, bias = False))
-            self.gene_multipliers.add_module('activation_out', nn.ReLU())
+            #self.gene_multipliers = nn.Sequential()
+            #self.gene_multipliers.add_module('linear_1', nn.Linear(ndim, 25, bias = False))
+            #self.gene_multipliers.add_module('linear_out', nn.Linear(25, ndim, bias = False))
+            #self.gene_multipliers.add_module('activation_out', nn.ReLU())
   
-            #self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
+            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
             #self.gene_taus = nn.Parameter(torch.randn(1,ndim, requires_grad= True))
-            #print("tau_mean =", torch.mean(torch.sigmoid(self.gene_taus)))
+            #print("mult_mean =", torch.mean(torch.relu(self.gene_multipliers)))
+            #print("mult_min =", torch.min(torch.relu(self.gene_multipliers)))
+            #print("mult_max =", torch.max(torch.relu(self.gene_multipliers)))
+            
             
             #self.minus_effect_factor = nn.Parameter(torch.zeros(1)+3, requires_grad= False) 
                 
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)   #0.05  
+                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)   #0.05  
 
+        #for n in self.gene_multipliers.modules():
+        #    if isinstance(n, nn.Linear):
+        #        nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+        
         #for n in self.net_prods.modules():
         #    if isinstance(n, nn.Linear):
         #        nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) #0.05
@@ -101,8 +108,8 @@ class ODENet(nn.Module):
                 
         for n in self.net_alpha_combine.modules():
             if isinstance(n, nn.Linear):
-                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
                 
         #self.net_prods.apply(off_diag_init)
         #self.net_sums.apply(off_diag_init)
@@ -126,7 +133,6 @@ class ODENet(nn.Module):
         
     def forward(self, t, y):
         sums = self.net_sums(y)
-        gene_mult = self.gene_multipliers(y)
         #prods_part = self.net_prods(y)
         #if torch.any(torch.isnan(prods_part)):
         #    print("we got prods problems!")
@@ -134,10 +140,9 @@ class ODENet(nn.Module):
         #prods = torch.exp(prods_part)
         #sums_prods_concat = torch.cat((sums, prods), dim= - 1)
         #joint = self.net_alpha_combine(sums_prods_concat)
-        #joint_relu = torch.relu(joint + 5) - 5
         joint = self.net_alpha_combine(sums)
-        final = gene_mult*(joint) 
-        #final = joint #- y  #- y*torch.sigmoid(self.gene_taus)
+        carry_cap = torch.sigmoid(joint)*16
+        final = (1/12)*y*(1 - y/carry_cap) #torch.relu(self.gene_multipliers)
         return(final) 
 
     def save(self, fp):

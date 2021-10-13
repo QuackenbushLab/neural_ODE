@@ -45,6 +45,7 @@ class Visualizator1D(Visualizator):
         else:
             if self.data_handler.val_split !=1 :
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 2)
+                #print( self.sample_plot_val_cutoff)
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
@@ -98,8 +99,8 @@ class Visualizator1D(Visualizator):
             upper_lim = 1.3
             lower_lim = 0.4
         else: #i.e. linear 
-            upper_lim =  5 #1.2
-            lower_lim = -5 #-0.2
+            upper_lim =  6+10 #1.2
+            lower_lim = -6+10 #-0.2
 
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
@@ -125,6 +126,7 @@ class Visualizator1D(Visualizator):
                 gene = self.genes_to_viz[row_num*self.TOT_COLS + col_num] #IH restricting to plot only few genes
                 ax.cla()
                 for sample_idx, (approx_traj, traj, true_mean) in enumerate(zip(self.trajectories, data_np_to_plot, data_np_0noise_to_plot)):
+                    
                     if self.data_handler.n_val > 0 and sample_idx < self.sample_plot_val_cutoff:
                         plot_col = "red"
                     else:

@@ -132,6 +132,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
+       # print(torch.min(batch_point),torch.max(batch_point))
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
     loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
     loss.backward() #MOST EXPENSIVE STEP!
@@ -147,7 +148,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "calico_1135highvargenes_169samples_6T"
+clean_name = "calico_1135highvargenes_3samples_6T"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
 
@@ -241,8 +242,9 @@ if __name__ == "__main__":
                 #{'params': odenet.net_prods.linear_out.weight},
                 #{'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
-                {'params': odenet.gene_multipliers.linear_1.weight,'lr': 1*settings['init_lr']},
-                {'params': odenet.gene_multipliers.linear_out.weight,'lr': 1*settings['init_lr']}
+                #{'params': odenet.gene_multipliers.linear_1.weight,'lr': 1*settings['init_lr']},
+                #{'params': odenet.gene_multipliers.linear_out.weight,'lr': 1*settings['init_lr']},
+                {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']},
                 #{'params': odenet.gene_taus,'lr': 5*settings['init_lr']}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
