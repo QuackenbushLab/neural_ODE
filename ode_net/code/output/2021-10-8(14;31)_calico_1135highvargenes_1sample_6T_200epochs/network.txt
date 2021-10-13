@@ -1,0 +1,17 @@
+ODENet(
+  (net_sums): Sequential(
+    (activation_0): SoftsignMod()
+    (linear_out): Linear(in_features=1135, out_features=10, bias=True)
+  )
+  (net_alpha_combine): Sequential(
+    (linear_out): Linear(in_features=10, out_features=1135, bias=False)
+  )
+)
+
+
+    def forward(self, t, y):
+        sums = self.net_sums(y)
+        joint = self.net_alpha_combine(sums)
+        carry_cap = torch.sigmoid(joint)*16
+        final = (1/12)*y*(1 - y/carry_cap)
+        return(final) 
