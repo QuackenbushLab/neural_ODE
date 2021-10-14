@@ -22,7 +22,7 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = 50*input - 25 #torch.exp(input -10)
+        shifted_input = 200*input - 100 #torch.exp(input -10)
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 
@@ -142,7 +142,7 @@ class ODENet(nn.Module):
         #joint = self.net_alpha_combine(sums_prods_concat)
         joint = self.net_alpha_combine(sums)
         carry_cap = torch.sigmoid(joint)
-        final = 1/10*y*(carry_cap - y) 
+        final = 1/20*y*(carry_cap - y)  # 
         return(final) 
 
     def save(self, fp):

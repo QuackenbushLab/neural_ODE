@@ -232,16 +232,16 @@ if __name__ == "__main__":
                 {'params': odenet.net_sums.linear_out.bias},
                 #{'params': odenet.net_prods.linear_out.weight},
                 #{'params': odenet.net_prods.linear_out.bias},
-                {'params': odenet.net_alpha_combine.linear_out.weight},
+                {'params': odenet.net_alpha_combine.linear_out.weight}
                 #{'params': odenet.gene_multipliers.linear_1.weight,'lr': 1*settings['init_lr']},
                 #{'params': odenet.gene_multipliers.linear_out.weight,'lr': 1*settings['init_lr']},
-                {'params': odenet.gene_multipliers,'lr': 1/2*settings['init_lr']},
+               # {'params': odenet.gene_multipliers,'lr': 1/2*settings['init_lr']},
                 #{'params': odenet.gene_taus,'lr': 5*settings['init_lr']}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=5e-05, 
+    factor=0.9, patience=3, threshold=1e-05, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     '''
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 15
+    epochs_to_fail_to_terminate = 25
     all_lrs_used = []
 
     #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
