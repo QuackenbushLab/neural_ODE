@@ -107,23 +107,14 @@ def true_loss(odenet, data_handler, method):
         loss =  [torch.mean(torch.abs((predictions - target)/target)),torch.mean((predictions - target) ** 2)] #regulated_loss(predictions, target, t)
     return loss
 
-'''
-def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr, one_time_drop = 0):
-    lr_step_size = (10*lower_lr-lower_lr)/(tot_epochs/2)
-    if epoch <= tot_epochs/2:
-        lr_direction = 1
-        dir_string = "Increasing"
-    else:
-        lr_direction = -1
-        dir_string = "Decreasing"
+
+def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
+    dir_string = "Decreasing"
     for param_group in opt.param_groups:
-        if one_time_drop == 0:
-            param_group['lr'] = param_group['lr']+ lr_direction * lr_step_size
-        else:
-            param_group['lr'] = one_time_drop
+        param_group['lr'] = param_group['lr'] * dec_lr_factor
     if verbose:
         print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
-'''
+
 
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
@@ -404,12 +395,12 @@ if __name__ == "__main__":
         #print("Saving intermediate model")
         #save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
     
-        '''
         # Decrease learning rate if specified
-        if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
+        if settings['dec_lr'] : #and epoch % settings['dec_lr'] == 0
             decrease_lr(opt, settings['verbose'],tot_epochs= tot_epochs,
-             epoch = epoch, lower_lr = settings['init_lr'])
+             epoch = epoch, lower_lr = settings['init_lr'], dec_lr_factor = settings['dec_lr_factor'])
         
+        '''
         #Decrease learning rate as a one-time thing:
         if (train_loss < 9*10**(-3) and zeroth_drop_done == False) or (epoch == 25 and zeroth_drop_done == False):
             decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-3))
@@ -441,8 +432,8 @@ if __name__ == "__main__":
                 rep_epochs_mu_losses.append(0)
                 #rep_epochs_mu_losses.append(true_loss_of_min_val_model.item())
             else:
-                print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
-                #print("True loss of best training model (MSE) = ", 0)
+                #print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
+                print("True loss of best training model (MSE) = ", 0)
             print("Saving MSE plot...")
             plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
             
