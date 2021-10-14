@@ -16,6 +16,7 @@ ODENet(
         final = 1/10*y*(carry_cap - y) 
         return(final) 
 
+
 class SoftsignMod(nn.Module):
     def __init__(self):
         super().__init__() # init the base class
@@ -24,4 +25,4 @@ class SoftsignMod(nn.Module):
     def forward(self, input):
         shifted_input = 50*input - 25 #torch.exp(input -10)
         abs_shifted_input = torch.abs(shifted_input)
-        return(shifted_input/(1+abs_shifted_input))  
+        return(shifted_input/(1+abs_shifted_input)) 

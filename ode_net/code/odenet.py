@@ -82,7 +82,7 @@ class ODENet(nn.Module):
             #self.gene_multipliers.add_module('linear_out', nn.Linear(25, ndim, bias = False))
             #self.gene_multipliers.add_module('activation_out', nn.ReLU())
   
-            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim, requires_grad= True))
+            self.gene_multipliers = nn.Parameter(torch.rand(1,ndim)*0.5, requires_grad= True)
             #self.gene_taus = nn.Parameter(torch.randn(1,ndim, requires_grad= True))
             #print("mult_mean =", torch.mean(torch.relu(self.gene_multipliers)))
             #print("mult_min =", torch.min(torch.relu(self.gene_multipliers)))
@@ -142,7 +142,7 @@ class ODENet(nn.Module):
         #joint = self.net_alpha_combine(sums_prods_concat)
         joint = self.net_alpha_combine(sums)
         carry_cap = torch.sigmoid(joint)
-        final = 1/10*y*(carry_cap - y) #torch.relu(self.gene_multipliers)
+        final = 1/10*y*(carry_cap - y) 
         return(final) 
 
     def save(self, fp):
