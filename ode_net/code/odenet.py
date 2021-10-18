@@ -22,7 +22,8 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = input - 0.5 #torch.exp(input -10)
+        pow = 1
+        shifted_input = 10*(input-0.5)**pow  
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))  
 
@@ -94,13 +95,9 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)   #0.05  
-
-        #for n in self.gene_multipliers.modules():
-        #    if isinstance(n, nn.Linear):
         #        nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-        
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)   #0.05  
+
         #for n in self.net_prods.modules():
         #    if isinstance(n, nn.Linear):
         #        nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) #0.05
@@ -140,10 +137,10 @@ class ODENet(nn.Module):
         #prods = torch.exp(prods_part)
         #sums_prods_concat = torch.cat((sums, prods), dim= - 1)
         #joint = self.net_alpha_combine(sums_prods_concat)
-        joint = self.net_alpha_combine(sums)
+        joint = self.net_alpha_combine(sums)/10
         carry_cap = torch.sigmoid(joint)
-        #carry_cap = joint
-        final =  y * (2*torch.sigmoid(carry_cap - y)  - 1)
+        final =  y*(torch.sigmoid(carry_cap - y)  - 0.5)
+        #final = joint - y
         return(final) 
 
     def save(self, fp):
