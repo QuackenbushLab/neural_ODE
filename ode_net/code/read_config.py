@@ -15,7 +15,7 @@ def _convert_arguments(settings):
     converted_settings = {}
     converted_settings['viz'] = settings.getboolean('viz')
     converted_settings['viz_every_iteration'] = False
-    converted_settings['verbose'] = True
+    converted_settings['verbose'] = False
     converted_settings['method'] = settings['method']
     converted_settings['neurons_per_layer'] = settings.getint('neurons_per_layer')
     converted_settings['optimizer'] = settings['optimizer']

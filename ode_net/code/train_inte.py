@@ -139,7 +139,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "calico_1135highvargenes_3samples_6T"
+clean_name = "calico_1135highvargenes_20samples_6T"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
 
@@ -306,9 +306,9 @@ if __name__ == "__main__":
         data_handler.reset_epoch()
         #visualizer.save(img_save_dir, epoch) #IH added to test
         this_epoch_total_train_loss = 0
+        print()
+        print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
         if settings['verbose']:
-            print()
-            print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
@@ -397,7 +397,7 @@ if __name__ == "__main__":
     
         # Decrease learning rate if specified
         if settings['dec_lr'] : #and epoch % settings['dec_lr'] == 0
-            decrease_lr(opt, settings['verbose'],tot_epochs= tot_epochs,
+            decrease_lr(opt, True,tot_epochs= tot_epochs,
              epoch = epoch, lower_lr = settings['init_lr'], dec_lr_factor = settings['dec_lr_factor'])
         
         '''

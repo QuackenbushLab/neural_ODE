@@ -22,7 +22,6 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        pow = 1
-        shifted_input = 10*(input-0.5)**pow  
+        shifted_input = 10*(input-0.5)
         abs_shifted_input = torch.abs(shifted_input)
-        return(shifted_input/(1+abs_shifted_input))          
+        return(shifted_input/(1+abs_shifted_input))
