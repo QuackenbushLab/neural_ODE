@@ -138,7 +138,7 @@ class ODENet(nn.Module):
         #joint = self.net_alpha_combine(sums_prods_concat)
         joint = self.net_alpha_combine(sums)/10
         carry_cap = torch.sigmoid(joint)
-        final =  (torch.sigmoid(carry_cap - y)  - 0.5)
+        final =  y*(torch.sigmoid(carry_cap - y)  - 0.5)
         #final = joint - y
         return(final) 
 
