@@ -94,8 +94,8 @@ class ODENet(nn.Module):
         # Initialize the layers of the model
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
-        #        nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)   #0.05  
+                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)   #0.05  
 
         #for n in self.net_prods.modules():
         #    if isinstance(n, nn.Linear):
