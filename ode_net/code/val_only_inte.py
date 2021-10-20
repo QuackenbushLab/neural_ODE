@@ -25,6 +25,14 @@ from visualization_inte import *
 torch.set_num_threads(8) #since we are on c5.2xlarge
 
 
+def my_r_squared(output, target):
+    x = output
+    y = target
+    vx = x - torch.mean(x)
+    vy = y - torch.mean(y)
+    my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
+    return(my_corr**2)
+
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target_full, n_val = data_handler.get_validation_set()
 
@@ -65,8 +73,9 @@ def true_loss(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
         
         # Calculate true mean loss
-        loss =  torch.mean(torch.abs((predictions - target)/target)) #regulated_loss(predictions, target, t)
-    return loss
+        loss =  torch.mean(torch.abs((predictions - target)/target))
+        var_explained = my_r_squared(predictions, target)
+    return [loss, var_explained]
 
 
 
@@ -155,13 +164,14 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     
     #val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    true_loss = true_loss(odenet, data_handler, settings['method'])
+    loss_calcs = true_loss(odenet, data_handler, settings['method'])
     
     #print(val_loss_list)
     #print("Validation loss {:.2%}, using {} points".format(val_loss_list[0], val_loss_list[1]))
-    print("True loss {:.2%}".format(true_loss))
+    print("True loss {:.2%}".format(loss_calcs[0]))
+    print("Variance explained {:.2%}".format(loss_calcs[1]))
     
-    np.savetxt('{}val_loss.csv'.format(output_root_dir), [true_loss], delimiter=',')
+    np.savetxt('{}val_loss.csv'.format(output_root_dir), [loss_calcs], delimiter=',')
     print("DONE!")
 
   
