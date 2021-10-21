@@ -18,8 +18,6 @@ ODENet(
         prods = torch.exp(self.net_prods(y))
         sums_prods_concat = torch.cat((sums, prods), dim= - 1)
         joint = self.net_alpha_combine(sums_prods_concat)
-        #alpha = torch.sigmoid(self.model_weights)
-        #joint =  (1-alpha)*prods + alpha*sums
         final = torch.relu(self.gene_multipliers)*(joint  - y) 
         return(final) 
 

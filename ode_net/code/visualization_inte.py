@@ -81,7 +81,7 @@ class Visualizator1D(Visualizator):
 
         self.time_span = (np.min([np.min(time[:]) for time in times]),
                           np.max([np.max(time[:]) for time in times]))
-        #self.time_span = (0.0, 11.0)
+        #self.time_span = (0.0, 100.0)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -132,7 +132,7 @@ class Visualizator1D(Visualizator):
                     else:
                         plot_col = "blue"    
                     #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
-                    ax.plot(times[sample_idx].flatten()[0:] , approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1) #  #  self.extrap_timepoints
+                    ax.plot(times[sample_idx].flatten()[0:] , approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1) # #  self.extrap_timepoints
                     ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), 'ko', alpha=0.2)
                     ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5) #
                    

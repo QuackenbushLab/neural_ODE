@@ -23,9 +23,10 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shifted_input = 50*(input-0.5)
+        shift = 0.5
+        shifted_input =500*(input- shift) #500*
         abs_shifted_input = torch.abs(shifted_input)
-        return(1/50*shifted_input/(1+abs_shifted_input))  
+        return(1/500*shifted_input/(1+abs_shifted_input))   #1/500*
 
 class LogShiftedSoftSignMod(nn.Module):
     def __init__(self):
@@ -76,7 +77,7 @@ class ODENet(nn.Module):
             self.net_sums.add_module('linear_out', nn.Linear(ndim, neurons, bias = True))
 
             self.net_alpha_combine = nn.Sequential()
-            self.net_alpha_combine.add_module('linear_out',nn.Linear(2*neurons, ndim, bias = False))
+            self.net_alpha_combine.add_module('linear_out',nn.Linear(neurons, ndim, bias = False))
           
           
             self.gene_multipliers = nn.Parameter(torch.rand(1,ndim)*0.5, requires_grad= True)
@@ -120,13 +121,14 @@ class ODENet(nn.Module):
         
     def forward(self, t, y):
         sums = self.net_sums(y)
-        prods = torch.exp(self.net_prods(y))
-        sums_prods_concat = torch.cat((sums, prods), dim= - 1)
-        joint = self.net_alpha_combine(sums_prods_concat)
-        #joint = self.net_alpha_combine(prods)
+        #prods = torch.exp(self.net_prods(y))
+        #sums_prods_concat = torch.cat((sums, prods), dim= - 1)
+        #joint = self.net_alpha_combine(sums_prods_concat)
+        joint = self.net_alpha_combine(sums)
         carry_cap = torch.sigmoid(joint)
         final =  y*(torch.sigmoid(carry_cap - y)  - 0.5)
         #final = joint - y
+        #final = torch.sigmoid(joint - y) - 0.5
         return(final) 
 
     def save(self, fp):
