@@ -37,7 +37,7 @@ class DataHandler:
         self.epoch_done = False
         self.img_save_dir = img_save_dir
         self.init_bias_y = init_bias_y
-        self.num_trajs_to_plot = 3#7
+        self.num_trajs_to_plot = 10
         #self.noise = noise
 
         self._calc_datasize()
@@ -47,7 +47,7 @@ class DataHandler:
         elif batch_type == 'trajectory':
             self._split_data_traj(val_split)
             self._create_validation_set_traj()
-            self.compare_train_val_plot() #only plot it trajectory
+            #self.compare_train_val_plot() #only plot it trajectory
         elif batch_type == 'batch_time':
             self._split_data_time(val_split)
             self._create_validation_set_time()

@@ -15,7 +15,7 @@ def _convert_arguments(settings):
     converted_settings = {}
     converted_settings['viz'] = settings.getboolean('viz')
     converted_settings['viz_every_iteration'] = False
-    converted_settings['verbose'] = True
+    converted_settings['verbose'] = False
     converted_settings['method'] = settings['method']
     converted_settings['neurons_per_layer'] = settings.getint('neurons_per_layer')
     converted_settings['optimizer'] = settings['optimizer']
@@ -25,8 +25,8 @@ def _convert_arguments(settings):
     converted_settings['batch_time'] = 99999
     converted_settings['batch_time_frac'] = 99999
 
-    converted_settings['dec_lr'] = False
-    converted_settings['dec_lr_factor'] = 999.00
+    converted_settings['dec_lr'] = settings.getboolean('dec_lr')
+    converted_settings['dec_lr_factor'] = settings.getfloat('dec_lr_factor')
     converted_settings['init_lr'] = settings.getfloat('init_lr')
     converted_settings['weight_decay'] = settings.getfloat('weight_decay')
 

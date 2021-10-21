@@ -89,7 +89,7 @@ def validation(odenet, data_handler, method, explicit_time):
         targets = torch.cat(targets, dim = 0).to(data_handler.device) 
         loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
         
-        #print("tau_mean =", torch.mean(torch.sigmoid(odenet.gene_taus)))
+        #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers)))
         
     return [loss, n_val]
 
@@ -107,23 +107,14 @@ def true_loss(odenet, data_handler, method):
         loss =  [torch.mean(torch.abs((predictions - target)/target)),torch.mean((predictions - target) ** 2)] #regulated_loss(predictions, target, t)
     return loss
 
-'''
-def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr, one_time_drop = 0):
-    lr_step_size = (10*lower_lr-lower_lr)/(tot_epochs/2)
-    if epoch <= tot_epochs/2:
-        lr_direction = 1
-        dir_string = "Increasing"
-    else:
-        lr_direction = -1
-        dir_string = "Decreasing"
+
+def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
+    dir_string = "Decreasing"
     for param_group in opt.param_groups:
-        if one_time_drop == 0:
-            param_group['lr'] = param_group['lr']+ lr_direction * lr_step_size
-        else:
-            param_group['lr'] = one_time_drop
+        param_group['lr'] = param_group['lr'] * dec_lr_factor
     if verbose:
         print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
-'''
+
 
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
@@ -148,7 +139,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name = "calico_1135highvargenes_3samples_6T"
+clean_name = "calico_1135highvargenes_169samples_6T"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
 
@@ -214,7 +205,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -241,16 +232,16 @@ if __name__ == "__main__":
                 {'params': odenet.net_sums.linear_out.bias},
                 #{'params': odenet.net_prods.linear_out.weight},
                 #{'params': odenet.net_prods.linear_out.bias},
-                {'params': odenet.net_alpha_combine.linear_out.weight},
+                {'params': odenet.net_alpha_combine.linear_out.weight}
                 #{'params': odenet.gene_multipliers.linear_1.weight,'lr': 1*settings['init_lr']},
                 #{'params': odenet.gene_multipliers.linear_out.weight,'lr': 1*settings['init_lr']},
-                {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']},
+               # {'params': odenet.gene_multipliers,'lr': 1/2*settings['init_lr']},
                 #{'params': odenet.gene_taus,'lr': 5*settings['init_lr']}
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-04, 
+    factor=0.9, patience=3, threshold=1e-05, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     '''
@@ -293,7 +284,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [5, 15, 25, 40, 50, 80, 120, 160, 200, 240, 300, 350, tot_epochs]
+    rep_epochs = [5, 15, 25, 40, 50, 80, 120, 160, 200,220, 240, 300, 350, tot_epochs]
     zeroth_drop_done = False
     first_drop_done = False 
     second_drop_done = False
@@ -303,7 +294,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 15
+    epochs_to_fail_to_terminate = 25
     all_lrs_used = []
 
     #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
@@ -315,9 +306,9 @@ if __name__ == "__main__":
         data_handler.reset_epoch()
         #visualizer.save(img_save_dir, epoch) #IH added to test
         this_epoch_total_train_loss = 0
+        print()
+        print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
         if settings['verbose']:
-            print()
-            print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
@@ -404,12 +395,12 @@ if __name__ == "__main__":
         #print("Saving intermediate model")
         #save_model(odenet, intermediate_models_dir, 'model_at_epoch{}'.format(epoch))
     
-        '''
         # Decrease learning rate if specified
-        if settings['dec_lr'] and epoch % settings['dec_lr'] == 0:
-            decrease_lr(opt, settings['verbose'],tot_epochs= tot_epochs,
-             epoch = epoch, lower_lr = settings['init_lr'])
+        if settings['dec_lr'] : #and epoch % settings['dec_lr'] == 0
+            decrease_lr(opt, True,tot_epochs= tot_epochs,
+             epoch = epoch, lower_lr = settings['init_lr'], dec_lr_factor = settings['dec_lr_factor'])
         
+        '''
         #Decrease learning rate as a one-time thing:
         if (train_loss < 9*10**(-3) and zeroth_drop_done == False) or (epoch == 25 and zeroth_drop_done == False):
             decrease_lr(opt, settings['verbose'], one_time_drop= 5*10**(-3))
@@ -441,8 +432,8 @@ if __name__ == "__main__":
                 rep_epochs_mu_losses.append(0)
                 #rep_epochs_mu_losses.append(true_loss_of_min_val_model.item())
             else:
-                print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
-                #print("True loss of best training model (MSE) = ", 0)
+                #print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
+                print("True loss of best training model (MSE) = ", 0)
             print("Saving MSE plot...")
             plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
             

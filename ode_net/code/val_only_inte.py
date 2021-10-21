@@ -79,9 +79,9 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name = "chalmers_350genes_150samples_earlyT_0bimod_1initvar"
+clean_name = "calico_1135highvargenes_169samples_6T"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     #print(data_handler.dim)
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
-    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
     odenet.load(pretrained_model_file)
     
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
@@ -154,14 +154,14 @@ if __name__ == "__main__":
             visualizer.plot()
             visualizer.save(img_save_dir, 0)
     
-    val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
+    #val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
     true_loss = true_loss(odenet, data_handler, settings['method'])
     
     #print(val_loss_list)
-    print("Validation loss {:.2%}, using {} points".format(val_loss_list[0], val_loss_list[1]))
+    #print("Validation loss {:.2%}, using {} points".format(val_loss_list[0], val_loss_list[1]))
     print("True loss {:.2%}".format(true_loss))
     
-    np.savetxt('{}val_loss.csv'.format(output_root_dir), [val_loss_list[0]], delimiter=',')
+    np.savetxt('{}val_loss.csv'.format(output_root_dir), [true_loss], delimiter=',')
     print("DONE!")
 
   
