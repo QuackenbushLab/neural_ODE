@@ -24,9 +24,9 @@ class SoftsignMod(nn.Module):
 
     def forward(self, input):
         shift = 0.5
-        shifted_input =500*(input- shift) #500*
+        shifted_input =200*(input- shift) #500*
         abs_shifted_input = torch.abs(shifted_input)
-        return(1/500*shifted_input/(1+abs_shifted_input))   #1/500*
+        return(shifted_input/(1+abs_shifted_input))   #1/500*
 
 class LogShiftedSoftSignMod(nn.Module):
     def __init__(self):
@@ -124,7 +124,7 @@ class ODENet(nn.Module):
         #prods = torch.exp(self.net_prods(y))
         #sums_prods_concat = torch.cat((sums, prods), dim= - 1)
         #joint = self.net_alpha_combine(sums_prods_concat)
-        joint = self.net_alpha_combine(sums)
+        joint = self.net_alpha_combine(sums)/200
         carry_cap = torch.sigmoid(joint)
         final =  y*(torch.sigmoid(carry_cap - y)  - 0.5)
         #final = joint - y
