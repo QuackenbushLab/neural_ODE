@@ -11,11 +11,3 @@ ODENet(
     (linear_out): Linear(in_features=120, out_features=6175, bias=False)
   )
 )
-
-
-    def forward(self, t, y):
-        sums = self.net_sums(y)
-        joint = self.net_alpha_combine(sums)/200
-        carry_cap = torch.sigmoid(joint)
-        final =  y*(torch.sigmoid(carry_cap - y)  - 0.5)
-        return(final) 
