@@ -230,8 +230,8 @@ if __name__ == "__main__":
         opt = optim.Adam([
                 {'params': odenet.net_sums.linear_out.weight}, 
                 {'params': odenet.net_sums.linear_out.bias},
-            #    {'params': odenet.net_prods.linear_out.weight},
-            #    {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+                {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
                 {'params': odenet.gene_multipliers,'lr': 5*settings['init_lr']}
                 
