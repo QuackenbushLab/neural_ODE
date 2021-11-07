@@ -139,9 +139,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" #"y5_384genes_17T"
+clean_name =  "calico_6175genes_171samples_6T" #"y5_384genes_17T"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -233,7 +233,7 @@ if __name__ == "__main__":
             #    {'params': odenet.net_prods.linear_out.weight},
             #    {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
-                {'params': odenet.gene_multipliers,'lr': 5*settings['init_lr']}
+                {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']}
                 
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
