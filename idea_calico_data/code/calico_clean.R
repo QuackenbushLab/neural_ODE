@@ -144,7 +144,8 @@ datamat <- datamat[, .SD[1:(.N+1)],
                    by=.(sample_id, reg_changed)][is.na(GENE), 
                                        (time_points) := as.list(time_vals)]
 datamat[,c("sample_id","reg_changed","GENE") := NULL]
-top_row <- as.list(rep(NA, length(time_vals)))
+datamat[, c("time_0", "time_5"):= NULL]
+top_row <- as.list(rep(NA, length(time_vals)-2))
 top_row[[1]] <- length(all_genes)
 top_row[[2]] <- length(samples_to_keep)
 datamat <- rbind(top_row, datamat)
@@ -207,7 +208,7 @@ datamat_small_no05<- rbind(top_row, datamat_small_no05)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/clean_data/calico_6175genes_171samples_8T.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/clean_data/calico_6175genes_171samples_6T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
