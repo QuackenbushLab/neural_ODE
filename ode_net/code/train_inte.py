@@ -87,8 +87,8 @@ def validation(odenet, data_handler, method, explicit_time):
         # Calculate validation loss
         predictions = torch.cat(predictions, dim = 0).to(data_handler.device) #IH addition
         targets = torch.cat(targets, dim = 0).to(data_handler.device) 
-        loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
-        
+        #loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
+        loss = torch.max(torch.abs(predictions - target))
         #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers)))
         
     return [loss, n_val]
@@ -125,7 +125,8 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     for index, (time, batch_point) in enumerate(zip(t, batch)):
        # print(torch.min(batch_point),torch.max(batch_point))
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
-    loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
+    #loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
+    loss = torch.max(torch.abs(predictions - target)) 
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss
