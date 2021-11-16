@@ -88,7 +88,7 @@ def validation(odenet, data_handler, method, explicit_time):
         predictions = torch.cat(predictions, dim = 0).to(data_handler.device) #IH addition
         targets = torch.cat(targets, dim = 0).to(data_handler.device) 
         #loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
-        loss = torch.max(torch.abs(predictions - target))
+        loss = torch.mean((predictions - targets)**2)
         #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers)))
         
     return [loss, n_val]
@@ -126,7 +126,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
        # print(torch.min(batch_point),torch.max(batch_point))
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
     #loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
-    loss = torch.max(torch.abs(predictions - target)) 
+    loss = torch.mean((predictions - target)**2) 
     loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return loss
@@ -140,9 +140,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "calico_6175genes_171samples_6T" #"y5_384genes_17T"
+clean_name =  "y5_384genes_17T" #"calico_6175genes_171samples_6T
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -231,16 +231,16 @@ if __name__ == "__main__":
         opt = optim.Adam([
                 {'params': odenet.net_sums.linear_out.weight}, 
                 {'params': odenet.net_sums.linear_out.bias},
-            #    {'params': odenet.net_prods.linear_out.weight},
-            #    {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+                {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
-               # {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']}
+                {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']}
                 
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-05, 
+    factor=0.9, patience=3, threshold=1e-04, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     '''
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 25
+    epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
     #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
