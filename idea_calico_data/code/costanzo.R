@@ -11,3 +11,6 @@ sig_pairs <- unique(sga[p_val < 0.05, .(pair)])
 write.csv(sig_pairs,
           "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/costanzo_edges.csv" ,
           row.names = F)
+
+
+
