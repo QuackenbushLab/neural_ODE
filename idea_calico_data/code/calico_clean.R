@@ -59,7 +59,7 @@ full_data <- merge(full_data,
 samples_to_keep_small <- full_data[reg_changed != GENE, 
           .(mean_expr = mean(abs(exprs_ratio))),
           by = .(sample_id, GENE)][,.(perc_non_zero_genes = sum(mean_expr != 0)/.N),
-                                   by = sample_id][order(perc_non_zero_genes)][1:20,sample_id]
+                                   by = sample_id][order(-perc_non_zero_genes)][1:20,sample_id]
 
 all_regs_changed <- full_data[, unique(reg_changed)]
 all_non_regs <- full_data[, unique(GENE)]
