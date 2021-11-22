@@ -89,7 +89,7 @@ def validation(odenet, data_handler, method, explicit_time):
         targets = torch.cat(targets, dim = 0).to(data_handler.device) 
         #loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
         loss = torch.mean((predictions - targets)**2)
-        #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers)))
+        #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))
         
     return [loss, n_val]
 
@@ -234,7 +234,7 @@ if __name__ == "__main__":
                # {'params': odenet.net_prods.linear_out.weight},
                # {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
-               # {'params': odenet.gene_multipliers,'lr': 1*settings['init_lr']}
+                #{'params': odenet.gene_multipliers,'lr': 1000*settings['init_lr']}
                 
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
