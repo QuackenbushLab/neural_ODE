@@ -37,7 +37,7 @@ class DataHandler:
         self.epoch_done = False
         self.img_save_dir = img_save_dir
         self.init_bias_y = init_bias_y
-        self.num_trajs_to_plot = 7
+        self.num_trajs_to_plot = 20
         #self.noise = noise
 
         self._calc_datasize()
@@ -303,7 +303,7 @@ class DataHandler:
                 _y = mu0[j]
             
             _y = mu1[j] #remove later
-            y = odeint(odenet, _y, extrap_time_points_pt  , method=method) + self.init_bias_y #   self.time_pt[j][0:]
+            y = odeint(odenet, _y,  self.time_pt[j][0:] , method=method) + self.init_bias_y #    extrap_time_points_pt
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples, extrap_time_points
