@@ -24,7 +24,7 @@ from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
-#torch.set_num_threads(8) #CHANGE THIS!
+torch.set_num_threads(8) #CHANGE THIS!
 
 def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.figure()
@@ -140,7 +140,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "calico_6175genes_20highvarsamples_6T" #"
+clean_name =  "calico_6175genes_171samples_6T" #"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
 
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-05, 
+    factor=0.9, patience=3, threshold=1e-06, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     '''

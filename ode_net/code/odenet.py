@@ -129,6 +129,7 @@ class ODENet(nn.Module):
         carry_cap = torch.sigmoid(joint)
         final =  y*(torch.sigmoid(carry_cap - y)  - 0.5)
         #final = torch.relu(self.gene_multipliers)*(joint - y)
+        #final = joint - y
         return(final) 
 
     def save(self, fp):
