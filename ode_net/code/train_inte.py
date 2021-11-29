@@ -140,9 +140,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "calico_6175genes_171samples_6T" #"
+clean_name =  "yeast_cdc15_787genes_1sample_24T" #"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -231,26 +231,19 @@ if __name__ == "__main__":
         opt = optim.Adam([
                 {'params': odenet.net_sums.linear_out.weight}, 
                 {'params': odenet.net_sums.linear_out.bias},
-               # {'params': odenet.net_prods.linear_out.weight},
-               # {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+                {'params': odenet.net_prods.linear_out.bias},
                 {'params': odenet.net_alpha_combine.linear_out.weight},
-                #{'params': odenet.gene_multipliers,'lr': 1000*settings['init_lr']}
+                {'params': odenet.gene_multipliers,'lr': 5*settings['init_lr']}
                 
             ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-06, 
+    factor=0.9, patience=3, threshold=1e-03, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
-    '''
-    odenet.net_sums.linear_out.weight.requires_grad_(False)
-    odenet.net_sums.linear_out.bias.requires_grad_(False)
-    odenet.net_prods.linear_out.weight.requires_grad_(False)
-    odenet.net_prods.linear_out.bias.requires_grad_(False)
-    odenet.gene_multipliers.requires_grad_(False)
-    '''
-
+    
     # Init plot
     if settings['viz']:
         visualizer = Visualizator1D(data_handler, odenet, settings)

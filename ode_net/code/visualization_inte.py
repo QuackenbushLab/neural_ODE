@@ -49,13 +49,13 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        #self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
         #LOWVAR : 
         #self.genes_to_viz = [271, 1705, 4724, 1219, 5794, 3334, 4264, 2732, 4676, 1661, 4484, 3681, 2507, 2072, 5417, 5632, 5204, 3989, 5279, 6102, 3103, 5685, 6163, 273, 2742, 272, 3136, 1698, 5745, 1362]
         
         #HIGHVAR : 
-        self.genes_to_viz = [3214, 902, 2762, 903, 981, 1498, 3438, 1781, 1780, 1778, 2990, 5357, 4332, 1053, 877, 1612, 1288, 4334, 4725, 3847, 2983, 1488, 1335, 235, 4525, 3133, 1513, 2999, 1769, 628]
+        #self.genes_to_viz = [3214, 902, 2762, 903, 981, 1498, 3438, 1781, 1780, 1778, 2990, 5357, 4332, 1053, 877, 1612, 1288, 4334, 4725, 3847, 2983, 1488, 1335, 235, 4525, 3133, 1513, 2999, 1769, 628]
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
@@ -84,9 +84,9 @@ class Visualizator1D(Visualizator):
         self.EXTRA_WIDTH_TRAJ = 0.2
         self.EXTRA_WIDTH_DYN = 1
 
-        self.time_span = (np.min([np.min(time[:]) for time in times]),
-                          np.max([np.max(time[:]) for time in times]))
-        #self.time_span = (0.0, 100.0)
+        #self.time_span = (np.min([np.min(time[:]) for time in times]),
+        #                  np.max([np.max(time[:]) for time in times]))
+        self.time_span = (0.0, 1500.0)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -104,8 +104,8 @@ class Visualizator1D(Visualizator):
             upper_lim = 1.3
             lower_lim = 0.4
         else: #i.e. linear 
-            upper_lim = 1.2 #3 #1.2 #6+14 
-            lower_lim = -0.2 #-3 #-0.2 #-6+10 
+            upper_lim = 3 #3 #1.2 #6+14 
+            lower_lim = -3 #-3 #-0.2 #-6+10 
 
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
@@ -137,7 +137,7 @@ class Visualizator1D(Visualizator):
                     else:
                         plot_col = "blue"    
                     #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), marker = "o", markerfacecolor = plot_col, markeredgecolor= plot_col, alpha=0.5)
-                    ax.plot(times[sample_idx].flatten()[0:] , approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1) # #  self.extrap_timepoints
+                    ax.plot(self.extrap_timepoints , approx_traj[:,:,gene].numpy().flatten(),color = plot_col, linestyle = "dashdot", lw=1) #times[sample_idx].flatten()[0:]  #  
                     ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten(), 'ko', alpha=0.2)
                     ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5) #
                    

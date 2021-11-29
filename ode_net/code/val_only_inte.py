@@ -88,9 +88,9 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name = "calico_6175genes_20highvarsamples_6T"
+clean_name =  "yeast_cdc15_787genes_1sample_24T" #"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/idea_calico_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
