@@ -1,14 +1,53 @@
 library(data.table)
+library(zoo)
+
+my_LOCF <- function(vec){
+  if(is.na(vec[1])){
+    first_non_blank_idx = which(!is.na(vec))[1]
+    vec[1] <- vec[first_non_blank_idx] #NOCB
+  }
+  
+  new_vec <- na.locf(vec, na.rm = FALSE) #LOCF
+  
+  return(new_vec)  
+}
 
 experiment_extractor <- function(this_data, exper){
-  X = dcast(this_data[experiment == exper], 
-        gene+experiment ~ time, 
-        value.var = "value")
+  spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/spellman_id_genes.csv")
+  spellman_id_genes <- spellman_id_genes[, .(ORF, SGD)]
+  subset_data <- merge(this_data[experiment == exper], spellman_id_genes, 
+                       by.x = "gene", by.y = "ORF" )
+  full_blank_genes <-  subset_data[,all(is.na(value)),by = gene][V1 == TRUE, gene]
+  subset_data <- subset_data[!gene %in% full_blank_genes]
+  subset_data[, 
+                 expression_LOCF := my_LOCF(value),
+                 by = .(gene)]
+  
+  X = dcast(subset_data, 
+        SGD+experiment ~ time, 
+        value.var = "expression_LOCF")
+  setnames(X, old = "SGD", new = "gene")
   
   time_cols <- setdiff(names(X), c("gene", "experiment"))
+  time_cols_new <- paste("time", time_cols, sep="_")
   setnames(X, old = time_cols, 
-           new = paste("time", time_cols, sep="_"))
-  return(X)
+           new = time_cols_new)
+  
+  stage_times <- as.numeric(time_cols)
+  X <- X[, .SD[1:(.N+1)],
+         by=experiment][is.na(gene),
+                        (time_cols_new) := as.list(stage_times)]
+  
+  gene_names <- X[!is.na(gene), unique(gene)]
+  X[, c("gene", "experiment") := NULL]
+  
+  top_row <- as.list(rep(NA, length(time_cols)))
+  top_row[[1]] <- length(gene_names)
+  top_row[[2]] <- 1
+  
+  X <- rbind(top_row, X)
+  return(list(transformed_data = X,
+              gene_names = gene_names))
 }
 
 full_data <- read.delim("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/combined.txt",
@@ -35,37 +74,17 @@ full_data[, variable:= NULL]
 
 full_data[, table(experiment)]
 
-cdc15_data <- experiment_extractor(full_data, "cdc15")
-cdc28_data <- experiment_extractor(full_data, "cdc28")
-
-#y5_data <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/y5_gene_exp.csv")
-#common_genes <- cdc28_data[toupper(gene) %in% toupper(y5_data$Gene), as.character(gene)]
-#plot(as.matrix(cdc28_data[toupper(gene) %in% common_genes, 3:19]),
-#     as.matrix(y5_data[toupper(Gene) %in% common_genes, 3:19])
-#     )
-alpha_data <- experiment_extractor(full_data, "alpha")
+cdc15_data_list <- experiment_extractor(full_data, "cdc15")
+#cdc28_data <- experiment_extractor(full_data, "cdc28")
+#alpha_data <- experiment_extractor(full_data, "alpha")
 
 
-time_cols <- c("c1","c2")
-stage_times <- c(1,2)
-
-datamat <- perturbed_inits[, .SD[1:(.N+1)],
-                   by = .(pert_gene)]
-
-
-datamat[is.na(c1),
-        (time_cols) := as.list(stage_times)]
-
-datamat[,c("pert_gene") := NULL]
-top_row <- as.list(rep(NA, 2))
-top_row[[1]] <- num_genes
-top_row[[2]] <- num_genes
-
-datamat <- rbind(top_row, datamat)
-
-write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_perturbation_inits.csv", 
+write.table( cdc15_data_list$transformed_data,
+             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc15_787genes_1sample_24T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
+write.csv(cdc15_data_list$gene_names,
+          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc15_names.csv",
+          row.names = F)
