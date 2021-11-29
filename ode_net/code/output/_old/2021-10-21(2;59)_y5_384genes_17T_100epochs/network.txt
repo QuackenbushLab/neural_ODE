@@ -1,0 +1,28 @@
+ODENet(
+  (net_sums): Sequential(
+    (activation_0): SoftsignMod()
+    (linear_out): Linear(in_features=384, out_features=80, bias=True)
+  )
+  (net_alpha_combine): Sequential(
+    (linear_out): Linear(in_features=80, out_features=384, bias=False)
+  )
+)
+
+
+    def forward(self, t, y):
+        sums = self.net_sums(y)
+        joint = self.net_alpha_combine(sums)
+        final = joint - y
+        return(final) 
+
+
+
+class SoftsignMod(nn.Module):
+    def __init__(self):
+        super().__init__() # init the base class
+        #self.shift = shift
+
+    def forward(self, input):
+        shifted_input =(input- 0.6) #500*
+        abs_shifted_input = torch.abs(shifted_input)
+        return(shifted_input/(1+abs_shifted_input))         
