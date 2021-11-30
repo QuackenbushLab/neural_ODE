@@ -23,7 +23,7 @@ class SoftsignMod(nn.Module):
         #self.shift = shift
 
     def forward(self, input):
-        shift = 0 #0.5
+        shift = 0.5
         shifted_input =(input- shift) #500*
         abs_shifted_input = torch.abs(shifted_input)
         return(shifted_input/(1+abs_shifted_input))   #1/500*
@@ -33,7 +33,7 @@ class LogShiftedSoftSignMod(nn.Module):
         super().__init__() # init the base class
 
     def forward(self, input):
-        shifted_input =  input - 0 #(input-0.5)
+        shifted_input =  input - 0.5 
         abs_shifted_input = torch.abs(shifted_input)
         soft_sign_mod = shifted_input/(1+abs_shifted_input)
         return(torch.log1p(soft_sign_mod))  
