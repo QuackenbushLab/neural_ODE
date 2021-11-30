@@ -78,6 +78,7 @@ full_data[, table(experiment)]
 cdc15_data_list <- experiment_extractor(full_data, "cdc15")
 cdc28_data_list <- experiment_extractor(full_data, "cdc28")
 alpha_data_list <- experiment_extractor(full_data, "alpha")
+elu_data_list <- experiment_extractor(full_data, "elu")
 
 
 write.table( cdc15_data_list$transformed_data,
@@ -111,4 +112,14 @@ write.table(alpha_data_list$transformed_data,
             na = "")
 write.csv(alpha_data_list$gene_names,
           "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/alpha_names.csv",
+          row.names = F)
+
+write.table(elu_data_list$transformed_data,
+            "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_elu_787genes_1sample_14T.csv", 
+            sep=",",
+            row.names = FALSE,
+            col.names = FALSE,
+            na = "")
+write.csv(elu_data_list$gene_names,
+          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/elu_names.csv",
           row.names = F)
