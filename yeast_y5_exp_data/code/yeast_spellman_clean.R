@@ -77,7 +77,7 @@ full_data[, table(experiment)]
 
 cdc15_data_list <- experiment_extractor(full_data, "cdc15")
 cdc28_data_list <- experiment_extractor(full_data, "cdc28")
-#alpha_data <- experiment_extractor(full_data, "alpha")
+alpha_data_list <- experiment_extractor(full_data, "alpha")
 
 
 write.table( cdc15_data_list$transformed_data,
@@ -103,3 +103,12 @@ write.csv(cdc28_data_list$gene_names,
 common_genes <- intersect(cdc15_data_list$gene_names,
                           cdc28_data_list$gene_names)
 
+write.table(alpha_data_list$transformed_data,
+            "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_alpha_787genes_1sample_18T.csv", 
+            sep=",",
+            row.names = FALSE,
+            col.names = FALSE,
+            na = "")
+write.csv(alpha_data_list$gene_names,
+          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/alpha_names.csv",
+          row.names = F)
