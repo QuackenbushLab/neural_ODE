@@ -19,6 +19,7 @@ experiment_extractor <- function(this_data, exper){
                        by.x = "gene", by.y = "ORF" )
   full_blank_genes <-  subset_data[,all(is.na(value)),by = gene][V1 == TRUE, gene]
   subset_data <- subset_data[!gene %in% full_blank_genes]
+ # subset_data <- subset_data[SGD %in% common_genes]
   subset_data[, 
                  expression_LOCF := my_LOCF(value),
                  by = .(gene)]
@@ -80,17 +81,17 @@ cdc28_data_list <- experiment_extractor(full_data, "cdc28")
 
 
 write.table( cdc15_data_list$transformed_data,
-             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc15_787genes_1sample_24T.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc15_786genes_1sample_24T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
 write.csv(cdc15_data_list$gene_names,
-          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc15_names.csv",
+          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc1528_names.csv",
           row.names = F)
 
 write.table(cdc28_data_list$transformed_data,
-             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc28_797genes_1sample_17T.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc28_786genes_1sample_17T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
@@ -98,3 +99,7 @@ write.table(cdc28_data_list$transformed_data,
 write.csv(cdc28_data_list$gene_names,
           "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc28_names.csv",
           row.names = F)
+
+common_genes <- intersect(cdc15_data_list$gene_names,
+                          cdc28_data_list$gene_names)
+
