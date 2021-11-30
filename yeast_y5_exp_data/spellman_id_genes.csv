@@ -193,7 +193,6 @@ unknown,unknown,S,YIL144W,TID3,TID3,lethal,New,"Protein with similarity to myosi
 unknown,unknown,M/G1,YDL169C,UGX2,UGX2,undocumented,New,Protein of unknown function ,1.652
 unknown,unknown,S/G2,YPL025C,YPL025C,YPL025C,undocumented,New,Protein of unknown function ,1.653
 sterol metabolism,C-5 sterol desaturase,S/G2,YLR056W,ERG3,ERG3,viable,New,"C-5 sterol desaturase, an iron non-heme oxygen-requiring enzyme of the ergosterol biosynthesis pathway ",1.657
-,,G2/M,YCRX05W,,,irrelevant,New,?,1.66
 unknown,unknown,M/G1,YDL089W,YDL089W,YDL089W,undocumented,New,novel,1.66
 mRNA 3'-end processing,cleavage/polyadenylation factor CF IA component,S,YOR250C,CLP1,CLP1,undocumented,New,"Subunit of cleavage and polyadenylation factor IA,required for 3'-end processing of pre-mRNA ",1.664
 unknown,major facilitator superfamily,S/G2,YPL264C,YPL264C,YPL264C,undocumented,New,"Protein of unknown function, member of the major facilitator superfamily (MFS) ",1.669
@@ -304,7 +303,6 @@ unknown,unknown,G1,YLR380W,YLR380W,YLR380W,undocumented,New,Protein of unknown f
 oxidative stress response (putative),flavohemoglobin,M/G1,YGR234W,YHB1,YHB1,viable,New,"Flavohemoglobin of unknown function, distantly related to animal hemoglobins ",1.972
 sporulation,putative cell wall component,G2/M,YOR313C,SPS4,SPS4,viable,New,"Protein expressed in mid-late (8-14 hr) sporulation, possible cell wall component ",1.976
 unknown,topoisomerase I interacting factor,G1,YNL273W,TOF1,TOF1,viable,New,Topoisomerase I interacting factor ,1.978
-,,S/G2,YCL062W,,YCL062W,irrelevant,New,This is now part of YCL063w,1.98
 unknown,unknown,G1,YIL025C,YIL025C,YIL025C,undocumented,New,Protein of unknown function ,1.98
 unknown,similar to subtelomerically-encoded proteins,G2/M,YHL040C,YHL040C,YHL040C,undocumented,New,Member of major facilitator superfamily (MFS) multidrug-resistance (MFS-MDR) protein family ,1.984
 unknown,similar to Gas1p,G1,YLR343W,YLR343W,YLR343W,viable,New,Protein with strong similarity to Gas1p,1.987
@@ -712,7 +710,6 @@ cell cycle,anaphase inhibitor (putative),G1,YDR113C,PDS1,PDS1,viable,New,Protein
 cell cycle,G1/S cyclin,G1,YDL127W,PCL2,PCL2,viable,Known,"Cyclin, found partly in association with Pho85p ",6.332
 unknown,unknown,G2/M,YML033W,YML033W,YML033W,undocumented,New,has weak similarity to Ydr458p ,6.421
 mitosis,activator of the anaphase promoting complex,G2/M,YGL116W,CDC20,CDC20,lethal,Known,adaptor for APC,6.425
-,,G1,YCL060C,,YCL060C,irrelevant,New,now combined into YCL061C,6.432
 unknown,similar to plant PR-pathogen related proteins,G1,YJL078C,PRY3,PRY3,undocumented,New,has strong similarity to Pry1p and Pry2p ,6.46
 cell cycle,Cdc28p kinase inhibitor,G2/M,YJL157C,FAR1,FAR1,viable,Known, Inhibitor of Cdc28p/Cln1p and Cdc28p/Cln2p complexes involved in cell cycle arrest for mating,6.488
 "bud site selection, bipolar",unknown,G1,YGR041W,BUD9,BUD9,viable,New,required for bud site selection but not for default mating,6.509
