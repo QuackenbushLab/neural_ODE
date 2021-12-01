@@ -119,11 +119,17 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
+    not_nan_idx = [i for i in range(len(t)) if not torch.any(torch.isnan(t[i]))]
+    t = t[not_nan_idx]
+    #not_nan_idx.pop()
+    batch = batch[not_nan_idx]
+    target = target[not_nan_idx]
+    
+
     init_bias_y = data_handler.init_bias_y
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
-       # print(torch.min(batch_point),torch.max(batch_point))
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
     #loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
     loss = torch.mean((predictions - target)**2) 
@@ -140,7 +146,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "yeast_cdc28_797genes_1sample_17T" #"
+clean_name =  "yeast_cdc1528_786genes_2samples_varyT" #"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
 
