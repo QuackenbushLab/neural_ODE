@@ -13,8 +13,8 @@ my_LOCF <- function(vec){
 }
 
 experiment_extractor <- function(this_data, exper){
-  #spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/spellman_id_genes.csv")
-  spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/all_spellman_orftogene.csv")
+  spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/spellman_id_genes.csv")
+  #spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/all_spellman_orftogene.csv")
   spellman_id_genes <- spellman_id_genes[, .(ORF, SGD)]
   subset_data <- merge(this_data[experiment == exper], spellman_id_genes, 
                        by.x = "gene", by.y = "ORF" )
@@ -26,11 +26,12 @@ experiment_extractor <- function(this_data, exper){
                  by = .(gene)]
   
   X = dcast(subset_data, 
-        SGD+experiment ~ time, 
+        gene + SGD + experiment ~ time, 
         value.var = "expression_LOCF")
-  setnames(X, old = "SGD", new = "gene")
   
-  time_cols <- setdiff(names(X), c("gene", "experiment"))
+  #setnames(X, old = "SGD", new = "gene")
+  
+  time_cols <- setdiff(names(X), c("gene","SGD","experiment"))
   time_cols_new <- paste("time", time_cols, sep="_")
   setnames(X, old = time_cols, 
            new = time_cols_new)
@@ -41,7 +42,8 @@ experiment_extractor <- function(this_data, exper){
                         (time_cols_new) := as.list(stage_times)]
   
   gene_names <- X[!is.na(gene), unique(gene)]
-  X[, c("gene", "experiment") := NULL]
+  SGD_names <- X[!is.na(gene), unique(SGD)]
+  X[, c("gene","SGD","experiment") := NULL]
   
   top_row <- as.list(rep(NA, length(time_cols)))
   top_row[[1]] <- length(gene_names)
@@ -49,7 +51,8 @@ experiment_extractor <- function(this_data, exper){
   
   X <- rbind(top_row, X)
   return(list(transformed_data = X,
-              gene_names = gene_names))
+              gene_sgd_names = data.table(orf = gene_names,
+                                          sgd = SGD_names)))
 }
 
 full_data <- read.delim("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/combined.txt",
@@ -77,20 +80,21 @@ full_data[, variable:= NULL]
 full_data[, table(experiment)]
 
 cdc15_data_list <- experiment_extractor(full_data, "cdc15")
-cdc28_data_list <- experiment_extractor(full_data, "cdc28")
-alpha_data_list <- experiment_extractor(full_data, "alpha")
-elu_data_list <- experiment_extractor(full_data, "elu")
+#cdc28_data_list <- experiment_extractor(full_data, "cdc28")
+#alpha_data_list <- experiment_extractor(full_data, "alpha")
+#elu_data_list <- experiment_extractor(full_data, "elu")
 
 
 write.table( cdc15_data_list$transformed_data,
-             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc15_5915genes_1sample_24T.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc15_785genes_1sample_24T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
-write.csv(cdc15_data_list$gene_names,
-          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc15_5915_names.csv",
+write.csv(cdc15_data_list$gene_sgd_names,
+          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc15_785gene_names.csv",
           row.names = F)
+
 
 write.table(cdc28_data_list$transformed_data,
              "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc28_786genes_1sample_17T.csv", 
@@ -124,3 +128,9 @@ write.table(elu_data_list$transformed_data,
 write.csv(elu_data_list$gene_names,
           "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/elu_names.csv",
           row.names = F)
+
+short_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/spellman_id_genes.csv")
+long_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/all_spellman_orftogene.csv")
+
+short_genes <- short_genes[, .(ORF, SGD)]
+long_genes <- long_genes[, .(ORF, SGD)]
