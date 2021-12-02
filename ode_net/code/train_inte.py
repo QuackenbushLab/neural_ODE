@@ -124,7 +124,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     #not_nan_idx.pop()
     batch = batch[not_nan_idx]
     target = target[not_nan_idx]
-    
+
 
     init_bias_y = data_handler.init_bias_y
     opt.zero_grad()
@@ -146,7 +146,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "yeast_cdc1528_786genes_2samples_varyT" #"
+clean_name =  "yeast_cdc15_5915genes_1sample_24T" #"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
 
