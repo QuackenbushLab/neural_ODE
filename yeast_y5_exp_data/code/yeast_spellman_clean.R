@@ -19,14 +19,14 @@ experiment_extractor <- function(this_data, exper){
   subset_data <- merge(this_data[experiment == exper], spellman_id_genes, 
                        by.x = "gene", by.y = "ORF" )
   full_blank_genes <-  subset_data[,all(is.na(value)),by = gene][V1 == TRUE, gene]
-  subset_data <- subset_data[!gene %in% full_blank_genes]
+  subset_data <- subset_data[!gene %in% full_blank_genes][order(gene, time)]
  # subset_data <- subset_data[SGD %in% common_genes]
   subset_data[, 
                  expression_LOCF := my_LOCF(value),
-                 by = .(gene)]
+                 by = .(SGD)]
   
   X = dcast(subset_data, 
-        gene + SGD + experiment ~ time, 
+        SGD + gene + experiment ~ time, 
         value.var = "expression_LOCF")
   
   #setnames(X, old = "SGD", new = "gene")
@@ -41,18 +41,17 @@ experiment_extractor <- function(this_data, exper){
          by=experiment][is.na(gene),
                         (time_cols_new) := as.list(stage_times)]
   
-  gene_names <- X[!is.na(gene), unique(gene)]
-  SGD_names <- X[!is.na(gene), unique(SGD)]
+  gene_names <- X[!is.na(gene), .(orf = gene, sgd = SGD)]
+  #SGD_names <- X[!is.na(gene), unique(SGD)]
   X[, c("gene","SGD","experiment") := NULL]
   
   top_row <- as.list(rep(NA, length(time_cols)))
-  top_row[[1]] <- length(gene_names)
+  top_row[[1]] <- gene_names[,.N]
   top_row[[2]] <- 1
   
   X <- rbind(top_row, X)
   return(list(transformed_data = X,
-              gene_sgd_names = data.table(orf = gene_names,
-                                          sgd = SGD_names)))
+              gene_sgd_names = gene_names))
 }
 
 full_data <- read.delim("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/combined.txt",
