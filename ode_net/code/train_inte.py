@@ -74,6 +74,7 @@ def validation(odenet, data_handler, method, explicit_time):
         for index, (time, batch_point, target_point) in enumerate(zip(t, data, target_full)):
             #IH: 9/10/2021 - added these to handle unequal time availability 
             #comment these out when not requiring nan-value checking
+            
             not_nan_idx = [i for i in range(len(time)) if not torch.isnan(time[i])]
             time = time[not_nan_idx]
             not_nan_idx.pop()
@@ -119,12 +120,13 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
 def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
+    
+    '''
     not_nan_idx = [i for i in range(len(t)) if not torch.any(torch.isnan(t[i]))]
     t = t[not_nan_idx]
-    #not_nan_idx.pop()
     batch = batch[not_nan_idx]
     target = target[not_nan_idx]
-
+    '''
 
     init_bias_y = data_handler.init_bias_y
     opt.zero_grad()
@@ -146,7 +148,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "yeast_cdc15_785genes_1sample_24T" #"
+clean_name =  "yeast_cdc15_787genes_1sample_24T" #"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
 
