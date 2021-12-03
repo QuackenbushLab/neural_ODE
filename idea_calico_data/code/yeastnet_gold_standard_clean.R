@@ -5,7 +5,7 @@ D = data.table(D)
 
 names(D) <- c("from", "to")
 
-translate_dict <- fread("C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/orftogene.csv")
+translate_dict <- fread("C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/orftogene_goldstandard.csv")
 translate_dict[, desc := NULL]
 
 D <- merge(D, translate_dict, by.x = "from", by.y = "orf_name")
@@ -30,4 +30,4 @@ D[, table(edge_in_calico)] #these 1006 edges are due to the 34 problematic ones
 
 D <- D[edge_in_calico == T, .(to, from)]
 
-write.csv(D, "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/gold_standard_edges.csv", row.names = F)
+write.csv(D, "C:/STUDIES/RESEARCH/neural_ODE/idea_calico_data/gold_standard_edges_full.csv", row.names = F)

@@ -13,8 +13,8 @@ my_LOCF <- function(vec){
 }
 
 experiment_extractor <- function(this_data, exper){
-  spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/spellman_id_genes.csv")
-  #spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/all_spellman_orftogene.csv")
+  #spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/spellman_id_genes.csv")
+  spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/all_spellman_orftogene.csv")
   spellman_id_genes <- spellman_id_genes[, .(ORF, SGD)]
   subset_data <- merge(this_data[experiment == exper], spellman_id_genes, 
                        by.x = "gene", by.y = "ORF" )
@@ -85,13 +85,13 @@ cdc15_data_list <- experiment_extractor(full_data, "cdc15")
 
 
 write.table( cdc15_data_list$transformed_data,
-             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc15_785genes_1sample_24T.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/clean_data/yeast_cdc15_5915genes_1sample_24T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
 write.csv(cdc15_data_list$gene_sgd_names,
-          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc15_785gene_names.csv",
+          "C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/cdc15_5915gene_names.csv",
           row.names = F)
 
 
