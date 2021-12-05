@@ -145,7 +145,7 @@ if __name__ == "__main__":
     #print(data_handler.dim)
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
-    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
     odenet.load(pretrained_model_file)
     
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
