@@ -49,10 +49,10 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        #self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
         #spellman ID'ed genes
-        self.genes_to_viz = [2, 146, 157, 322, 562, 1088, 1360, 1712, 1794, 1885, 1886, 2112, 2151, 2366, 2376, 2491, 2499, 2520, 2571, 2792, 2972, 2976, 3157, 3395, 4023, 4664, 4840, 5092, 5313, 5423]
+        #self.genes_to_viz = [2, 146, 157, 322, 562, 1088, 1360, 1712, 1794, 1885, 1886, 2112, 2151, 2366, 2376, 2491, 2499, 2520, 2571, 2792, 2972, 2976, 3157, 3395, 4023, 4664, 4840, 5092, 5313, 5423]
         
         #LOWVAR : 
         #self.genes_to_viz = [271, 1705, 4724, 1219, 5794, 3334, 4264, 2732, 4676, 1661, 4484, 3681, 2507, 2072, 5417, 5632, 5204, 3989, 5279, 6102, 3103, 5685, 6163, 273, 2742, 272, 3136, 1698, 5745, 1362]

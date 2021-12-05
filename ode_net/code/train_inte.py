@@ -148,7 +148,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "yeast_cdc15_5915genes_1sample_24T" #"
+clean_name =  "yeast_cdc15_787genes_1sample_24T" #"
 #parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 15
+    epochs_to_fail_to_terminate = 25
     all_lrs_used = []
 
     #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
