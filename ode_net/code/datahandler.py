@@ -37,7 +37,7 @@ class DataHandler:
         self.epoch_done = False
         self.img_save_dir = img_save_dir
         self.init_bias_y = init_bias_y
-        self.num_trajs_to_plot = 7
+        self.num_trajs_to_plot = 2
         #self.noise = noise
 
         self._calc_datasize()
