@@ -88,9 +88,8 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name =  "yeast_cdc15_787genes_1sample_24T" #"
-#parser.add_argument('--data', type=str, default='C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/yeast_y5_exp_data/clean_data/{}.csv'.format(clean_name))
+clean_name =  "pramila_3551genes_2samples_24T" #"
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -145,7 +144,7 @@ if __name__ == "__main__":
     #print(data_handler.dim)
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'])
     odenet.float()
-    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
+    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
     odenet.load(pretrained_model_file)
     
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
