@@ -88,7 +88,7 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name =  "pramila_3551genes_2samples_24T" #"
+clean_name =  "pramila_459genes_2samples_24T" #"
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
