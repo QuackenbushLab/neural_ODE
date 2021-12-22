@@ -9,4 +9,6 @@ full_data <- data.table(full_data)
 spellman_id_genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/yeast_y5_exp_data/spellman_id_genes.csv")
 spellman_id_genes <- spellman_id_genes$ORF
 
-full_data[V1 %in% spellman_id_genes]
+full_data <- full_data[V1 %in% spellman_id_genes]
+write.csv(full_data, "C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/clean_data/pramila_subset_spellman.csv", 
+          row.names = F)
