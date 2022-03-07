@@ -140,11 +140,15 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
     #loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
     loss_data = torch.mean((predictions - target)**2) 
-    prior_grad = torch.matmul(batch.squeeze(),prior_mat)
     
-    loss_data.backward() #MOST EXPENSIVE STEP!
+    prior_grad = torch.matmul(batch,prior_mat)
+    loss_prior = torch.mean((predictions - prior_grad)**2)
+    
+    loss_lambda = 0.9
+    composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
+    composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
-    return loss_data
+    return [loss_data, loss_prior]
 
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -323,7 +327,9 @@ if __name__ == "__main__":
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
-            loss = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], prior_mat)
+            loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], prior_mat)
+            loss = loss_list[0]
+            prior_loss = loss_list[1]
             #batch_times.append(perf_counter() - start_batch_time)
 
             this_epoch_total_train_loss += loss.item()
@@ -332,7 +338,7 @@ if __name__ == "__main__":
 
             if settings['verbose']:
                 pbar.update(1)
-                pbar.set_description("Training loss (current batch): {:.5E}".format(loss.item()))
+                pbar.set_description("Training loss, Prior loss: {:.2E}, {:.2E}".format(loss.item(), prior_loss.item()))
         
         epoch_times.append(perf_counter() - start_epoch_time)
 
