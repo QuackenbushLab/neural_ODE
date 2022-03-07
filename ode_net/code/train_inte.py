@@ -48,7 +48,12 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
     plt.legend(loc='upper right')
     plt.ylabel("Error (MSE)")
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
-        
+
+def read_prior_matrix(prior_mat_file_loc):
+    mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
+    mat_torch = torch.from_numpy(mat)
+    return mat_torch.float()
+
 '''
 def regulated_loss(predictions, target, time, val = False):
     #return(torch.mean((predictions - target) ** 2))
@@ -117,7 +122,7 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
         print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
 
 
-def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
+def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error, prior_mat):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
     
@@ -134,10 +139,12 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
     #loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
-    loss = torch.mean((predictions - target)**2) 
-    loss.backward() #MOST EXPENSIVE STEP!
+    loss_data = torch.mean((predictions - target)**2) 
+    prior_grad = torch.matmul(batch.squeeze(),prior_mat)
+    
+    loss_data.backward() #MOST EXPENSIVE STEP!
     opt.step()
-    return loss
+    return loss_data
 
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -204,6 +211,10 @@ if __name__ == "__main__":
                                         scale_expression = settings['scale_expression'],
                                         log_scale = settings['log_scale'],
                                         init_bias_y = settings['init_bias_y'])
+    
+    #Read in the prior matrix
+    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350.csv'
+    prior_mat = read_prior_matrix(prior_mat_loc)
 
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
@@ -312,7 +323,7 @@ if __name__ == "__main__":
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
-            loss = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'])
+            loss = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], prior_mat)
             #batch_times.append(perf_counter() - start_batch_time)
 
             this_epoch_total_train_loss += loss.item()
