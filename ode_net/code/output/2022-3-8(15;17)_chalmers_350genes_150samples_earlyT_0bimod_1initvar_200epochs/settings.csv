@@ -16,7 +16,7 @@ weight_decay,0.0
 cpu,True
 val_split,0.02
 noise,0.0
-epochs,100
+epochs,200
 solve_eq_gridsize,100
 solve_A,False
 debug,False
@@ -24,7 +24,7 @@ output_dir,output
 normalize_data,False
 explicit_time,False
 relative_error,False
-pretrained_model,False
+pretrained_model,True
 lr_range_test,False
 scale_expression,1.0
 log_scale,linear
