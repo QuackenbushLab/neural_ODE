@@ -128,6 +128,13 @@ class ODENet(nn.Module):
         final = torch.relu(self.gene_multipliers)*(joint - y)
         return(final) 
 
+    def prior_only_forward(self, t, y):
+        sums = self.net_sums(y)
+        prods = torch.exp(self.net_prods(y))
+        sums_prods_concat = torch.cat((sums, prods), dim= - 1)
+        joint = self.net_alpha_combine(sums_prods_concat)
+        return(joint)
+
     def save(self, fp):
         ''' Save the model to file '''
         idx = fp.index('.')

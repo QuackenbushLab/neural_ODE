@@ -137,12 +137,14 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
-        predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
-    #loss = torch.mean((predictions - target) ** 2) #regulated_loss(predictions, target, t)
+        predictions[index, :, :] = odeint(odenet, batch_point, time, method= method )[1] + init_bias_y #IH comment
+    
     loss_data = torch.mean((predictions - target)**2) 
     
-    prior_grad = torch.matmul(batch,prior_mat)
-    loss_prior = torch.mean((predictions - prior_grad)**2)
+    batch_for_prior = torch.rand(4,1,350, device = data_handler.device)
+    pred_grad = odenet.prior_only_forward(t,batch_for_prior)
+    prior_grad = torch.matmul(batch_for_prior,prior_mat)
+    loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
     loss_lambda = 0.9
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
