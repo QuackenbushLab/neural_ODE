@@ -137,7 +137,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     opt.zero_grad()
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
-        predictions[index, :, :] = odeint(odenet, batch_point, time, method= method )[1] + init_bias_y #IH comment
+        predictions[index, :, :] = odeint(odenet, batch_point, time, method= method  )[1] + init_bias_y #IH comment
     
     loss_data = torch.mean((predictions - target)**2) 
     
@@ -145,7 +145,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     prior_grad = torch.matmul(batch_for_prior,prior_mat)
     loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
-    loss_lambda = 0.9
+    loss_lambda = 0.95
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     #Read in the prior matrix
     prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
-    batch_for_prior = torch.rand(40,1,350, device = data_handler.device)
+    batch_for_prior = torch.rand(200,1,350, device = data_handler.device)
 
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
