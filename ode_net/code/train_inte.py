@@ -145,7 +145,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     prior_grad = torch.matmul(batch_for_prior,prior_mat)
     loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
-    loss_lambda = 0.95
+    loss_lambda = 0.90
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()

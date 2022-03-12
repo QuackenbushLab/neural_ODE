@@ -16,7 +16,7 @@ weight_decay,0.0
 cpu,True
 val_split,0.02
 noise,0.0
-epochs,100
+epochs,200
 solve_eq_gridsize,100
 solve_A,False
 debug,False
