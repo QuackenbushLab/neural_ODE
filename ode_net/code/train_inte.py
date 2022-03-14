@@ -122,7 +122,7 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
         print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
 
 
-def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error, prior_mat, batch_for_prior):
+def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error, batch_for_prior, prior_grad):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
     
@@ -142,11 +142,9 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     loss_data = torch.mean((predictions - target)**2) 
     
     pred_grad = odenet.prior_only_forward(t,batch_for_prior)
-    prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here #can also move this out...
     loss_prior = torch.mean((pred_grad - prior_grad)**2)
-    #loss_prior = loss_data
-
-    loss_lambda = 0.95
+    
+    loss_lambda = 0.80
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -222,6 +220,7 @@ if __name__ == "__main__":
     prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
     batch_for_prior = torch.rand(500,1,350, device = data_handler.device)
+    prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
 
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
@@ -330,7 +329,7 @@ if __name__ == "__main__":
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
-            loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], prior_mat, batch_for_prior)
+            loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], batch_for_prior, prior_grad)
             loss = loss_list[0]
             prior_loss = loss_list[1]
             #batch_times.append(perf_counter() - start_batch_time)

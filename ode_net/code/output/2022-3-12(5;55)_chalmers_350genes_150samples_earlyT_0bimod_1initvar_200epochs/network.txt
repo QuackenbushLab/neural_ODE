@@ -22,3 +22,6 @@ ODENet(
         #final =  y*(torch.sigmoid(carry_cap - y)  - 0.5)
         final = torch.relu(self.gene_multipliers)*(joint - y)
         return(final) 
+
+  prior_lambda = 0.95
+  prior_batch = 500
