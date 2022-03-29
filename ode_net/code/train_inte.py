@@ -243,7 +243,7 @@ if __name__ == "__main__":
     #Read in the prior matrix
     prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
-    batch_for_prior = torch.rand(500,1,prior_mat.shape[0], device = data_handler.device)*2 - 1
+    batch_for_prior = torch.rand(500,1,prior_mat.shape[0], device = data_handler.device)
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
 
     # Initialization
@@ -339,7 +339,7 @@ if __name__ == "__main__":
     epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
-    #get_true_val_set_r2(odenet, data_handler, settings['method'])
+    #print(get_true_val_set_r2(odenet, data_handler, settings['method']))
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
