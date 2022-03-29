@@ -250,7 +250,7 @@ class DataHandler:
     
     def get_true_mu_set(self, val_only = False):
         if val_only:
-            all_indx = [x for x in self.val_set_indx]
+            all_indx = [self.indx[x] for x in np.arange(len(self.indx)) if self.indx[x][0] in  self.val_set_indx]
         else:
             all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         mean_data = []
@@ -309,7 +309,7 @@ class DataHandler:
                 _y = mu0[j]
             
             _y = mu1[j] #remove later
-            y = odeint(odenet, _y, extrap_time_points_pt , method=method) + self.init_bias_y #self.time_pt[j][0:] #   
+            y = odeint(odenet, _y, self.time_pt[j][0:]  , method=method) + self.init_bias_y # #extrap_time_points_pt   
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples, extrap_time_points

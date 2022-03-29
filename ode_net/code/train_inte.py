@@ -48,6 +48,7 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
     plt.legend(loc='upper right')
     plt.ylabel("Error (MSE)")
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
+    np.savetxt('{}full_loss_info.csv'.format(output_root_dir), np.c_[training_loss, validation_loss, true_mean_losses], delimiter=',')
 
 def my_r_squared(output, target):
     x = output
@@ -56,8 +57,8 @@ def my_r_squared(output, target):
     vy = y - torch.mean(y)
     my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
     return(my_corr**2)
-    
-def get_true_r2(odenet, data_handler, method):
+
+def get_true_val_set_r2(odenet, data_handler, method):
     data, t, target = data_handler.get_true_mu_set(val_only = True) 
     init_bias_y = data_handler.init_bias_y
     #odenet.eval()
@@ -67,7 +68,7 @@ def get_true_r2(odenet, data_handler, method):
             predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
         
         # Calculate true mean loss
-        loss =  torch.mean(torch.abs((predictions - target)/target))
+        loss =  999#torch.mean(torch.abs((predictions - target)/target))
         var_explained = my_r_squared(predictions, target)
     return [loss, var_explained]
 
@@ -167,7 +168,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     pred_grad = odenet.prior_only_forward(t,batch_for_prior)
     loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
-    loss_lambda = 0.50
+    loss_lambda = 0.95
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -210,8 +211,8 @@ if __name__ == "__main__":
         os.makedirs(output_root_dir, exist_ok=True)
     if not os.path.exists(img_save_dir):
         os.mkdir(img_save_dir)
-    #if not os.path.exists(intermediate_models_dir):
-    #    os.mkdir(intermediate_models_dir)
+    if not os.path.exists(interm_models_save_dir):
+        os.mkdir(interm_models_save_dir)
 
     # Save the settings for future reference
     with open('{}/settings.csv'.format(output_root_dir), 'w') as f:
@@ -323,8 +324,9 @@ if __name__ == "__main__":
     #quit()
     
     tot_epochs = settings['epochs']
-    viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [5, 15, 25, 40, 50, 80, 120, 160, 200,220, 240, 300, 350, tot_epochs]
+    #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
+    rep_epochs = [5, 15, 25, 40, 50, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
+    viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
     second_drop_done = False
@@ -334,11 +336,10 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 25
+    epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
-    #validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    #true_loss(odenet, data_handler, settings['method'])
+    #get_true_val_set_r2(odenet, data_handler, settings['method'])
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -372,8 +373,8 @@ if __name__ == "__main__":
         training_loss.append(train_loss)
         #print("Overall training loss {:.5E}".format(train_loss))
 
-        mu_loss = true_loss(odenet, data_handler, settings['method'])
-        #mu_loss = train_loss
+        mu_loss = get_true_val_set_r2(odenet, data_handler, settings['method'])
+        #mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss[1])
         all_lrs_used.append(opt.param_groups[0]['lr'])
         
@@ -424,8 +425,8 @@ if __name__ == "__main__":
 
         print("Overall training loss {:.5E}".format(train_loss))
 
-        print("True mu loss (absolute) {:.5E}".format(mu_loss[1]))
-        print("True mu loss (%) {:.2%}".format(mu_loss[0]))
+        #print("True mu loss (absolute) {:.5E}".format(mu_loss[1]))
+        print("True R^2 of val trajectories (%) {:.2%}".format(mu_loss[1]))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
@@ -472,8 +473,8 @@ if __name__ == "__main__":
                 print("Best validation (MSE) so far = ", min_val_loss.item())
                 #print("True loss of best validation model (MSE) = ", true_loss_of_min_val_model.item())
                 rep_epochs_val_losses.append(min_val_loss.item())
-                rep_epochs_mu_losses.append(0)
-                #rep_epochs_mu_losses.append(true_loss_of_min_val_model.item())
+                #rep_epochs_mu_losses.append(0)
+                rep_epochs_mu_losses.append(true_loss_of_min_val_model.item())
             else:
                 #print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
                 print("True loss of best training model (MSE) = ", 0)
@@ -485,12 +486,12 @@ if __name__ == "__main__":
 
             print("Saving losses..")
             if data_handler.n_val > 0:
-                rep_epochs_val_r2 = 
-                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses, rep_epochs_val_r2]
+                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
                 np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
+            
             print("Saving best intermediate val model..")
             interm_model_file_name = 'best_val_model_epoch_' + str(epoch)
-            save_model(best_vaL_model_so_far, interm_models_save_dir, interm_model_file_name)
+            save_model(best_vaL_model_so_far, interm_models_save_dir , interm_model_file_name)
                 
             
             #else:
@@ -513,10 +514,9 @@ if __name__ == "__main__":
     save_model(odenet, output_root_dir, 'final_model')
 
     print("Saving times")
-    #np.savetxt('{}total_time.csv'.format(output_root_dir), [total_time], delimiter=',')
-    #np.savetxt('{}batch_times.csv'.format(output_root_dir), batch_times, delimiter=',')
     np.savetxt('{}epoch_times.csv'.format(output_root_dir), epoch_times, delimiter=',')
 
+        
     print("DONE!")
 
   
