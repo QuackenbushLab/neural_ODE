@@ -248,7 +248,7 @@ class DataHandler:
     def get_mu1(self):
         return [tensor[0] for tensor in self.data_pt_0noise]
     
-    def get_true_mu_set(self, val_only = False):
+    def get_true_mu_set_old(self, val_only = False):
         if val_only:
             all_indx = [self.indx[x] for x in np.arange(len(self.indx)) if self.indx[x][0] in  self.val_set_indx]
         else:
@@ -273,7 +273,23 @@ class DataHandler:
 
         return mean_data, mean_t, mean_target
        
+def get_true_mu_set(self, val_only = False):
+        train_set_size = len(self.train_set)
 
+        if train_set_size > 1:
+            i = np.random.choice(train_set_size, replace=False)
+            indx = self.train_set[i]
+            self.train_set = np.delete(self.train_set, i)
+        else:
+            indx = self.train_set[0]
+            self.epoch_done = True # We are doing the last items in current epoch
+        # Convert the lists to tensors
+        batch = self.data_pt[indx][0:-1].to(self.device)
+        t = []
+        for i in range(self.time_pt[indx].shape[0] - 1):
+            t.append(torch.tensor([self.time_pt[indx][i], self.time_pt[indx][i+1]]))
+        t = torch.stack(t)
+        target = self.data_pt[indx][1::].to(self.device)
 
 
     def get_times(self):
