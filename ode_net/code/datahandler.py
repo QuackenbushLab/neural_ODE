@@ -193,7 +193,8 @@ class DataHandler:
     def _split_data_traj(self, val_split):
         ''' Split the data into a training set and validation set '''
         self.n_val = int(round(self.ntraj * val_split))
-        self.val_set_indx = np.random.choice(np.arange(self.ntraj), size=self.n_val, replace=False)
+        #self.val_set_indx = np.random.choice(np.arange(self.ntraj), size=self.n_val, replace=False)
+        self.val_set_indx = np.array([3, 23, 25, 61, 74, 90, 103, 128, 139, 146]) #fixed val_set
         traj_indx = np.arange(self.ntraj)
         self.train_set_original = np.setdiff1d(traj_indx, self.val_set_indx)
         self.train_data_length = len(self.train_set_original)
@@ -247,8 +248,11 @@ class DataHandler:
     def get_mu1(self):
         return [tensor[0] for tensor in self.data_pt_0noise]
     
-    def get_true_mu_set(self):
-        all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
+    def get_true_mu_set(self, val_only = False):
+        if val_only:
+            all_indx = [x for x in self.val_set_indx]
+        else:
+            all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         mean_data = []
         mean_target = []
         mean_t = []
@@ -267,9 +271,11 @@ class DataHandler:
         mean_t = mean_t[not_nan_idx]
         mean_target = mean_target[not_nan_idx]
 
-
         return mean_data, mean_t, mean_target
        
+
+
+
     def get_times(self):
         times = torch.stack(self.time_pt)
         return times

@@ -49,6 +49,29 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
     plt.ylabel("Error (MSE)")
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
 
+def my_r_squared(output, target):
+    x = output
+    y = target
+    vx = x - torch.mean(x)
+    vy = y - torch.mean(y)
+    my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
+    return(my_corr**2)
+    
+def get_true_r2(odenet, data_handler, method):
+    data, t, target = data_handler.get_true_mu_set(val_only = True) 
+    init_bias_y = data_handler.init_bias_y
+    #odenet.eval()
+    with torch.no_grad():
+        predictions = torch.zeros(data.shape).to(data_handler.device)
+        for index, (time, batch_point) in enumerate(zip(t, data)):
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
+        
+        # Calculate true mean loss
+        loss =  torch.mean(torch.abs((predictions - target)/target))
+        var_explained = my_r_squared(predictions, target)
+    return [loss, var_explained]
+
+
 def read_prior_matrix(prior_mat_file_loc):
     mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
     mat_torch = torch.from_numpy(mat)
@@ -159,8 +182,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "pramila_3551genes_2samples_24T" #"
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
+clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" #"
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -179,6 +202,7 @@ if __name__ == "__main__":
     output_root_dir = '{}/{}/'.format(settings['output_dir'], save_file_name)
 
     img_save_dir = '{}img/'.format(output_root_dir)
+    interm_models_save_dir = '{}interm_models/'.format(output_root_dir)
     #intermediate_models_dir = '{}intermediate_models/'.format(output_root_dir)
 
     # Create image and model save directory
@@ -216,7 +240,7 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/edge_prior_matrix_pramila_3551.csv'
+    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
     batch_for_prior = torch.rand(500,1,prior_mat.shape[0], device = data_handler.device)*2 - 1
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
@@ -381,6 +405,7 @@ if __name__ == "__main__":
                 min_val_loss = val_loss
                 true_loss_of_min_val_model = mu_loss[1]
                 print('Model improved, saving current model')
+                best_vaL_model_so_far = odenet
                 save_model(odenet, output_root_dir, 'best_val_model')
             else:
                 if val_loss < min_val_loss:
@@ -458,10 +483,16 @@ if __name__ == "__main__":
             if settings['lr_range_test']:
                 plot_LR_range_test(all_lrs_used, training_loss, img_save_dir)
 
-            print("Saving losses")
+            print("Saving losses..")
             if data_handler.n_val > 0:
-                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses]
+                rep_epochs_val_r2 = 
+                L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_val_losses, rep_epochs_mu_losses, rep_epochs_val_r2]
                 np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
+            print("Saving best intermediate val model..")
+            interm_model_file_name = 'best_val_model_epoch_' + str(epoch)
+            save_model(best_vaL_model_so_far, interm_models_save_dir, interm_model_file_name)
+                
+            
             #else:
             #    L = [rep_epochs_so_far, rep_epochs_time_so_far, rep_epochs_train_losses, rep_epochs_mu_losses]
             #    np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
