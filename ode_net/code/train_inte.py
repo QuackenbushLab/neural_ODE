@@ -42,13 +42,13 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
     if len(validation_loss) > 0:
         plt.plot(range(1, epoch_so_far + 1), validation_loss, color = "red", label = "Validation loss")
-    plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
+    #plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
     plt.yscale('log')
     plt.xlabel("Epoch")
     plt.legend(loc='upper right')
     plt.ylabel("Error (MSE)")
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
-    np.savetxt('{}full_loss_info.csv'.format(output_root_dir), np.c_[training_loss, validation_loss, true_mean_losses], delimiter=',')
+    np.savetxt('{}full_loss_info.csv'.format(output_root_dir), np.c_[training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based], delimiter=',')
 
 def my_r_squared(output, target):
     x = output
@@ -59,18 +59,21 @@ def my_r_squared(output, target):
     return(my_corr**2)
 
 def get_true_val_set_r2(odenet, data_handler, method):
-    data, t, target = data_handler.get_true_mu_set(val_only = True) 
-    init_bias_y = data_handler.init_bias_y
+    data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True)
     #odenet.eval()
     with torch.no_grad():
-        predictions = torch.zeros(data.shape).to(data_handler.device)
-        for index, (time, batch_point) in enumerate(zip(t, data)):
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
+        predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
+        for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
+            predictions_pw[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] 
+        var_explained_pw = my_r_squared(predictions_pw, target_pw)
         
-        # Calculate true mean loss
-        loss =  999#torch.mean(torch.abs((predictions - target)/target))
-        var_explained = my_r_squared(predictions, target)
-    return [loss, var_explained]
+        predictions = torch.zeros(target.shape).to(data_handler.device)
+        for index, (time, batch_point) in enumerate(zip(t, data)):
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
+        var_explained_init_val_based = my_r_squared(predictions, target)
+
+    return [var_explained_init_val_based, var_explained_pw]
 
 
 def read_prior_matrix(prior_mat_file_loc):
@@ -305,6 +308,7 @@ if __name__ == "__main__":
     validation_loss = []
     training_loss = []
     true_mean_losses = []
+    true_mean_losses_init_val_based = []
     A_list = []
 
     min_loss = 0
@@ -339,7 +343,7 @@ if __name__ == "__main__":
     epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
-    #print(get_true_val_set_r2(odenet, data_handler, settings['method']))
+    print(get_true_val_set_r2(odenet, data_handler, settings['method']))
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -376,6 +380,7 @@ if __name__ == "__main__":
         mu_loss = get_true_val_set_r2(odenet, data_handler, settings['method'])
         #mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss[1])
+        true_mean_losses_init_val_based.append(mu_loss[0])
         all_lrs_used.append(opt.param_groups[0]['lr'])
         
         if epoch == 1:
@@ -426,7 +431,8 @@ if __name__ == "__main__":
         print("Overall training loss {:.5E}".format(train_loss))
 
         #print("True mu loss (absolute) {:.5E}".format(mu_loss[1]))
-        print("True R^2 of val trajectories (%) {:.2%}".format(mu_loss[1]))
+        print("True R^2 of val traj (init val based){:.2%}".format(mu_loss[0]))
+        print("True R^2 of val traj (pairwise){:.2%}".format(mu_loss[1]))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
@@ -479,7 +485,7 @@ if __name__ == "__main__":
                 #print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
                 print("True loss of best training model (MSE) = ", 0)
             print("Saving MSE plot...")
-            plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, img_save_dir)    
+            plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, img_save_dir)    
             
             if settings['lr_range_test']:
                 plot_LR_range_test(all_lrs_used, training_loss, img_save_dir)
