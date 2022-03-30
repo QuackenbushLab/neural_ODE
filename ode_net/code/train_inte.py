@@ -37,7 +37,7 @@ def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.legend(loc='upper right')
     plt.savefig("{}/LR_range_test.png".format(img_save_dir))
 
-def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, img_save_dir):
+def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, img_save_dir):
     plt.figure()
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
     if len(validation_loss) > 0:
@@ -343,7 +343,7 @@ if __name__ == "__main__":
     epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
-    print(get_true_val_set_r2(odenet, data_handler, settings['method']))
+    #print(get_true_val_set_r2(odenet, data_handler, settings['method']))
 
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
@@ -431,8 +431,8 @@ if __name__ == "__main__":
         print("Overall training loss {:.5E}".format(train_loss))
 
         #print("True mu loss (absolute) {:.5E}".format(mu_loss[1]))
-        print("True R^2 of val traj (init val based){:.2%}".format(mu_loss[0]))
-        print("True R^2 of val traj (pairwise){:.2%}".format(mu_loss[1]))
+        print("True R^2 of val traj (init val based): {:.2%}".format(mu_loss[0]))
+        print("True R^2 of val traj (pairwise): {:.2%}".format(mu_loss[1]))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
