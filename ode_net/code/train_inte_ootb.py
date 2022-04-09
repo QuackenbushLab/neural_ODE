@@ -19,7 +19,7 @@ except ImportError:
 
 #from datagenerator import DataGenerator
 from datahandler import DataHandler
-from odenet import ODENet
+from odenet_ootb import ODENet
 from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
@@ -76,24 +76,6 @@ def get_true_val_set_r2(odenet, data_handler, method):
     return [var_explained_init_val_based, var_explained_pw]
 
 
-def read_prior_matrix(prior_mat_file_loc):
-    mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
-    mat_torch = torch.from_numpy(mat)
-    return mat_torch.float()
-
-'''
-def regulated_loss(predictions, target, time, val = False):
-    #return(torch.mean((predictions - target) ** 2))
-    if val == True:
-        pred_cost = torch.mean(((predictions - target) ** 2)[0], dim = 2)
-        t_cost = torch.unsqueeze(torch.tensor([8, 6.5, 4, 1]), dim = 1)
-        return(torch.mean(pred_cost * t_cost * t_cost))
-
-    t_cost = torch.unsqueeze(9 - torch.mean(time, 1),1)
-    pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
-    return(torch.mean(pred_cost * t_cost * t_cost)) #the hope is that earlier points will get penalized more
-'''
-
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target_full, n_val = data_handler.get_validation_set()
 
@@ -149,7 +131,7 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
         print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
 
 
-def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error, batch_for_prior, prior_grad):
+def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
     
@@ -165,17 +147,10 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method= method  )[1] + init_bias_y #IH comment
-    
     loss_data = torch.mean((predictions - target)**2) 
-    
-    pred_grad = odenet.prior_only_forward(t,batch_for_prior)
-    loss_prior = torch.mean((pred_grad - prior_grad)**2)
-    
-    loss_lambda = 0.95
-    composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
-    composed_loss.backward() #MOST EXPENSIVE STEP!
+    loss_data.backward() #MOST EXPENSIVE STEP!
     opt.step()
-    return [loss_data, loss_prior]
+    return [loss_data, loss_data]
 
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -243,12 +218,6 @@ if __name__ == "__main__":
                                         log_scale = settings['log_scale'],
                                         init_bias_y = settings['init_bias_y'])
     
-    #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_690.csv'
-    prior_mat = read_prior_matrix(prior_mat_loc)
-    batch_for_prior = torch.rand(500,1,prior_mat.shape[0], device = data_handler.device)
-    prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
-
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
                     log_scale = settings['log_scale'], init_bias_y = settings['init_bias_y'])
@@ -278,19 +247,8 @@ if __name__ == "__main__":
     elif settings['optimizer'] == 'adagrad':
         opt = optim.Adagrad(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
     else:
-#       opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
-        num_gene = data_handler.dim
-        opt = optim.Adam([
-                {'params': odenet.net_sums.linear_out.weight}, 
-                {'params': odenet.net_sums.linear_out.bias},
-                {'params': odenet.net_prods.linear_out.weight},
-                {'params': odenet.net_prods.linear_out.bias},
-                {'params': odenet.net_alpha_combine.linear_out.weight},
-                {'params': odenet.gene_multipliers,'lr': 5*settings['init_lr']}
-                
-            ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
-
-
+        opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+        
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
     factor=0.9, patience=3, threshold=1e-05, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
@@ -357,7 +315,7 @@ if __name__ == "__main__":
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
-            loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], batch_for_prior, prior_grad)
+            loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'])
             loss = loss_list[0]
             prior_loss = loss_list[1]
             #batch_times.append(perf_counter() - start_batch_time)
