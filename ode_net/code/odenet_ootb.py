@@ -120,20 +120,10 @@ class ODENet(nn.Module):
     def load_model(self, fp):
         ''' Load a model from a file '''
         idx = fp.index('.')
-        gene_mult_path = fp[:idx] + '_gene_multipliers' + fp[idx:]
-        prod_path =  fp[:idx] + '_prods' + fp[idx:]
-        sum_path = fp[:idx] + '_sums' + fp[idx:]
-        alpha_comb_path = fp[:idx] + '_alpha_comb' + fp[idx:]
-        self.net_prods = torch.load(prod_path)
-        self.net_sums = torch.load(sum_path)
-        self.gene_multipliers = torch.load(gene_mult_path)
-        self.net_alpha_combine = torch.load(alpha_comb_path)
+        ootb_path =  fp[:idx] + '_ootb' + fp[idx:]
+        self.net_ootb = torch.load(ootb_path)
+        self.net_ootb.to('cpu')
         
-        self.net_prods.to('cpu')
-        self.net_sums.to('cpu')
-        self.gene_multipliers.to('cpu')
-        self.net_alpha_combine.to('cpu')
-
     def load(self, fp):
         ''' General loading from a file '''
         try:
