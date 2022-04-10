@@ -1,16 +1,19 @@
 library(data.table)
 library(ggplot2)
 library(matrixStats)
+#library(ggpubr)
 
-run_sims = T
+run_sims = F
 
 chief_directory <- "/home/ubuntu/neural_ODE/master_regulators/"
 #chief_directory <- "C:/STUDIES/RESEARCH/neural_ODE/master_regulators"
-write_directory <- paste(chief_directory,"score_outputs/scores_to_save_norm_score.csv", sep = "/")
-img_directory <- paste(chief_directory,"plots/inflential_genes_norm_score.png", sep = "/")
+write_directory <- paste(chief_directory,"score_outputs/scores_to_save_nonself.csv", sep = "/")
+img_directory <- paste(chief_directory,"plots/inflential_genes_nonself.png", sep = "/")
+img_directory_2 <- paste(chief_directory,"plots/central_metrics_nonself.png", sep = "/")
+
 
 times_to_project <- seq(0,10, by = 2)  
-num_iter <- 5
+num_iter <- 100
 pert_level <- 0.50
 
 wo_prods <- fread(paste(chief_directory,"model_to_test/wo_prods.csv", sep = "/"))
@@ -39,6 +42,8 @@ true_nums[is.na(true_out), true_out := 0 ]
 true_nums[is.na(true_inc), true_inc := 0 ]
 
 harmonic_cent <- fread(paste(chief_directory,"model_to_test/gene_centralities.csv", sep = "/"))
+true_influences <- fread(paste(chief_directory,"model_to_test/true_influences.csv", sep = "/"))
+
 
 
 soft_sign_mod <- function(x){
@@ -70,11 +75,12 @@ my_neural_ode <- function(t, y, parms = NULL,...){
   
 score_matrix <- matrix(NA, nrow = num_genes, ncol = num_iter)
 row.names(score_matrix) <- genes_in_dataset
+colnames(score_matrix) <- paste("V",1:num_iter, sep = "")
 
 if (run_sims == T){
   print("Running perturbations...")
   for (iter in 1:num_iter){
-    baseline_init_val <- runif(num_genes, min = 0, max = 1)
+    baseline_init_val <- runif(num_genes, min = 0.1, max = 0.9)
     names(baseline_init_val) <- genes_in_dataset
     unpert_soln <- deSolve::ode(y = baseline_init_val, 
                                 times = times_to_project, 
@@ -92,11 +98,16 @@ if (run_sims == T){
                                           times = times_to_project, 
                                           func = my_neural_ode)
       
-      
-      this_gene_score <- 10^4 * mean(abs(this_genes_pert_soln[-1,genes_in_dataset] - 
-                                    unpert_soln[-1,genes_in_dataset]))
+      genes_to_consider <- setdiff(genes_in_dataset, gene) #ignore the perturbed gene itself
+      delta_mat <- abs(this_genes_pert_soln[-1,genes_to_consider] - 
+                                    unpert_soln[-1,genes_to_consider])
+      times_considered <- c(2,4,6,8,10)
+      #weights_considered <- (1*times_considered)^2
+      weights_considered <- rep(1, length(times_considered))
+      this_gene_score <- 10^4 * mean(diag(weights_considered) %*% delta_mat)
                                     #don't consider artifically perturbed init values (t = 0)!
-      score_matrix[gene, iter] <- this_gene_score/this_gene_curr_val  #normalize by gene unperturbed val 
+      #print(this_gene_score)
+      score_matrix[gene, iter] <- this_gene_score 
     }
     
     
@@ -127,23 +138,52 @@ score_summary <-merge(score_summary,
                       by.x = "gene_short",
                       by.y = "gene")
 
+score_summary <- merge(score_summary,
+                      true_influences, 
+                      by.x = "gene_short",
+                      by.y = "gene")                     
+
+
+setnames(score_summary, old = c("out_cent","true_out","true_pert_median", "ivi_cent", "infer_cent"),
+                new = c("true_harmonic_cent", "true_out_degree", "true_influence", "true_ivi_cent","inferred_harmonic_cent"))
+
+score_summary$true_out_degree <- as.numeric(score_summary$true_out_degree)
+
 score_sd <- score_summary[, sd(pert_score)]
 genes_to_print <- score_summary[pert_score > 2*score_sd,][order(-pert_score), gene]
 print(score_summary[gene %in% genes_to_print,
                     .(gene, pert_score, 
-                      harmonic_cent = out_cent,
-                      out_degree = true_out)][order(-pert_score), ])
+                      true_harmonic_cent,
+                      inferred_harmonic_cent,
+                   #   true_out_degree,
+                      true_ivi_cent,
+                      true_influence)][order(-pert_score), ])
+
+#print("")
+#print("Least influential genes:")
+#print(score_summary[order(pert_score),
+#                    .(gene, pert_score, 
+#                      true_harmonic_cent,
+                   #   true_out_degree,
+#                      true_ivi_cent,
+#                      true_influence)][1:5,])
 
 print("")
 print("influence breakdown by input gene:")
 score_summary[,.(mean_score = mean(pert_score),
                  sd_score = sd(pert_score),
-                 corr_out_degree =  cor(true_out, pert_score, method = "pearson"),
-                 corr_harmonic_cent = cor(out_cent, pert_score, method = "pearson")), 
-              by = input_gene]
+                # corr_out_degree =  cor(true_out_degree, pert_score, method = "pearson"),
+                # corr_harmonic_cent = cor(true_harmonic_cent, pert_score, method = "pearson"),
+                corr_infharmcent_and_truinf = cor(inferred_harmonic_cent, true_influence, method = "pearson"),
+                #corr_ivi_cent = cor(true_ivi_cent, pert_score, method = "pearson"),
+                corr_pert_score_and_truinf = cor(true_influence, pert_score, method = "pearson"),
+                corr_pert_score_and_infharmcent = cor(inferred_harmonic_cent, pert_score, method = "pearson"),
+                corr_truinf_and_truharmcent = cor(true_harmonic_cent, true_influence, method = "pearson")
+                )] #,by = input_gene
+
 
 print("")
-print("Making influence plots")
+print(paste("Making influence plots using all", num_iter, "iterations"))
 boxplot_data <- score_matrix[genes_to_print,]
 boxplot_data$gene <- row.names(boxplot_data)
 boxplot_data <- data.table(boxplot_data)
@@ -167,4 +207,26 @@ ggplot(boxplot_data, aes(x = factor(gene,
   xlab("most influential genes")
 dev.off()
   
-  
+
+scatterplot_data <- melt(score_summary, 
+                          id.vars = c("gene","input_gene","true_influence"),
+                          measure.vars = c("inferred_harmonic_cent","pert_score"),
+                          variable.name = "inferred_metric", value.name = "inferred_metric_val")
+
+png(filename=img_directory_2, height = 6, width = 6, units = "in", res = 1200)
+ggplot(scatterplot_data, aes(x = true_influence, y = inferred_metric_val)) + 
+  geom_point(col = "red") +
+  #geom_smooth(method = "lm", se = FALSE, col = "black") + 
+  theme_bw() + 
+  facet_grid(factor(inferred_metric, 
+                    levels = c("inferred_harmonic_cent", "pert_score"),
+                    labels = c("Inferred harmonic centrality (cheap)", "Inferred influence (expensive)")) ~., 
+                     scales = "free") +
+  xlab("True influence from ground-truth GRN") + 
+  ylab("Inferred metrics from model")
+dev.off()
+
+print("")
+print("DONE!")
+
+

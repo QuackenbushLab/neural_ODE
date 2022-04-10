@@ -15,8 +15,9 @@ def expression_maker(val, log_scale):
     elif log_scale == "reciprocal":
         return(np.reciprocal(val+1))    
     else: #i.e. "linear"
+        #return(1/6 *(val + 3))
+        #return(1/20*(val+10))
         return(val)
-
 
 def readcsv(fp, device, noise_to_add, scale_expression, log_scale):
     print("Reading from file {}".format(fp))

@@ -37,7 +37,7 @@ class DataHandler:
         self.epoch_done = False
         self.img_save_dir = img_save_dir
         self.init_bias_y = init_bias_y
-        self.num_trajs_to_plot = 1
+        self.num_trajs_to_plot = 7
         #self.noise = noise
 
         self._calc_datasize()
@@ -47,7 +47,7 @@ class DataHandler:
         elif batch_type == 'trajectory':
             self._split_data_traj(val_split)
             self._create_validation_set_traj()
-            self.compare_train_val_plot() #only plot it trajectory
+            #self.compare_train_val_plot() #only plot it trajectory
         elif batch_type == 'batch_time':
             self._split_data_time(val_split)
             self._create_validation_set_time()
@@ -193,7 +193,8 @@ class DataHandler:
     def _split_data_traj(self, val_split):
         ''' Split the data into a training set and validation set '''
         self.n_val = int(round(self.ntraj * val_split))
-        self.val_set_indx = np.random.choice(np.arange(self.ntraj), size=self.n_val, replace=False)
+        #self.val_set_indx = np.random.choice(np.arange(self.ntraj), size=self.n_val, replace=False)
+        self.val_set_indx = np.array([3, 23, 25, 61, 74, 90, 103, 128, 139, 146]) #fixed val_set
         traj_indx = np.arange(self.ntraj)
         self.train_set_original = np.setdiff1d(traj_indx, self.val_set_indx)
         self.train_data_length = len(self.train_set_original)
@@ -245,10 +246,13 @@ class DataHandler:
         return [tensor[0] for tensor in self.data_pt_0noise]
     
     def get_mu1(self):
-        return [tensor[1] for tensor in self.data_pt_0noise]
+        return [tensor[0] for tensor in self.data_pt_0noise]
     
-    def get_true_mu_set(self):
-        all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
+    def get_true_mu_set_pairwise(self, val_only = False):
+        if val_only:
+            all_indx = [self.indx[x] for x in np.arange(len(self.indx)) if self.indx[x][0] in  self.val_set_indx]
+        else:
+            all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         mean_data = []
         mean_target = []
         mean_t = []
@@ -267,19 +271,36 @@ class DataHandler:
         mean_t = mean_t[not_nan_idx]
         mean_target = mean_target[not_nan_idx]
 
-
         return mean_data, mean_t, mean_target
        
+    def get_true_mu_set_init_val_based(self, val_only = False): 
+        batch = []
+        t = []
+        target = []
+
+        for indx in self.val_set_indx: #val only by default
+            t.append(self.time_pt[indx])
+            batch.append(self.data_pt[indx][0])
+            target.append(self.data_pt[indx][1::])
+
+        t = torch.stack(t)
+        batch = torch.stack(batch)
+        target = torch.stack(target)
+        
+        return batch, t, target
+
     def get_times(self):
         times = torch.stack(self.time_pt)
         return times
 
     def calculate_trajectory(self, odenet, method, num_val_trajs):
-        extrap_time_points = np.array(range(1,100)).astype(float)
+        #print(self.val_set_indx)
+        #print(num_val_trajs)
+        extrap_time_points = np.array(range(0,300, 10)).astype(float)
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
-       # mu1 = self.get_mu1() #remove later
+        mu1 = self.get_mu1() #remove later
         if self.val_split == 1:
             all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
         else:
@@ -290,7 +311,7 @@ class DataHandler:
                     try:
                         all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), self.num_trajs_to_plot, replace=False))
                     except:
-                        all_plotted_samples = sorted(np.random.choice(list(set([x[0] for x in self.train_set_original])), 1, replace=False))   #if only ONE SAMPLE (e.g y5 dataset)
+                        all_plotted_samples = sorted(list(set([x[0] for x in self.train_set_original])))   #if very few samplesE (e.g y5 dataset, calico)
                 else:
                     all_plotted_samples = sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot, replace=False))
         
@@ -300,8 +321,8 @@ class DataHandler:
             else:
                 _y = mu0[j]
             
-           # _y = mu1[j] #remove later
-            y = odeint(odenet, _y, extrap_time_points_pt, method=method) + self.init_bias_y # self.time_pt[j][0:]
+            _y = mu1[j] #remove later
+            y = odeint(odenet, _y, self.time_pt[j][0:]  , method=method) + self.init_bias_y # #extrap_time_points_pt   
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples, extrap_time_points
