@@ -70,9 +70,9 @@ class ODENet(nn.Module):
            
             
             self.net_ootb = nn.Sequential()
-            self.net_ootb.add_module('activation_0', nn.Tanh())
+            self.net_ootb.add_module('activation_0', nn.ReLU())
             self.net_ootb.add_module('linear_1', nn.Linear(ndim, 2*neurons, bias = True))
-            self.net_ootb.add_module('activation_1', nn.Tanh())
+            self.net_ootb.add_module('activation_1', nn.ReLU())
             self.net_ootb.add_module('linear_out', nn.Linear(2*neurons,ndim, bias = True))
         
 
