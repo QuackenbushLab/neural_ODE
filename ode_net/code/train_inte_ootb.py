@@ -67,13 +67,14 @@ def get_true_val_set_r2(odenet, data_handler, method):
         for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
             predictions_pw[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] 
         var_explained_pw = my_r_squared(predictions_pw, target_pw)
+        true_val_mse = torch.mean((predictions_pw - target_pw)**2)
         
-        predictions = torch.zeros(target.shape).to(data_handler.device)
-        for index, (time, batch_point) in enumerate(zip(t, data)):
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
-        var_explained_init_val_based = my_r_squared(predictions, target)
+        #predictions = torch.zeros(target.shape).to(data_handler.device)
+        #for index, (time, batch_point) in enumerate(zip(t, data)):
+        #    predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
+        #var_explained_init_val_based = my_r_squared(predictions, target)
 
-    return [var_explained_init_val_based, var_explained_pw]
+    return [var_explained_pw, true_val_mse]
 
 
 def validation(odenet, data_handler, method, explicit_time):
@@ -389,8 +390,8 @@ if __name__ == "__main__":
         print("Overall training loss {:.5E}".format(train_loss))
 
         #print("True mu loss (absolute) {:.5E}".format(mu_loss[1]))
-        print("True R^2 of val traj (init val based): {:.2%}".format(mu_loss[0]))
-        print("True R^2 of val traj (pairwise): {:.2%}".format(mu_loss[1]))
+        print("True MSE of val traj (pairwise): {:.5E}".format(mu_loss[1]))
+        print("True R^2 of val traj (pairwise): {:.2%}".format(mu_loss[0]))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):

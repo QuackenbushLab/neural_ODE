@@ -33,6 +33,24 @@ def my_r_squared(output, target):
     my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
     return(my_corr**2)
 
+def get_true_val_set_r2(odenet, data_handler, method):
+    data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True)
+    #odenet.eval()
+    with torch.no_grad():
+        predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
+        for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
+            predictions_pw[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] 
+        var_explained_pw = my_r_squared(predictions_pw, target_pw)
+        true_val_mse = torch.mean((predictions_pw - target_pw)**2)
+        
+        #predictions = torch.zeros(target.shape).to(data_handler.device)
+        #for index, (time, batch_point) in enumerate(zip(t, data)):
+        #    predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
+        #var_explained_init_val_based = my_r_squared(predictions, target)
+
+    return [var_explained_pw, true_val_mse]    
+
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target_full, n_val = data_handler.get_validation_set()
 
@@ -87,9 +105,9 @@ def _build_save_file_name(save_path, epochs):
 #    odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name =  "pramila_3551genes_2samples_24T" #"
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--settings', type=str, default='config_inte.cfg')
+clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" #"
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -163,14 +181,14 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     
     #val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    loss_calcs = true_loss(odenet, data_handler, settings['method'])
+    loss_calcs = get_true_val_set_r2(odenet, data_handler, settings['method'])
     
     #print(val_loss_list)
     #print("Validation loss {:.2%}, using {} points".format(val_loss_list[0], val_loss_list[1]))
-    print("True loss {:.2%}".format(loss_calcs[0]))
-    print("Variance explained {:.2%}".format(loss_calcs[1]))
+    print("True MSE of val traj (pairwise): {:.5E}".format(loss_calcs[1]))
+    print("True R^2 of val traj (pairwise): {:.2%}".format(loss_calcs[0]))
     
-    np.savetxt('{}val_loss.csv'.format(output_root_dir), [loss_calcs], delimiter=',')
+    #np.savetxt('{}val_loss.csv'.format(output_root_dir), [loss_calcs], delimiter=',')
     print("DONE!")
 
   
