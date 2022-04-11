@@ -30,8 +30,13 @@ import matplotlib.pyplot as plt
 ootb_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model_ootb.pt')
 
 Wo_1 = np.transpose(ootb_model.linear_1.weight.detach().numpy())
+Bo_1 = np.transpose(ootb_model.linear_1.bias.detach().numpy())
 Wo_2 = np.transpose(ootb_model.linear_out.weight.detach().numpy())
+Bo_2 = np.transpose(ootb_model.linear_out.bias.detach().numpy())
 
 np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/wo_1.csv", Wo_1, delimiter=",")
 np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/wo_2.csv", Wo_2, delimiter=",")
+np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/bo_1.csv", Bo_1, delimiter=",")
+np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/bo_2.csv", Bo_2, delimiter=",")
+
 
