@@ -293,7 +293,7 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method, num_val_trajs):
+    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None):
         #print(self.val_set_indx)
         #print(num_val_trajs)
         extrap_time_points = np.array(range(0,300, 10)).astype(float)
@@ -302,7 +302,10 @@ class DataHandler:
         mu0 = self.get_mu0()
         mu1 = self.get_mu1() #remove later
         if self.val_split == 1:
-            all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
+            if fixed_traj_idx is None:
+                all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
+            else:
+                all_plotted_samples = fixed_traj_idx
         else:
             if num_val_trajs >0 :
                 all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot - num_val_trajs, replace=False))
