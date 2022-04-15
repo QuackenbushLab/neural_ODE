@@ -93,7 +93,7 @@ if __name__ == "__main__":
     gene_to_plot_dict = {"sim350": [4, 136, 200, 275], "sim690": [20, 100, 275, 320]} #100
     colors = ['orange','red','blue','green', 'pink', 'brown']
     leg_350 = [Patch(facecolor=this_col, edgecolor='black',
-                         label= gene_name_list_350[this_gene]['x']) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim350'])]
+                         label= gene_name_list_350[this_gene]['x'].replace("_input","",1)) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim350'])]
     leg_690 = [Patch(facecolor=this_col, edgecolor='black',
                          label= this_gene) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim690'])]
     
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                             #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten() + np.random.normal(0,this_noise,5), markerfacecolor = this_col, markeredgecolor = 'black', marker = "o", linestyle = 'None', alpha=0.5, label = gene)
                             
                             #ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5) #
-                ax.text(10, 1.15, 'log val MSE = {:.2f}'.format(math.log10(true_val_mse)),
+                ax.text(10, 1.15, r'$\log_{10}$' +'(val MSE) = {:.2f}'.format(math.log10(true_val_mse)),
                     verticalalignment='top', horizontalalignment='right',
                    # transform=ax.transAxes,
                     color='black', fontsize=12)
@@ -171,9 +171,9 @@ if __name__ == "__main__":
                     ax.set_title("Noise level = {}".format(this_noise), fontsize = ax_lab_size)    
                 
     temp_leg = fig_traj_split.legend(handles = leg_350 + leg_general_info, 
-                                        loc='lower center', prop={'size': 13}, ncol = 6)
+                                        loc='lower center', prop={'size': 15}, ncol = 6)
     #fig_traj_split.legend(handles = leg_690, loc='lower right', prop={'size': 15})
     #fig_traj_split.add_artist(temp_leg)
     #fig_traj_split.tight_layout()
-    fig_traj_split.savefig('{}/manuscript_fig_2.png'.format(output_root_dir), bbox_inches='tight')
+    fig_traj_split.savefig('{}/manuscript_fig_temp_perf.png'.format(output_root_dir), bbox_inches='tight')
     

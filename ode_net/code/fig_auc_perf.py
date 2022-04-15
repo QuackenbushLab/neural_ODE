@@ -24,8 +24,8 @@ if __name__ == "__main__":
     metric_labels = {'causal_TP':'TPR', 'causal_AUC':'AUC','causal_TN':'TNR',
                      'out_deg_cor':r'$\rho_{degree}$', 'sparsity_avg_deg': 'optimal exclusion'}
     model_colors = {"phoenix":"green", "phoenix_noprior" :"red", "ootb_tanh" : "purple"} 
-    model_labels = {"phoenix":"PHOENIX with prior " + r"($weight_{prior}$ = 5%)", 
-                    "phoenix_noprior" :"PHOENIX without prior",
+    model_labels = {"phoenix":"PHOENIX", 
+                    "phoenix_noprior" :"Unregularized PHOENIX (no prior)",
                     "ootb_tanh" : "Out-of-the-box NeuralODE"} 
     
     leg_general_info = [Patch(facecolor=model_colors[this_model], edgecolor= "black", alpha = 0.8,
@@ -93,5 +93,5 @@ if __name__ == "__main__":
                     ax.set_title(this_title, fontsize = ax_lab_size, pad = 15)    
     
     fig_auc_perfs.legend(handles = leg_general_info, loc='lower center', prop={'size': 15}, ncol = 4)
-    fig_auc_perfs.savefig('{}/manuscript_fig_3.png'.format(output_root_dir), bbox_inches='tight')
+    fig_auc_perfs.savefig('{}/manuscript_fig_auc_perf.png'.format(output_root_dir), bbox_inches='tight')
     
