@@ -90,9 +90,8 @@ if __name__ == "__main__":
                     color = model_colors[this_model], alpha = 0.5,  edgecolor = "black", 
                     linewidth = 1.5, align = 'center', hatch = model_hatch[this_model])
             ax.set_xscale("log")
-            #ax.set_axisbelow(True)
             ax.grid(visible = True, which = "both", axis = "x", color = "black", 
-            linestyle = "--", alpha = 0.3, zorder = 3)
+            linestyle = "--", alpha = 0.3)
             
         ax.set_xlabel('validation MSE ({})'.format(this_data.upper()), fontsize=ax_lab_size)
         if col_num == 0:
