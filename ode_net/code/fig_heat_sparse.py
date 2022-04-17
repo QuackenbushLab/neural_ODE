@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
                 y, x = np.meshgrid(np.linspace(1, 350, 350), np.linspace(1, 350, 350))
                 z = np.matmul(Wo_sums, alpha_comb[0:this_neurons,]) + np.matmul(Wo_prods, alpha_comb[this_neurons:(2*this_neurons),])    
-                z = np.transpose(z)* gene_mult.reshape(-1, 1) #effect of gene_mult (apply row wise)
+                z = np.transpose(z* gene_mult.reshape(1, -1)) 
                 color_mult = 0.1
                 z_min, z_max = color_mult*-np.abs(z).max(), color_mult*np.abs(z).max()
                 c = ax.pcolormesh(x, y, z, cmap='RdBu', vmin=z_min, vmax=z_max) 
