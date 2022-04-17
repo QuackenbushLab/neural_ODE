@@ -153,7 +153,7 @@ class ODENet(nn.Module):
     
     def load_model(self, fp):
         ''' Load a model from a file '''
-        idx = fp.index('.')
+        idx = fp.index('.pt')
         gene_mult_path = fp[:idx] + '_gene_multipliers' + fp[idx:]
         prod_path =  fp[:idx] + '_prods' + fp[idx:]
         sum_path = fp[:idx] + '_sums' + fp[idx:]

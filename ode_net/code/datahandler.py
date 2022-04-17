@@ -194,8 +194,8 @@ class DataHandler:
     def _split_data_traj(self, val_split):
         ''' Split the data into a training set and validation set '''
         self.n_val = int(round(self.ntraj * val_split))
-        #self.val_set_indx = np.random.choice(np.arange(self.ntraj), size=self.n_val, replace=False)
-        self.val_set_indx = np.array([3, 23, 25, 61, 74, 90, 103, 128, 139, 146]) #fixed val_set
+        self.val_set_indx = np.random.choice(np.arange(self.ntraj), size=self.n_val, replace=False)
+        #self.val_set_indx = np.array([3, 23, 25, 61, 74, 90, 103, 128, 139, 146]) #fixed val_set
         traj_indx = np.arange(self.ntraj)
         self.train_set_original = np.setdiff1d(traj_indx, self.val_set_indx)
         self.train_data_length = len(self.train_set_original)
@@ -302,16 +302,19 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method, num_val_trajs):
+    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None):
         #print(self.val_set_indx)
         #print(num_val_trajs)
-        extrap_time_points = np.array(range(0,300, 10)).astype(float)
+        extrap_time_points = np.arange(0,400,1.0) 
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
         mu1 = self.get_mu1() #remove later
         if self.val_split == 1:
-            all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
+            if fixed_traj_idx is None:
+                all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False))
+            else:
+                all_plotted_samples = fixed_traj_idx
         else:
             if num_val_trajs >0 :
                 all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot - num_val_trajs, replace=False))
@@ -331,7 +334,7 @@ class DataHandler:
                 _y = mu0[j]
             
             _y = mu1[j] #remove later
-            y = odeint(odenet, _y, self.time_pt[j][0:]  , method=method) + self.init_bias_y # #extrap_time_points_pt   
+            y = odeint(odenet, _y,  extrap_time_points_pt  , method=method) + self.init_bias_y #self.time_pt[j][0:] #  
             y = torch.Tensor.cpu(y)
             trajectories.append(y)
         return trajectories, all_plotted_samples, extrap_time_points
