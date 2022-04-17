@@ -183,7 +183,8 @@ class DataHandler:
         ''' Split the data into a training set and validation set '''
         self.n_val = int((self.datasize - self.ntraj) * val_split)
         all_indx = np.arange(len(self.indx))
-        val_indx = np.random.choice(all_indx, size=self.n_val, replace=False)
+        #val_indx = np.random.choice(all_indx, size=self.n_val, replace=False)
+        val_indx = np.array([ 16,  39,  42,  51,  55,  68,  78, 101, 107, 144, 160, 184, 208,233, 237, 318, 319, 320, 324, 335, 378, 393, 394, 422, 433, 434, 447, 469, 482, 491, 493, 495, 513, 529, 541, 546, 563, 570, 577])
         train_indx = np.setdiff1d(all_indx, val_indx, assume_unique=True)
         self.val_set_indx = [self.indx[x] for x in val_indx]
         self.train_set_original = [self.indx[x] for x in train_indx]
@@ -247,12 +248,20 @@ class DataHandler:
     
     def get_mu1(self):
         return [tensor[0] for tensor in self.data_pt_0noise]
+
     
-    def get_true_mu_set_pairwise(self, val_only = False):
-        if val_only:
-            all_indx = [self.indx[x] for x in np.arange(len(self.indx)) if self.indx[x][0] in  self.val_set_indx]
-        else:
-            all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
+    def get_true_mu_set_pairwise(self, val_only = False, batch_type = "trajectory"):
+        if batch_type == "trajectory":
+            if val_only:
+                all_indx = [self.indx[x] for x in np.arange(len(self.indx)) if self.indx[x][0] in  self.val_set_indx]
+            else:
+                all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
+        if batch_type == "single":
+            if val_only:
+                all_indx = self.val_set_indx
+            else:
+                all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
+        
         mean_data = []
         mean_target = []
         mean_t = []
