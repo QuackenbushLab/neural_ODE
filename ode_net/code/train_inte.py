@@ -58,10 +58,8 @@ def my_r_squared(output, target):
     my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
     return(my_corr**2)
 
-def get_true_val_set_r2(odenet, data_handler, method):
-    data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
-    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True)
-    #odenet.eval()
+def get_true_val_set_r2(odenet, data_handler, method, batch_type):
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  batch_type)
     with torch.no_grad():
         predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
@@ -69,11 +67,12 @@ def get_true_val_set_r2(odenet, data_handler, method):
         var_explained_pw = my_r_squared(predictions_pw, target_pw)
         true_val_mse = torch.mean((predictions_pw - target_pw)**2)
         
+    #data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
         #predictions = torch.zeros(target.shape).to(data_handler.device)
         #for index, (time, batch_point) in enumerate(zip(t, data)):
         #    predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
         #var_explained_init_val_based = my_r_squared(predictions, target)
-
+    
     return [var_explained_pw, true_val_mse]
 
 
@@ -187,7 +186,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" #"
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" #"
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
@@ -245,7 +244,7 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350.csv'
+    prior_mat_loc = '/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/edge_prior_matrix_chalmers_690.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
     batch_for_prior = torch.rand(500,1,prior_mat.shape[0], device = data_handler.device)
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
@@ -344,8 +343,8 @@ if __name__ == "__main__":
     epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
-    #print(get_true_val_set_r2(odenet, data_handler, settings['method']))
-
+    #print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
+    
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1
@@ -378,7 +377,7 @@ if __name__ == "__main__":
         training_loss.append(train_loss)
         #print("Overall training loss {:.5E}".format(train_loss))
 
-        mu_loss = get_true_val_set_r2(odenet, data_handler, settings['method'])
+        mu_loss = get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type'])
         #mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss[1])
         true_mean_losses_init_val_based.append(mu_loss[0])
