@@ -95,15 +95,15 @@ if __name__ == "__main__":
             num_gene = 3551
             y, x = np.meshgrid(np.linspace(1, num_gene, num_gene), np.linspace(1, num_gene, num_gene))
             z = np.matmul(Wo_sums, alpha_comb[0:this_neurons,]) + np.matmul(Wo_prods, alpha_comb[this_neurons:(2*this_neurons),])    
-            z = z* gene_mult.reshape(1, -1)
-            if this_model == "phoenix_noprior":
-                z = z*4
+            z = np.transpose(z* gene_mult.reshape(1, -1))
+            #if this_model == "phoenix_noprior":
+            #    z = z*4
             #row_sums =  z.sum(axis=1)
             #z = np.transpose(z / row_sums[:, np.newaxis])
 
             #color_mult =0.1
             z_min, z_max = -np.abs(z).max(), np.abs(z).max()
-            c = ax.pcolormesh(x, y, z, cmap='RdBu', vmin= -0.2, vmax= 0.2) #  
+            c = ax.pcolormesh(x, y, z, cmap='RdBu', vmin= z_min, vmax= z_max) #   
             ax.axis([x.min(), x.max(), y.min(), y.max()]) 
             fig_yeast_res.colorbar(c, ax =ax, shrink=0.95, orientation = "horizontal", pad = 0.05)
 
