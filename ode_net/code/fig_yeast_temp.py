@@ -68,8 +68,8 @@ if __name__ == "__main__":
 
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)"} 
-    gene_to_plot_dict = {"yeast": [136, 3000, 2500]}
-    colors = ['red','blue','orange','green', 'pink', 'brown']
+    gene_to_plot_dict = {"yeast": [527, 395, 2229]} #3000, 2500
+    colors = ['blue','orange', 'magenta', 'brown']
     
     leg_yeast = [Patch(facecolor=this_col, edgecolor='black',
                          label= gene_name_list_yeast[this_gene]['y'].replace("_input","",1)) for this_col,this_gene in zip(colors, gene_to_plot_dict['yeast'])]
@@ -126,16 +126,16 @@ if __name__ == "__main__":
     ax.spines['right'].set_linewidth(border_width)
     ax.cla()
 
-    ax.set_ylim((-2, 2))
+    ax.set_ylim((0, 1))
     ax.set_xlim((0,300))
     for sample_idx, (approx_traj, traj, true_mean) in enumerate(zip(trajectories, data_np_to_plot, data_np_0noise_to_plot)):
         for gene,this_col in zip(genes, colors):
             with torch.no_grad():
-                this_pred_traj = approx_traj[:,:,gene].numpy().flatten()
+                this_pred_traj = 1/6*(approx_traj[:,:,gene].numpy().flatten() + 3)
                 ax.plot(extrap_timepoints, this_pred_traj,
                     color = this_col, linestyle = "--", lw=2, label = "prediction") #times[sample_idx].flatten()[0:] 
                 
-                noisy_traj =  traj[:,:,gene].flatten()
+                noisy_traj =  1/6* (traj[:,:,gene].flatten() + 3)
                 observed_times = times[sample_idx].flatten()
                 ax.plot(observed_times, noisy_traj,    
                 color = this_col, lw = 5, linestyle = '-', alpha=0.3)
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     ax.tick_params(axis='x', labelsize= tick_lab_size)
     ax.tick_params(axis='y', labelsize= tick_lab_size)
 
-    ax.legend(handles = leg_yeast + leg_general_info, prop={'size': 10})
+    ax.legend(handles = leg_yeast + leg_general_info, prop={'size': 10}, frameon = False)
 
     ax.set_ylabel("normalized gene expression", fontsize=ax_lab_size)
     ax.set_xlabel(r'$t$' + " (min)", fontsize=ax_lab_size)
@@ -169,17 +169,19 @@ if __name__ == "__main__":
                                             img_save_dir = "not needed",
                                             scale_expression = 1)
     preds_targets_corr = get_preds_and_targets(this_odenet, data_handler_yeast_for_corr , 'dopri5')
-    preds =  preds_targets_corr[0]
-    targets =  preds_targets_corr[1]
-    corr =  preds_targets_corr[2]
+    preds =  (preds_targets_corr[0] + 3) * 1/6
+    targets = (preds_targets_corr[1] + 3) * 1/6
+    corr =  preds_targets_corr[2].item()
     corr_plot = ax1.plot(targets.squeeze().tolist(), #observed
-                        preds.squeeze().tolist(),
+                         preds.squeeze().tolist(),
                         markerfacecolor = "silver", markeredgecolor = 'black', marker = "o",
                         linestyle = 'None')
-    #ax1.ax.axline((0, 0), slope=1, c="orange", linewidth=1)
-    ax1.text(4, -1.5, r'$\rho$' + " = {:.4f}".format(corr.item()) ,
+    ax1.plot([-0.5,1.5], [-0.5,1.5], c = "black", linewidth = 1.5, linestyle = "--")
+    ax1.text(1, 0.15, r'$\rho$' + " = {:.4f}".format(corr) ,
             verticalalignment='top', horizontalalignment='right',
             color='black', fontsize=14)
+    ax1.set_ylim((0, 1.05))
+    ax1.set_xlim((0,1.05))
     ax1.set_ylabel("predicted expression", fontsize=ax_lab_size)
     ax1.set_xlabel('observed expression', fontsize=ax_lab_size)
 
@@ -192,10 +194,11 @@ if __name__ == "__main__":
     ax2.spines['right'].set_linewidth(border_width)
     ax2.cla()
     
-    lambdas = [0.8, 0.95]
-    auc_cols = {0.8: "green", 0.95: "blue"}
-    auc_labs = {0.8: r"$\lambda_{prior}$" + " = 0.20", 
-                0.95: r"$\lambda_{prior}$" + " = 0.05"}
+    lambdas = [0.8, 0.95, 1]
+    auc_cols = {0.8: "darkgreen", 0.95: "limegreen", 1: "red"}
+    auc_labs = {0.8: r"$\lambda_{prior}$" + "= 0.20 (AUC 0.77)", 
+                0.95: r"$\lambda_{prior}$" + "= 0.05 (AUC 0.58)",
+                1:  "no prior (AUC 0.53)"}
     all_auc_vals = {}
     for this_lambda in lambdas:
         if this_lambda not in all_auc_vals:
@@ -208,16 +211,17 @@ if __name__ == "__main__":
     for this_lambda in lambdas:
         ax2.plot( all_auc_vals[this_lambda]["fpr"], all_auc_vals[this_lambda]["tpr"],
                  color = auc_cols[this_lambda], lw=2, linestyle = "-")
-
-    leg_auc = [ Line2D([0], [0], label=auc_labs[this_lambda], lw = 2,
-                          linestyle = '-',  color =auc_cols[this_lambda]) for this_lambda in lambdas]    
+    
+    ax2.plot([-0.5,1.5], [-0.5,1.5], c = "black", linewidth = 1.5, linestyle = "--")
+    
     ax2.set_ylim((-0.05, 1.05))
     ax2.set_xlim((-0.05, 1.05))
     ax2.set_xlabel("FPR", fontsize=ax_lab_size)
     ax2.set_ylabel("TPR", fontsize=ax_lab_size)
     ax2.yaxis.tick_right()
-    #ax2.yaxis.set_label_position("right")
-    ax2.legend(handles = leg_auc, prop={'size': 10})
     
-
+    leg_auc = [ Line2D([0], [0], label=auc_labs[this_lambda], lw = 2,
+                          linestyle = '-',  color =auc_cols[this_lambda]) for this_lambda in lambdas]    
+    ax2.legend(handles = leg_auc, prop={'size': 10}, frameon = False)
+    
     fig_yeast_res.savefig('{}/manuscript_fig_yeast_res.png'.format(output_root_dir), bbox_inches='tight')    
