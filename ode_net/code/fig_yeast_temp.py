@@ -194,11 +194,15 @@ if __name__ == "__main__":
     ax2.spines['right'].set_linewidth(border_width)
     ax2.cla()
     
-    lambdas = [0.8, 0.95, 1]
-    auc_cols = {0.8: "darkgreen", 0.95: "limegreen", 1: "red"}
-    auc_labs = {0.8: r"$\lambda_{prior}$" + "= 0.20 (AUC 0.77)", 
+    lambdas = [0.2, 0.8, 0.95, 1]
+    auc_cols = {0.2: "darkgreen", 0.8: "limegreen", 0.95: "aquamarine", 1: "red"}
+    auc_labs = {0.2: r"$\lambda_{prior}$" + "= 0.80 (AUC 0.69)",
+               # 0.5: r"$\lambda_{prior}$" + "= 0.50 (AUC 0.77)",
+                0.8: r"$\lambda_{prior}$" + "= 0.20 (AUC 0.77)", 
                 0.95: r"$\lambda_{prior}$" + "= 0.05 (AUC 0.58)",
                 1:  "no prior (AUC 0.53)"}
+    
+    
     all_auc_vals = {}
     for this_lambda in lambdas:
         if this_lambda not in all_auc_vals:
@@ -220,7 +224,7 @@ if __name__ == "__main__":
     ax2.set_ylabel("TPR", fontsize=ax_lab_size)
     ax2.yaxis.tick_right()
     
-    leg_auc = [ Line2D([0], [0], label=auc_labs[this_lambda], lw = 2,
+    leg_auc = [ Line2D([0], [0], label=auc_labs[this_lambda], lw = 3,
                           linestyle = '-',  color =auc_cols[this_lambda]) for this_lambda in lambdas]    
     ax2.legend(handles = leg_auc, prop={'size': 10}, frameon = False)
     
