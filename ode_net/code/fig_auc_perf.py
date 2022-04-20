@@ -20,9 +20,9 @@ if __name__ == "__main__":
     datasets = ["sim350", "sim690"]
     noises = [0, 0.025, 0.05, 0.1]
     perf_info = {}
-    metrics = ['causal_TP', 'causal_AUC','causal_TN', 'out_deg_cor', 'sparsity_avg_deg' ]
-    metric_labels = {'causal_TP':'TPR', 'causal_AUC':'AUC','causal_TN':'TNR',
-                     'out_deg_cor':r'$\rho_{degree}$', 'sparsity_avg_deg': 'optimal exclusion'}
+    metrics = ['opt_TP', 'causal_AUC','opt_TN', 'sparse_out_deg_cor', 'opt_avg_degree' ]
+    metric_labels = {'opt_TP':r'$TPR_{opt}$', 'causal_AUC':'AUC','opt_TN':r'$TNR_{opt}$',
+                     'sparse_out_deg_cor':r'$\rho_{degree}$', 'opt_avg_degree': r'$\mathcal{C}_{\max}$'}
     model_colors = {"phoenix":"green", "phoenix_noprior" :"red", "ootb_tanh" : "purple"} 
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)",
@@ -45,8 +45,9 @@ if __name__ == "__main__":
     for line in perf_csv: 
         if line['model'] in models and float(line['noise']) in noises:
             for this_metric in metrics:
-                if this_metric == "sparsity_avg_deg":
-                    perf_info[line['dataset'].lower()][line['model']][float(line['noise'])][this_metric] = 1- float(line[this_metric])/num_gene_dict[line['dataset'].lower()]
+                if this_metric == 'opt_avg_degree':
+                    scale_to_start = 0
+                    perf_info[line['dataset'].lower()][line['model']][float(line['noise'])][this_metric] = ((1- float(line[this_metric])/num_gene_dict[line['dataset'].lower()])-scale_to_start)/(1- scale_to_start)
                 else:
                     perf_info[line['dataset'].lower()][line['model']][float(line['noise'])][this_metric] = float(line[this_metric])
 
