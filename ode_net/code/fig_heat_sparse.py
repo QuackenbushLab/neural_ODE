@@ -39,16 +39,8 @@ if __name__ == "__main__":
     datasets = ["sim350"]
     noises = [0,0.025, 0.05, 0.1]
     
-    dir_350 = 'C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_150samples_earlyT_0bimod_1initvar.csv'
     
-    data_handler_350 = DataHandler.fromcsv(dir_350, "cpu", 1, normalize=False, 
-                                            batch_type="trajectory", batch_time=100, 
-                                            batch_time_frac=0.5,
-                                            noise = 0,
-                                            img_save_dir = "not needed",
-                                            scale_expression = 1)
-
-    datahandler_dict = {"sim350": data_handler_350}
+    datahandler_dim = {"sim350": 350}
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)"} 
     SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")    
@@ -69,9 +61,9 @@ if __name__ == "__main__":
     print("......")
     
     for this_data in datasets:
-        this_data_handler = datahandler_dict[this_data]
+        #this_data_handler = datahandler_dict[this_data]
         this_neurons = neuron_dict[this_data]
-        this_odenet = ODENet("cpu", this_data_handler.dim, explicit_time=False, neurons = this_neurons)
+        this_odenet = ODENet("cpu", datahandler_dim[this_data], explicit_time=False, neurons = this_neurons)
         this_odenet.float()
         for this_noise in noises:
             noise_string = "noise_{}".format(this_noise)
@@ -95,9 +87,10 @@ if __name__ == "__main__":
                 alpha_comb = np.transpose(this_odenet.net_alpha_combine.linear_out.weight.detach().numpy())
                 gene_mult = np.transpose(torch.relu(this_odenet.gene_multipliers.detach()).numpy()) 
 
-                y, x = np.meshgrid(np.linspace(1, 350, 350), np.linspace(1, 350, 350))
+                y, x = np.meshgrid(np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]), np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]))
                 z = np.matmul(Wo_sums, alpha_comb[0:this_neurons,]) + np.matmul(Wo_prods, alpha_comb[this_neurons:(2*this_neurons),])    
                 z = np.transpose(z* gene_mult.reshape(1, -1)) 
+                #z = np.transpose(z)
                 color_mult = 0.1
                 z_min, z_max = color_mult*-np.abs(z).max(), color_mult*np.abs(z).max()
                 c = ax.pcolormesh(x, y, z, cmap='RdBu', vmin=z_min, vmax=z_max) 
@@ -125,7 +118,7 @@ if __name__ == "__main__":
     cbar.set_ticks([0, 0.35, -0.35])
     cbar.set_ticklabels(['None', 'Activating', 'Repressive'])
     cbar.ax.tick_params(labelsize = tick_lab_size+3) 
-    cbar.set_label('Estimated effect of '+ r'$g_i$'+ ' on ' +r"$\frac{dg_j}{dt}$" +' (based on trained model)', size = ax_lab_size)
+    cbar.set_label('Estimated effect of '+ r'$g_i$'+ ' on ' +r"$\frac{dg_j}{dt}$" +' (based on trained model) in SIM350', size = ax_lab_size)
     cbar.outline.set_linewidth(2)
 
     
