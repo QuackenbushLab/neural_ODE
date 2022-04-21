@@ -43,6 +43,9 @@ if __name__ == "__main__":
     datahandler_dim = {"sim350": 350}
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)"} 
+    model_mults = {"phoenix":0.20, 
+                    "phoenix_noprior" :0.30} 
+                    
     SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")    
     #Plotting setup
     #plt.xticks(fontsize=10)
@@ -89,19 +92,22 @@ if __name__ == "__main__":
 
                 y, x = np.meshgrid(np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]), np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]))
                 z = np.matmul(Wo_sums, alpha_comb[0:this_neurons,]) + np.matmul(Wo_prods, alpha_comb[this_neurons:(2*this_neurons),])    
-                z = np.transpose(z* gene_mult.reshape(1, -1)) 
+                z = z* gene_mult.reshape(1, -1) 
+                row_sums =  np.abs(z).sum(axis=1)
+                z = z / row_sums[:, np.newaxis]
                 #z = np.transpose(z)
-                color_mult = 0.1
+
+                color_mult = model_mults[this_model] #0.25
                 z_min, z_max = color_mult*-np.abs(z).max(), color_mult*np.abs(z).max()
                 c = ax.pcolormesh(x, y, z, cmap='RdBu', vmin=z_min, vmax=z_max) 
                 ax.axis([x.min(), x.max(), y.min(), y.max()]) 
                 
                 if row_num == 0 and col_num == 0:
                     fig_heat_sparse.canvas.draw()
-                    labels_x = [item.get_text() for item in ax.get_xticklabels()]
-                    labels_x_mod = [(r"$g'$"+item).translate(SUB) for item in labels_x]
                     labels_y = [item.get_text() for item in ax.get_yticklabels()]
-                    labels_y_mod = [(r'$g$'+item).translate(SUB) for item in labels_y]
+                    labels_y_mod = [(r"$g'$"+item).translate(SUB) for item in labels_y]
+                    labels_x = [item.get_text() for item in ax.get_xticklabels()]
+                    labels_x_mod = [(r'$g$'+item).translate(SUB) for item in labels_x]
                 
                 ax.set_xticklabels(labels_x_mod)
                 ax.set_yticklabels(labels_y_mod)
@@ -115,10 +121,10 @@ if __name__ == "__main__":
                  
     cbar =  fig_heat_sparse.colorbar(c, ax=axes_heat_sparse.ravel().tolist(), 
                                         shrink=0.95, orientation = "horizontal", pad = 0.05)
-    cbar.set_ticks([0, 0.35, -0.35])
+    cbar.set_ticks([0, 0.03, -0.03])
     cbar.set_ticklabels(['None', 'Activating', 'Repressive'])
     cbar.ax.tick_params(labelsize = tick_lab_size+3) 
-    cbar.set_label('Estimated effect of '+ r'$g_i$'+ ' on ' +r"$\frac{dg_j}{dt}$" +' (based on trained model) in SIM350', size = ax_lab_size)
+    cbar.set_label(r'$\widetilde{D_{ij}}$= '+'Estimated effect of '+ r'$g_j$'+ ' on ' +r"$\frac{dg_i}{dt}$" +' in SIM350', size = ax_lab_size)
     cbar.outline.set_linewidth(2)
 
     
