@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch, Polygon
 import numpy as np
 
+def my_relu_func(x):
+    if x > 0:
+        return x
+    return 0
+
 if __name__ == "__main__":
 
     save_file_name = "just_plots"
@@ -71,7 +76,7 @@ if __name__ == "__main__":
         for this_model in models:
             for this_noise in noises:
                 print("Now on data = {}, noise = {}".format(this_data, this_noise))
-                radar_data = [perf_info[this_data][this_model][this_noise][this_metric] for this_metric in plot_metrics]
+                radar_data = [my_relu_func(perf_info[this_data][this_model][this_noise][this_metric]) for this_metric in plot_metrics]
                 
                 row_num = datasets.index(this_data)
                 this_row_plots = axes_auc_perfs[row_num]
