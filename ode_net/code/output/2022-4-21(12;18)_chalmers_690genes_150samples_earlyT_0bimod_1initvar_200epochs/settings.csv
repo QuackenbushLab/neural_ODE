@@ -5,7 +5,7 @@ verbose,True
 method,dopri5
 neurons_per_layer,50
 optimizer,adam
-batch_type,trajectory
+batch_type,single
 batch_size,4
 batch_time,99999
 batch_time_frac,99999
