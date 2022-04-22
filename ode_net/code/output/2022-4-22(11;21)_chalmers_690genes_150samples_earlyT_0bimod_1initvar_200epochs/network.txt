@@ -1,0 +1,14 @@
+ODENet(
+  (net_ootb): Sequential(
+    (activation_0): Tanh()
+    (linear_1): Linear(in_features=690, out_features=100, bias=True)
+    (activation_1): Tanh()
+    (linear_out): Linear(in_features=100, out_features=690, bias=True)
+  )
+)
+
+
+    def forward(self, t, y):
+        res = self.net_ootb(y)
+        final = res - y
+        return(final) 
