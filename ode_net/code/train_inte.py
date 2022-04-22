@@ -168,14 +168,14 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     
     loss_data = torch.mean((predictions - target)**2) 
     
-    pred_grad = odenet.prior_only_forward(t,batch_for_prior)
-    loss_prior = torch.mean((pred_grad - prior_grad)**2)
+    #pred_grad = odenet.prior_only_forward(t,batch_for_prior)
+    #loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
-    loss_lambda = 0.2 #0.95
-    composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
+    loss_lambda = 1 #0.95
+    composed_loss = loss_lambda * loss_data #+ (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
-    return [loss_data, loss_prior]
+    return [loss_data, loss_data- loss_data]
 
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -186,8 +186,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "pramila_3551genes_2samples_24T" #"
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" #"
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -244,7 +244,7 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/edge_prior_matrix_pramila_3551.csv'
+    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_690.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
     batch_for_prior = torch.rand(500,1,prior_mat.shape[0], device = data_handler.device)
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
@@ -340,11 +340,13 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 25
+    epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
     #print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
-    
+    x,y,z,n = data_handler.get_validation_set()
+    x1, y1, z1 = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  settings['batch_type'])
+
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1

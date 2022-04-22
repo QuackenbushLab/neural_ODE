@@ -151,7 +151,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     loss_data = torch.mean((predictions - target)**2) 
     loss_data.backward() #MOST EXPENSIVE STEP!
     opt.step()
-    return [loss_data, loss_data]
+    return [loss_data, loss_data-loss_data]
 
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -162,7 +162,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" #"
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" #"
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
