@@ -28,7 +28,7 @@ if __name__ == "__main__":
     metrics = ['opt_TP', 'causal_AUC','opt_TN', 'sparse_out_deg_cor', 'opt_avg_degree' ]
     metric_labels = {'opt_TP':r'$\rm{TPR}_{\max}$', 'causal_AUC':'AUC','opt_TN':r'$\rm{TNR}_{\max}$',
                      'sparse_out_deg_cor':r'$\rho_{\rm{out}}$', 'opt_avg_degree': r'$\mathcal{C}_{\max}$'}
-    model_colors = {"phoenix":"green", "phoenix_noprior" :"red", "ootb_tanh" : "purple"} 
+    model_colors = {"phoenix":"dodgerblue", "phoenix_noprior" :"red", "ootb_tanh" : "saddlebrown"} 
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)",
                     "ootb_tanh" : "Out-of-the-box NeuralODE"} 
