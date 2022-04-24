@@ -23,8 +23,8 @@ if __name__ == "__main__":
     perf_info = {}
     metrics = ['true_val_MSE']
     metric_labels = {'true_val_MSE':'MSE'}
-    model_colors = {"phoenix":"green", "phoenix_noprior" :"red", 
-                    "ootb_tanh" : "purple", "ootb_relu" : "purple", "ootb_sigmoid" : "purple"} 
+    model_colors = {"phoenix":"dodgerblue", "phoenix_noprior" :"red", 
+                    "ootb_tanh" : "saddlebrown", "ootb_relu" : "sandybrown", "ootb_sigmoid" : "peachpuff"} 
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX",
                     "ootb_tanh" : "OOTB NeuralODE (tanh)",
@@ -35,7 +35,7 @@ if __name__ == "__main__":
                     "ootb_tanh" : "//", "ootb_relu" : "..", "ootb_sigmoid" : "xx"}                
     
     leg_general_info = [Patch(facecolor=model_colors[this_model], edgecolor= "black", 
-                            alpha = 0.5, hatch = model_hatch[this_model],
+                            alpha = 0.7, hatch = model_hatch[this_model],
                          label= model_labels[this_model]) for this_model in models]
                      
     for this_data in datasets:
@@ -87,7 +87,7 @@ if __name__ == "__main__":
             this_delta = deltas[models.index(this_model)] 
             this_model_mses =  [perf_info[this_data][this_model][this_noise]['true_val_MSE'] for this_noise in noises]
             ax.barh(ind + height*this_delta, this_model_mses, height = height,
-                    color = model_colors[this_model], alpha = 0.5,  edgecolor = "black", 
+                    color = model_colors[this_model], alpha = 0.7,  edgecolor = "black", 
                     linewidth = 1.5, align = 'center', hatch = model_hatch[this_model])
             ax.set_xscale("log")
             ax.grid(visible = True, which = "both", axis = "x", color = "black", 

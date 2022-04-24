@@ -91,7 +91,7 @@ if __name__ == "__main__":
     tick_lab_size = 11
     ax_lab_size = 15
     gene_to_plot_dict = {"sim350": [4, 136, 200, 275], "sim690": [20, 100, 275, 320]} #100
-    colors = ['orange','red','blue','green', 'pink', 'brown']
+    colors = ['orange','green','magenta', 'brown']
     leg_350 = [Patch(facecolor=this_col, edgecolor='black',
                          label= gene_name_list_350[this_gene]['x'].replace("_input","",1)) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim350'])]
     leg_690 = [Patch(facecolor=this_col, edgecolor='black',
@@ -166,9 +166,9 @@ if __name__ == "__main__":
                     color='black', fontsize=12)
                 ax.set_xlabel(r'$t$', fontsize=ax_lab_size)
                 if col_num == 0:
-                    ax.set_ylabel('gene expression ({})'.format(this_data.upper()), fontsize=ax_lab_size)
+                    ax.set_ylabel('{}\ngene expression'.format(this_data.upper()), fontsize=ax_lab_size)
                 if row_num == 0:
-                    ax.set_title("Noise level = {}".format(this_noise), fontsize = ax_lab_size)    
+                    ax.set_title("Noise level = {:.0%}".format(this_noise/0.5), fontsize = ax_lab_size)    
                 
     temp_leg = fig_traj_split.legend(handles = leg_350 + leg_general_info, 
                                         loc='lower center', prop={'size': 15}, ncol = 6)

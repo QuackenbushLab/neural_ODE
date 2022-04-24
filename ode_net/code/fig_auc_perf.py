@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch, Polygon
 import numpy as np
 
+def my_relu_func(x):
+    if x > 0:
+        return x
+    return 0
+
 if __name__ == "__main__":
 
     save_file_name = "just_plots"
@@ -23,7 +28,7 @@ if __name__ == "__main__":
     metrics = ['opt_TP', 'causal_AUC','opt_TN', 'sparse_out_deg_cor', 'opt_avg_degree' ]
     metric_labels = {'opt_TP':r'$\rm{TPR}_{\max}$', 'causal_AUC':'AUC','opt_TN':r'$\rm{TNR}_{\max}$',
                      'sparse_out_deg_cor':r'$\rho_{\rm{out}}$', 'opt_avg_degree': r'$\mathcal{C}_{\max}$'}
-    model_colors = {"phoenix":"green", "phoenix_noprior" :"red", "ootb_tanh" : "purple"} 
+    model_colors = {"phoenix":"dodgerblue", "phoenix_noprior" :"red", "ootb_tanh" : "saddlebrown"} 
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)",
                     "ootb_tanh" : "Out-of-the-box NeuralODE"} 
@@ -71,7 +76,7 @@ if __name__ == "__main__":
         for this_model in models:
             for this_noise in noises:
                 print("Now on data = {}, noise = {}".format(this_data, this_noise))
-                radar_data = [perf_info[this_data][this_model][this_noise][this_metric] for this_metric in plot_metrics]
+                radar_data = [my_relu_func(perf_info[this_data][this_model][this_noise][this_metric]) for this_metric in plot_metrics]
                 
                 row_num = datasets.index(this_data)
                 this_row_plots = axes_auc_perfs[row_num]

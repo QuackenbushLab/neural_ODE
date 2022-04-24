@@ -69,7 +69,7 @@ if __name__ == "__main__":
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)"} 
     gene_to_plot_dict = {"yeast": [527, 395, 2229]} #3000, 2500
-    colors = ['blue','orange', 'magenta', 'brown']
+    colors = ['green','darkorange', 'darkorchid', 'brown']
     
     leg_yeast = [Patch(facecolor=this_col, edgecolor='black',
                          label= gene_name_list_yeast[this_gene]['y'].replace("_input","",1)) for this_col,this_gene in zip(colors, gene_to_plot_dict['yeast'])]
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     ax2.cla()
     
     lambdas = [0.2, 0.8, 0.95, 1]
-    auc_cols = {0.2: "darkgreen", 0.8: "limegreen", 0.95: "aquamarine", 1: "red"}
+    auc_cols = {0.2: "navy", 0.8: "dodgerblue", 0.95: "skyblue", 1: "red"}
     auc_labs = {0.2: r"$\lambda_{prior}$" + "= 0.80 (AUC 0.69)",
                # 0.5: r"$\lambda_{prior}$" + "= 0.50 (AUC 0.77)",
                 0.8: r"$\lambda_{prior}$" + "= 0.20 (AUC 0.77)", 
