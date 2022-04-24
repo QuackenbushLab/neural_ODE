@@ -91,7 +91,7 @@ if __name__ == "__main__":
     tick_lab_size = 11
     ax_lab_size = 15
     gene_to_plot_dict = {"sim350": [4, 136, 200, 275], "sim690": [20, 100, 275, 320]} #100
-    colors = ['orange','green','magenta', 'brown']
+    colors = ['darkorange','deeppink','darkorchid', 'limegreen']
     leg_350 = [Patch(facecolor=this_col, edgecolor='black',
                          label= gene_name_list_350[this_gene]['x'].replace("_input","",1)) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim350'])]
     leg_690 = [Patch(facecolor=this_col, edgecolor='black',
