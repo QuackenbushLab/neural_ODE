@@ -117,7 +117,7 @@ if __name__ == "__main__":
                 if row_num == 0:
                     ax.set_title(model_labels[this_model], fontsize=ax_lab_size, pad = 10)
                 if col_num == 0:
-                    ax.set_ylabel("Noise level = {}".format(this_noise), fontsize = ax_lab_size) 
+                    ax.set_ylabel("Noise level = {:.0%}".format(this_noise/0.5), fontsize = ax_lab_size) 
                  
     cbar =  fig_heat_sparse.colorbar(c, ax=axes_heat_sparse.ravel().tolist(), 
                                         shrink=0.95, orientation = "horizontal", pad = 0.05)

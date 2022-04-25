@@ -29,6 +29,8 @@ if __name__ == "__main__":
     metric_labels = {'opt_TP':r'$\rm{TPR}_{\max}$', 'causal_AUC':'AUC','opt_TN':r'$\rm{TNR}_{\max}$',
                      'sparse_out_deg_cor':r'$\rho_{\rm{out}}$', 'opt_avg_degree': r'$\mathcal{C}_{\max}$'}
     model_colors = {"phoenix":"dodgerblue", "phoenix_noprior" :"red", "ootb_tanh" : "saddlebrown"} 
+    model_alphas = {"phoenix":0.20, "phoenix_noprior" :0.20, "ootb_tanh" : 0.35} 
+    
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)",
                     "ootb_tanh" : "Out-of-the-box NeuralODE"} 
@@ -84,18 +86,20 @@ if __name__ == "__main__":
                 #col_num = datasets.index(this_data)*len(noises) + noises.index(this_noise)
                 ax = this_row_plots[col_num]
                 ax.tick_params(axis='x', labelsize= tick_lab_size)
+                ax.grid(visible = True, which = "both", axis = "both", color = "black", 
+                        linestyle = "-", alpha = 0.3)
                 #ax.tick_params(axis='y', labelsize= tick_lab_size)
 
                 #ax.cla()
                 if not(this_model == "ootb_tanh" and this_noise in [0.025, 0.05]):
                     ax.plot(label_loc, radar_data, color = model_colors[this_model])
-                    ax.fill(label_loc, radar_data, facecolor= model_colors[this_model], alpha=0.17)
+                    ax.fill(label_loc, radar_data, facecolor= model_colors[this_model], alpha=model_alphas[this_model])
                     ax.set_thetagrids(angles = np.degrees(label_loc), 
                                         labels=[metric_labels[this_metric] for this_metric in plot_metrics])
                 if col_num == 0:
                     ax.set_ylabel('{}'.format(this_data.upper()), fontsize=ax_lab_size + 5)
                 if row_num == 0:
-                    this_title = "Noise level = {}".format(this_noise) 
+                    this_title = "Noise level = {:.0%}".format(this_noise/0.5) 
                     ax.set_title(this_title, fontsize = ax_lab_size, pad = 15)    
     
     fig_auc_perfs.legend(handles = leg_general_info, loc='lower center', prop={'size': 15}, ncol = 4)
