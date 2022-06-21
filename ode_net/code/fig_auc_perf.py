@@ -91,7 +91,7 @@ if __name__ == "__main__":
                 #ax.tick_params(axis='y', labelsize= tick_lab_size)
 
                 #ax.cla()
-                if not(this_model == "ootb_tanh" and this_data == "sim350" and this_noise in [0.025, 0.05]):
+                if not(this_model == "ootb_tanh" and this_data == "sim350" and this_noise in [0.05]):
                     ax.plot(label_loc, radar_data, color = model_colors[this_model])
                     ax.fill(label_loc, radar_data, facecolor= model_colors[this_model], alpha=model_alphas[this_model])
                     ax.set_thetagrids(angles = np.degrees(label_loc), 
