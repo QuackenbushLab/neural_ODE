@@ -87,9 +87,9 @@ class Visualizator1D(Visualizator):
         self.EXTRA_WIDTH_TRAJ = 0.2
         self.EXTRA_WIDTH_DYN = 1
 
-        self.time_span = (np.min([np.min(time[:]) for time in times]),
-                          np.max([np.max(time[:]) for time in times]))
-        #self.time_span = (0.0, 300.0)
+        #self.time_span = (np.min([np.min(time[:]) for time in times]),
+        #                  np.max([np.max(time[:]) for time in times]))
+        self.time_span = (0.0, 2.0)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
