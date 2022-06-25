@@ -171,7 +171,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     pred_grad = odenet.prior_only_forward(t,batch_for_prior)
     loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
-    loss_lambda = 0.95 #0.95
+    loss_lambda = 0.95 #0.9995
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -186,7 +186,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "desmedt_4000genes_1sample_186T" #"
+clean_name =  "desmedt_2000genes_1sample_186T" #"
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
@@ -244,9 +244,9 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_4000.csv'
+    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_2000.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
-    batch_for_prior = torch.rand(500,1,prior_mat.shape[0], device = data_handler.device)
+    batch_for_prior = torch.rand(100,1,prior_mat.shape[0], device = data_handler.device)
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
 
     # Initialization
@@ -329,7 +329,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [5, 15, 25, 40, 50, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
+    rep_epochs = [1, 5, 15, 25, 40, 50, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
     viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
@@ -439,7 +439,7 @@ if __name__ == "__main__":
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print("Saving plot")
             with torch.no_grad():
-                continue 
+                #print("nope..")
                 visualizer.visualize()
                 visualizer.plot()
                 visualizer.save(img_save_dir, epoch)
