@@ -171,7 +171,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     pred_grad = odenet.prior_only_forward(t,batch_for_prior)
     loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
-    loss_lambda = 0.95 #0.9995
+    loss_lambda = 0.80 #0.9995
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -292,7 +292,7 @@ if __name__ == "__main__":
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-06, 
+    factor=0.9, patience=3, threshold=1e-07, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     
