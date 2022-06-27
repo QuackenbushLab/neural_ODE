@@ -1,0 +1,13 @@
+ODENet(
+  (net_prods): Sequential(
+    (activation_0): LogShiftedSoftSignMod()
+    (linear_out): Linear(in_features=4000, out_features=80, bias=True)
+  )
+  (net_sums): Sequential(
+    (activation_0): SoftsignMod()
+    (linear_out): Linear(in_features=4000, out_features=80, bias=True)
+  )
+  (net_alpha_combine): Sequential(
+    (linear_out): Linear(in_features=160, out_features=4000, bias=False)
+  )
+)
