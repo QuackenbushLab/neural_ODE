@@ -1,8 +1,0 @@
-ODENet(
-  (net_ootb): Sequential(
-    (activation_0): Tanh()
-    (linear_1): Linear(in_features=350, out_features=80, bias=True)
-    (activation_1): Tanh()
-    (linear_out): Linear(in_features=80, out_features=350, bias=True)
-  )
-)
