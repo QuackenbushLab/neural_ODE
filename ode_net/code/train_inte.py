@@ -292,7 +292,7 @@ if __name__ == "__main__":
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-06, 
+    factor=0.9, patience=3, threshold=1e-07, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     
