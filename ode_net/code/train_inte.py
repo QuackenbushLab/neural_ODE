@@ -340,7 +340,7 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 25
+    epochs_to_fail_to_terminate = 100
     all_lrs_used = []
 
     #print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
