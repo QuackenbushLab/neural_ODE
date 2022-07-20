@@ -37,12 +37,14 @@ def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.legend(loc='upper right')
     plt.savefig("{}/LR_range_test.png".format(img_save_dir))
 
-def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, img_save_dir):
+def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses ,img_save_dir):
     plt.figure()
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
     if len(validation_loss) > 0:
         plt.plot(range(1, epoch_so_far + 1), validation_loss, color = "red", label = "Validation loss")
     #plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
+    plt.plot(range(1, epoch_so_far + 1), prior_losses, color = "magenta", label = "Prior loss")
+    
     plt.yscale('log')
     plt.xlabel("Epoch")
     plt.legend(loc='upper right')
@@ -171,7 +173,7 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     pred_grad = odenet.prior_only_forward(t,batch_for_prior)
     loss_prior = torch.mean((pred_grad - prior_grad)**2)
     
-    loss_lambda = 0.60 #0.9995
+    loss_lambda = 0.9999 #0.9995
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -292,7 +294,7 @@ if __name__ == "__main__":
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-08, 
+    factor=0.9, patience=3, threshold=1e-09, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
 
     
@@ -307,6 +309,7 @@ if __name__ == "__main__":
     total_time = 0
     validation_loss = []
     training_loss = []
+    prior_losses = []
     true_mean_losses = []
     true_mean_losses_init_val_based = []
     A_list = []
@@ -353,6 +356,7 @@ if __name__ == "__main__":
         data_handler.reset_epoch()
         #visualizer.save(img_save_dir, epoch) #IH added to test
         this_epoch_total_train_loss = 0
+        this_epoch_total_prior_loss = 0
         print()
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
         if settings['verbose']:
@@ -365,6 +369,7 @@ if __name__ == "__main__":
             #batch_times.append(perf_counter() - start_batch_time)
 
             this_epoch_total_train_loss += loss.item()
+            this_epoch_total_prior_loss += prior_loss.item()
             # Print and update plots
             iteration_counter += 1
 
@@ -377,6 +382,7 @@ if __name__ == "__main__":
         #Epoch done, now handle training loss
         train_loss = this_epoch_total_train_loss/iterations_in_epoch
         training_loss.append(train_loss)
+        prior_losses.append(this_epoch_total_prior_loss/iterations_in_epoch)
         #print("Overall training loss {:.5E}".format(train_loss))
 
         mu_loss = get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type'])
@@ -487,7 +493,7 @@ if __name__ == "__main__":
                 #print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
                 print("True loss of best training model (MSE) = ", 0)
             print("Saving MSE plot...")
-            plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, img_save_dir)    
+            plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir)    
             
             if settings['lr_range_test']:
                 plot_LR_range_test(all_lrs_used, training_loss, img_save_dir)
