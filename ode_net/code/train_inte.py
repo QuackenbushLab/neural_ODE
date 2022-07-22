@@ -249,7 +249,7 @@ if __name__ == "__main__":
     prior_mat = read_prior_matrix(prior_mat_loc)
     batch_for_prior = torch.rand(4000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
-    loss_lambda = 0.70
+    loss_lambda = 0.90
 
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
