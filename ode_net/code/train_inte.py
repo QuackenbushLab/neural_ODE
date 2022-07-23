@@ -168,10 +168,10 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method= method  )[1] + init_bias_y #IH comment
     
-    loss_data = torch.mean((predictions - target)**2) 
+    loss_data = torch.mean(torch.abs(predictions - target)/(torch.abs(target)+1)) 
     
     pred_grad = odenet.prior_only_forward(t,batch_for_prior)
-    loss_prior = torch.mean((pred_grad - prior_grad)**2)
+    loss_prior = torch.mean(torch.abs(pred_grad - prior_grad)/(torch.abs(prior_grad)+1))
     
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
@@ -187,7 +187,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "desmedt_4000genes_1sample_186T" #"
+clean_name =  "desmedt_500genes_1sample_186T" #"
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
@@ -245,9 +245,9 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_4000.csv'
+    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_500.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
-    batch_for_prior = torch.rand(4000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
+    batch_for_prior = torch.rand(1000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
     loss_lambda = 0.90
 
