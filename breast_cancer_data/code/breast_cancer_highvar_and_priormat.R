@@ -25,7 +25,7 @@ full_data_melt <- melt(full_data,
                        value.name = "exprs")
 
 full_data_melt[, hist(exprs)]
-num_genes <- 500
+num_genes <- 11165 #basically all that the prior has
 high_var_genes <- full_data_melt[,var(exprs), by = gene][order(-V1)]
 high_var_genes[, gene_in_prior:= gene %in% all_prior_affiliated_genes]
 high_var_genes <- high_var_genes[gene_in_prior ==T, ][1:num_genes,gene]
@@ -46,11 +46,11 @@ top_row[[2]] <- 1
 full_data <- rbind(top_row, full_data)
 
 write.csv(genes_names_to_save , 
-          "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_gene_names_1000.csv",
+          "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_gene_names_11165.csv",
           row.names = F)
 
 write.table(full_data,
-             "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_1000genes_1sample_186T.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_11165genes_1sample_186T.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
@@ -82,10 +82,13 @@ edges[,
       update_edge_mat(edge_mat,from, to, activation), 
       by= .(from, to)]
 
-write.table(edge_mat,
-            "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_1000.csv",
-            sep = ",",
-            row.names = F, 
-            col.names = F
-)
+library(Matrix)
+B <- Matrix(edge_mat, sparse = TRUE)
+writeMM(B, "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv")
+#write.table(edge_mat,
+#            "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv",
+#            sep = ",",
+#            row.names = F, 
+#            col.names = F
+#)
 
