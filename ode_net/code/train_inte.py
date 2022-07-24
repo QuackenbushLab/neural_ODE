@@ -168,11 +168,14 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method= method  )[1] + init_bias_y #IH comment
     
-    loss_data = torch.mean(torch.abs(predictions - target)/(torch.abs(target)+1)) 
+    loss_data = torch.mean((predictions - target)**2) 
+    #loss_data = torch.mean(torch.abs(predictions - target)/(torch.abs(target)+1)) 
     
     pred_grad = odenet.prior_only_forward(t,batch_for_prior)
-    loss_prior = torch.mean(torch.abs(pred_grad - prior_grad)/(torch.abs(prior_grad)+1))
-    
+    #loss_prior = torch.mean((pred_grad - prior_grad)**2)
+    #loss_prior = torch.mean(torch.abs(pred_grad - prior_grad)/(torch.abs(prior_grad)+1))
+    loss_prior = my_r_squared(pred_grad,prior_grad)
+
     composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
@@ -247,7 +250,7 @@ if __name__ == "__main__":
     #Read in the prior matrix
     prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_500.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
-    batch_for_prior = torch.rand(1000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
+    batch_for_prior = torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
     loss_lambda = 0.90
 
