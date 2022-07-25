@@ -78,10 +78,14 @@ def get_true_val_set_r2(odenet, data_handler, method, batch_type):
     return [var_explained_pw, true_val_mse]
 
 
-def read_prior_matrix(prior_mat_file_loc):
-    mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
-    mat_torch = torch.from_numpy(mat)
-    return mat_torch.float()
+def read_prior_matrix(prior_mat_file_loc, sparse = False):
+    if sparse == False: 
+        mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
+        mat_torch = torch.from_numpy(mat)
+        return mat_torch.float()
+    else: 
+        mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
+        return(mat)
 
 '''
 def regulated_loss(predictions, target, time, val = False):
@@ -190,7 +194,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "desmedt_2000genes_1sample_186T" #"
+clean_name =  "desmedt_11165genes_1sample_186T" #"
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
@@ -248,7 +252,7 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_2000.csv'
+    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
     prior_mat = read_prior_matrix(prior_mat_loc)
     batch_for_prior = torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
