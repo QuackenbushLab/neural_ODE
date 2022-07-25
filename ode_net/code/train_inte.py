@@ -78,14 +78,16 @@ def get_true_val_set_r2(odenet, data_handler, method, batch_type):
     return [var_explained_pw, true_val_mse]
 
 
-def read_prior_matrix(prior_mat_file_loc, sparse = False):
+def read_prior_matrix(prior_mat_file_loc, sparse = False, num_genes = 11165):
     if sparse == False: 
         mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
         mat_torch = torch.from_numpy(mat)
         return mat_torch.float()
-    else: 
+    else: #when scaling up >10000
         mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
-        return(mat)
+        sparse_mat = torch.sparse_coo_tensor([mat[:,0].astype(int)-1, mat[:,1].astype(int)-1], mat[:,2], ( num_genes,  num_genes))
+        mat_torch = sparse_mat.to_dense().float()
+        return(mat_torch)
 
 '''
 def regulated_loss(predictions, target, time, val = False):
@@ -253,9 +255,10 @@ if __name__ == "__main__":
     
     #Read in the prior matrix
     prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
-    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True)
-    batch_for_prior = torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
+    batch_for_prior = torch.rand(1000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
+    del prior_mat
     loss_lambda = 0.99
 
     # Initialization
