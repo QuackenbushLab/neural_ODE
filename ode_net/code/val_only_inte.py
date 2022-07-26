@@ -106,7 +106,7 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "desmedt_4000genes_1sample_186T" #"
+clean_name =  "desmedt_11165genes_1sample_186T" #"
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
