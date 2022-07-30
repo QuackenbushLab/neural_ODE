@@ -359,10 +359,8 @@ if __name__ == "__main__":
     epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
-    #print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
-    x,y,z,n = data_handler.get_validation_set()
-    x1, y1, z1 = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  settings['batch_type'])
-
+    print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
+    
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
         iteration_counter = 1

@@ -150,7 +150,7 @@ if __name__ == "__main__":
         print("Running on CPU")
         device = 'cpu'
     
-    data_handler = DataHandler.fromcsv(args.data, device, settings['val_split'], normalize=settings['normalize_data'], 
+    data_handler = DataHandler.fromcsv(args.data, device, 1, normalize=settings['normalize_data'], 
                                         batch_type=settings['batch_type'], batch_time=settings['batch_time'], 
                                         batch_time_frac=settings['batch_time_frac'],
                                         noise = settings['noise'],
