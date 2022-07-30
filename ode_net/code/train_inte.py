@@ -24,7 +24,7 @@ from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
-torch.set_num_threads(8) #CHANGE THIS!
+torch.set_num_threads(16) #CHANGE THIS!
 
 def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.figure()
@@ -196,8 +196,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "desmedt_11165genes_1sample_186T" #"
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
+clean_name =  "pramila_3551genes_2samples_24T" #"
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -254,12 +254,12 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
-    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
-    batch_for_prior = torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5
+    prior_mat_loc = '/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/edge_prior_matrix_pramila_3551.csv'
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
+    batch_for_prior = 4*(torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5)
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
     del prior_mat
-    loss_lambda = 0.999
+    loss_lambda = 0.90
 
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
