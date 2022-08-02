@@ -53,7 +53,7 @@ gene_mult = np.transpose(torch.relu(gene_mult.detach()).numpy())
 
 num_features = alpha_comb.shape[0]
 effects_mat = np.matmul(Wo_sums,alpha_comb[0:num_features//2]) + np.matmul(Wo_prods,alpha_comb[num_features//2:num_features])
-effects_mat =   effects_mat #gene_mult.T*
+effects_mat =   1*effects_mat #gene_mult.T*
 make_mask(effects_mat)
 
 np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat.csv", effects_mat, delimiter=",")
