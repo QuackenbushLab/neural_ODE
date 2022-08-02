@@ -34,7 +34,7 @@ gene_eff[, effect := NULL]
 #print(gene_eff)
 
 print("getting true edges")
-true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/edge_properties.csv")
+true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/edge_properties_690.csv")
 
 #true_edges <- true_edges[p_val < 0.001,]
 #true_edges[, num_edges_for_this_TF := .N, by = from]
