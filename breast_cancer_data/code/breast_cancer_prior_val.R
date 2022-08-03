@@ -32,29 +32,30 @@ full_data_melt <- melt(full_data,
 
 full_data_melt[, hist(exprs)]
 
-all_num_genes <- c(100, 300, 500, 700, 1000, 1500, 2000, 2500, 3000, 4000)
-#all_num_genes <- c(100, 300, 500)
+high_var_genes <- full_data_melt[,var(exprs), by = gene][order(-V1)]
+high_var_genes[, gene_in_prior:= gene %in% all_prior_affiliated_genes]
+#all_num_genes <- c(100, 300, 500, 700, 1000, 1500, 2000, 2500, 3000, 4000)
+all_num_genes <- c(7000)
 for (num_genes in all_num_genes){
-  high_var_genes <- full_data_melt[,var(exprs), by = gene][order(-V1)]
-  high_var_genes[, gene_in_prior:= gene %in% all_prior_affiliated_genes]
-  high_var_genes <- high_var_genes[gene_in_prior ==T, ][1:num_genes,gene]
+  high_var_genes_this <- high_var_genes[gene_in_prior ==T, ][1:num_genes,gene]
   
-  edges <- data.table(expand.grid(high_var_genes, high_var_genes))
+  edges <- data.table(expand.grid(high_var_genes_this, high_var_genes_this))
   setnames(edges, 
            old = c("Var1", "Var2"),
            new = c("from", "to"))
   edges <- merge(edges, long_prior,
                  by = c("from", "to"),
                  all.x = T)
-  edges[is.na(prior_pred), prior_pred := 0]
+  print("done merging")
+ # edges[is.na(prior_pred), prior_pred := 0]
   
   edges <- merge(edges, long_val,
                  by = c("from", "to"),
                  all.x = T)
-  edges[is.na(val_pred), val_pred := 0]
+  #edges[is.na(val_pred), val_pred := 0]
   
-  PRROC_obj <- roc.curve(scores.class0 = edges$prior_pred,
-                         weights.class0 = edges$val_pred,
+  PRROC_obj <- roc.curve(scores.class0 = !is.na(edges$prior_pred),
+                         weights.class0 = !is.na(edges$val_pred),
                          curve=FALSE)
   print(paste(num_genes,
               "genes, AUC = ",
