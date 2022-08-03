@@ -194,11 +194,11 @@ if __name__ == "__main__":
     ax2.spines['right'].set_linewidth(border_width)
     ax2.cla()
     
-    lambdas = [0.2, 0.8, 0.95, 1]
-    auc_cols = {0.2: "navy", 0.8: "dodgerblue", 0.95: "skyblue", 1: "red"}
+    lambdas = [0.2, 0.9, 0.95, 1]
+    auc_cols = {0.2: "navy", 0.9: "dodgerblue", 0.95: "skyblue", 1: "red"}
     auc_labs = {0.2: r"$\lambda_{prior}$" + "= 0.80 (AUC 0.69)",
                # 0.5: r"$\lambda_{prior}$" + "= 0.50 (AUC 0.77)",
-                0.8: r"$\lambda_{prior}$" + "= 0.20 (AUC 0.77)", 
+                0.9: r"$\lambda_{prior}$" + "= 0.10 (AUC 0.86)", 
                 0.95: r"$\lambda_{prior}$" + "= 0.05 (AUC 0.58)",
                 1:  "no prior (AUC 0.53)"}
     
