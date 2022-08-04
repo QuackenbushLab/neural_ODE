@@ -359,7 +359,7 @@ if __name__ == "__main__":
     epochs_to_fail_to_terminate = 15
     all_lrs_used = []
 
-    print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
+    #print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
     
     for epoch in range(1, tot_epochs + 1):
         start_epoch_time = perf_counter()
