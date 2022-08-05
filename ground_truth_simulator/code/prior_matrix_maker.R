@@ -51,7 +51,7 @@ edges[edge_to_reloc ==1,
       c("to", "from", "activation"):= 
         reloc_edge(to, from, activation),
       by = .(to, from, activation)]
-edges[edge_to_flip == 1, activation := -1*activation]
+#edges[edge_to_flip == 1, activation := -1*activation]
 edges[, prior_edge:= 1]
 
 all_pos_edges <- merge(all_pos_edges, 
