@@ -21,8 +21,7 @@ if __name__ == "__main__":
     datasets = ["sim350", "sim690"]
     noises = [0, 0.1]
     perf_info = {}
-    metrics = ['true_val_MSE']
-    metric_labels = {'true_val_MSE':'MSE'}
+    metrics = ['true_val_MSE_1', 'true_val_MSE_2', 'true_val_MSE_3', 'true_val_MSE_4','true_val_MSE_5']
     model_colors = {"phoenix":"dodgerblue", "phoenix_noprior" :"red", 
                     "ootb_tanh" : "saddlebrown", "ootb_relu" : "sandybrown", "ootb_sigmoid" : "peachpuff"} 
     model_labels = {"phoenix":"PHOENIX", 
@@ -85,8 +84,12 @@ if __name__ == "__main__":
             ax.tick_params(axis='y', labelsize= tick_lab_size)
             
             this_delta = deltas[models.index(this_model)] 
-            this_model_mses =  [perf_info[this_data][this_model][this_noise]['true_val_MSE'] for this_noise in noises]
-            ax.barh(ind + height*this_delta, this_model_mses, height = height,
+            this_model_mses =  [np.mean([perf_info[this_data][this_model][this_noise][true_val_col] 
+                                            for true_val_col in metrics]) for this_noise in noises]
+            this_model_stdev =  [np.std([perf_info[this_data][this_model][this_noise][true_val_col] 
+                                            for true_val_col in metrics]) for this_noise in noises]                                
+            ax.barh(ind + height*this_delta, this_model_mses, height = height, 
+                    xerr = this_model_stdev, capsize = 5,
                     color = model_colors[this_model], alpha = 0.7,  edgecolor = "black", 
                     linewidth = 1.5, align = 'center', hatch = model_hatch[this_model])
             ax.set_xscale("log")
