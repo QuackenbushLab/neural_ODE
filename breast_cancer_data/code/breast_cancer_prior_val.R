@@ -5,16 +5,16 @@ library(PRROC)
 
 
 ### will want genes to also have prior info so...
-long_prior <- fread("C:/STUDIES/RESEARCH/ODE_project_local_old/breast_cancer_data/otter_clean_harmonized_full_prior.csv")
+long_prior <- fread("/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/otter_clean_harmonized_full_prior.csv")
 long_prior[,prior_pred := 1]
 all_prior_affiliated_genes <- unique(c(long_prior$from, long_prior$to))
 
-long_val <- fread("C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/otter_chip_val_clean.csv")
+long_val <- fread("/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/otter_chip_val_clean.csv")
 long_val[, val_pred := 1]
 
 ### start cleaning
-full_data <- fread("C:/STUDIES/RESEARCH/ODE_project_local_old/breast_cancer_data/Data_smooth_allgenes.csv")
-gene_names <- fread("C:/STUDIES/RESEARCH/ODE_project_local_old/breast_cancer_data/GeneNames.csv",
+full_data <- fread("/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/Data_smooth_allgenes.csv")
+gene_names <- fread("/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/GeneNames.csv",
                     header = F)
 names(gene_names) <- "gene"
 full_data <- cbind(gene_names, full_data)
@@ -34,8 +34,8 @@ full_data_melt[, hist(exprs)]
 
 high_var_genes <- full_data_melt[,var(exprs), by = gene][order(-V1)]
 high_var_genes[, gene_in_prior:= gene %in% all_prior_affiliated_genes]
-#all_num_genes <- c(100, 300, 500, 700, 1000, 1500, 2000, 2500, 3000, 4000)
-all_num_genes <- c(7000)
+all_num_genes <- c(500, 2000, 4000, 11165)
+#all_num_genes <- c(7000)
 for (num_genes in all_num_genes){
   high_var_genes_this <- high_var_genes[gene_in_prior ==T, ][1:num_genes,gene]
   
@@ -46,7 +46,7 @@ for (num_genes in all_num_genes){
   edges <- merge(edges, long_prior,
                  by = c("from", "to"),
                  all.x = T)
-  print("done merging")
+  #print("done merging")
  # edges[is.na(prior_pred), prior_pred := 0]
   
   edges <- merge(edges, long_val,
