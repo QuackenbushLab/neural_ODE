@@ -9,3 +9,4 @@
 [1] "3000 genes, AUC =  0.809 , num vals found = 16011"
 [1] "4000 genes, AUC =  0.809 , num vals found = 27644"
 [1] "6000 genes, AUC =  0.803 , num vals found = 66378"
+[1] "11165 genes, AUC =  0.805 , num vals found = 226545"

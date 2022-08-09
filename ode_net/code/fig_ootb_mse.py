@@ -79,7 +79,7 @@ if __name__ == "__main__":
             ax.spines['right'].set_linewidth(border_width)
             ax.set_xlim((6*10**-4,5*10**-3))
             ax.set_yticks(ind)
-            ax.set_yticklabels(['No noise', 'High noise'], rotation=90, va = "center")
+            ax.set_yticklabels(['No noise', 'High (20%) noise'], rotation=90, va = "center")
             ax.tick_params(axis='x', labelsize= tick_lab_size)
             ax.tick_params(axis='y', labelsize= tick_lab_size)
             

@@ -47,13 +47,13 @@ if __name__ == "__main__":
                 perf_info[this_data][this_model] = {}
             for this_noise in noises: 
                 if this_noise not in perf_info[this_data][this_model]:
-                    perf_info[this_data][this_model][this_noise] = {'true_val_MSE':0}
+                    perf_info[this_data][this_model][this_noise] = {'true_val_MSE_1':0}
     
 
     perf_csv = csv.DictReader(open('C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/perf_plotting.csv', 'r'))
     for line in perf_csv: 
         if line['model'] in models:
-            perf_info[line['dataset'].lower()][line['model']][float(line['noise'])]['true_val_MSE'] = float(line['true_val_MSE'])
+            perf_info[line['dataset'].lower()][line['model']][float(line['noise'])]['true_val_MSE_1'] = float(line['true_val_MSE_1'])
 
     gene_name_350 = csv.DictReader(open('C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/gene_names_350.csv', 'r'))
     gene_name_list_350 = []
@@ -117,7 +117,7 @@ if __name__ == "__main__":
             for this_noise in noises:
                 print("Now on data = {}, noise = {}".format(this_data, this_noise))
                 noise_string = "noise_{}".format(this_noise)
-                true_val_mse = perf_info[this_data][this_model][this_noise]['true_val_MSE']
+                true_val_mse = perf_info[this_data][this_model][this_noise]['true_val_MSE_1']
                 #print(true_val_mse)
                 pretrained_model_file = 'C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/{}/{}/{}/best_val_model.pt'.format(this_data, this_model, noise_string)
                 this_odenet.load(pretrained_model_file)
@@ -150,6 +150,7 @@ if __name__ == "__main__":
                              color = this_col, linestyle = "--", lw=2, label = "prediction") #times[sample_idx].flatten()[0:] 
                             
                             noisy_traj =  this_pred_traj + np.random.normal(0,this_noise,len(this_pred_traj))
+                            #noisy_traj =  traj[:,:,gene].flatten()
                             observed_times = times[sample_idx].flatten()
                             noisy_traj = [noisy_traj[i] for i in range(len(extrap_timepoints)) if extrap_timepoints[i] in observed_times]
                             ax.plot(observed_times, noisy_traj,    

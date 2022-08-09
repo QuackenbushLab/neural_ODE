@@ -23,6 +23,16 @@ import warnings
 from torch.serialization import SourceChangeWarning
 warnings.filterwarnings("ignore", category=SourceChangeWarning)
 
+def make_mask(X):
+    triu = np.triu(X)
+    tril = np.tril(X)
+    triuT = triu.T
+    trilT = tril.T
+    masku = abs(triu) > abs(trilT)
+    maskl = abs(tril) > abs(triuT)
+    main_mask = ~(masku | maskl)
+    X[main_mask] = 0
+
 if __name__ == "__main__":
 
     sys.setrecursionlimit(3000)
@@ -43,9 +53,9 @@ if __name__ == "__main__":
     datahandler_dim = {"sim350": 350}
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)"} 
-    model_mults = {"phoenix":0.20, 
-                    "phoenix_noprior" :0.30} 
-                    
+    model_mults = {"phoenix":0.30, 
+                    "phoenix_noprior" :0.30}
+
     SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")    
     #Plotting setup
     #plt.xticks(fontsize=10)
@@ -92,10 +102,11 @@ if __name__ == "__main__":
 
                 y, x = np.meshgrid(np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]), np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]))
                 z = np.matmul(Wo_sums, alpha_comb[0:this_neurons,]) + np.matmul(Wo_prods, alpha_comb[this_neurons:(2*this_neurons),])    
-                z = z* gene_mult.reshape(1, -1) 
+                #z = z* gene_mult.reshape(1, -1) 
+                #make_mask(z)
+                #print(np.diag(z))
                 row_sums =  np.abs(z).sum(axis=1)
                 z = z / row_sums[:, np.newaxis]
-                #z = np.transpose(z)
 
                 color_mult = model_mults[this_model] #0.25
                 z_min, z_max = color_mult*-np.abs(z).max(), color_mult*np.abs(z).max()
