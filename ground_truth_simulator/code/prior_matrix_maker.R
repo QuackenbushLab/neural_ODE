@@ -1,10 +1,10 @@
 library(data.table)
 library(PRROC)
 
-edges <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_chalmers_350_prior_40_0308/edge_properties.csv")
+edges <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_chalmers_690_prior_50_0411/edge_properties.csv")
 edges <- edges[, .(from, to, activation)]
 
-genes <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_chalmers_350_prior_40_0308/gene_names.csv")
+genes <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_chalmers_690_prior_50_0411/gene_names.csv")
 genes[ ,x:= gsub("_input","",x)]
 genes[, gene_sl := .I]
 
@@ -28,7 +28,7 @@ all_pos_edges <- merge(all_pos_edges,
                        all.x = T)
 edges[, true_edge := NULL]
 
-noise <- 0.025
+noise <- 0.05
 noise_perc <- noise/0.5
 edges[,activation := as.integer(2*(activation - 0.5))]
 edges[, edge_to_flip:= 0]
@@ -79,7 +79,7 @@ edges[,
       update_edge_mat(edge_mat,from, to, activation), 
       by= .(from, to)]
 
-prior_name <- paste0("edge_prior_matrix_chalmers_350_noise_",noise,".csv")
+prior_name <- paste0("edge_prior_matrix_chalmers_690_noise_",noise,".csv")
 write.table(edge_mat,
           paste0("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/",
                  prior_name),
