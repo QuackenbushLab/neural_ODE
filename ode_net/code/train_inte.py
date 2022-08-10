@@ -176,12 +176,11 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     
     loss_data = torch.mean((predictions - target)**2) 
     
+    pred_grad = odenet.prior_only_forward(t,batch_for_prior)
+    loss_prior = torch.mean((pred_grad - prior_grad)**2)
+    #loss_prior = loss_data
 
-    #pred_grad = odenet.prior_only_forward(t,batch_for_prior)
-    #loss_prior = torch.mean((pred_grad - prior_grad)**2)
-    loss_prior = loss_data
-
-    composed_loss = loss_lambda * loss_data #+ (1- loss_lambda) * loss_prior
+    composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
     composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
     return [loss_data, loss_prior]
@@ -258,7 +257,7 @@ if __name__ == "__main__":
     batch_for_prior = 4*(torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5)
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
     del prior_mat
-    loss_lambda = 1
+    loss_lambda = 0.99
 
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 

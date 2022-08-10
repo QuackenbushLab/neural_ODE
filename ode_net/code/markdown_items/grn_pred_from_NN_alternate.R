@@ -16,7 +16,7 @@ gene_eff <- melt(gene_eff,
                  variable.name = "aff", value.name = "effect")
 gene_eff[,aff := gsub("V","",aff)]
 
-cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/gene_names.csv",
+cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/desmedt_gene_names_500.csv",
                          sep = ",",
                          header = T))
 #cell_names[,x:= gsub("_input","", x)]
@@ -69,10 +69,10 @@ gene_eff[!is.na(activation_sym), true_effect := "true_effect"]
 gene_eff[,prop.table(table(true_effect, pred_effect), margin = 1)]
 
 print(PRROC_obj$auc)
-png(file = "AUC_plot.png")
-plot(PRROC_obj, main = "", legend = F, col = "red")
-abline(0,1)
-dev.off()
+# png(file = "AUC_plot.png")
+# plot(PRROC_obj, main = "", legend = F, col = "red")
+# abline(0,1)
+# dev.off()
 
 print("doing centrality stuff now")
 library(igraph)
@@ -95,15 +95,18 @@ library(CINNA)
                                    weights = 1/inferred_edges_main$prop_effect)
 
  harm_cent_plot <- data.table(gene = names(h_cent_all), h_cent = h_cent_all)
- plot_subset <- harm_cent_plot[order(-h_cent)][1:15]
 
- png(file = "cent_plot.png")
- ggplot(plot_subset, 
-        aes(x = factor(gene,
-                       levels = plot_subset$gene), 
-            y = h_cent)) + 
-   geom_col(fill = "dodgerblue") +
-   theme_bw() + 
-   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-   xlab("most influential genes")
-dev.off()
+ harm_cent_to_write <- harm_cent_plot[order(-h_cent),][1:100]
+ write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/harm_cents.csv", row.names = F)
+#  plot_subset <- harm_cent_plot[order(-h_cent)][1:15]
+
+#  png(file = "cent_plot.png")
+#  ggplot(plot_subset, 
+#         aes(x = factor(gene,
+#                        levels = plot_subset$gene), 
+#             y = h_cent)) + 
+#    geom_col(fill = "dodgerblue") +
+#    theme_bw() + 
+#    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+#    xlab("most influential genes")
+# dev.off()
