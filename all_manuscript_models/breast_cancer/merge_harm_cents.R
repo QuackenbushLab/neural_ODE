@@ -1,6 +1,6 @@
 library(data.table)
 
-num_tops <- 15
+num_tops <- 17
 all_genes <- c(500, 2000, 4000, 11165)
 all_top_genes <- c()
 
@@ -38,7 +38,7 @@ for(this_gene in all_genes){
   
   D <- fread(this_gene_file)
   D <-  D[order(-h_cent),]
-  D[, cent_rank:= .I]
+  D[, cent_rank:= h_cent] #.I
   D_to_take <- D[gene %in% all_top_genes, .(gene, cent_rank)]
   D_to_take[, num_gene := paste0("scale_to_", this_gene)]
   all_harms_merged <- rbind(all_harms_merged, D_to_take)
@@ -51,10 +51,14 @@ all_harms_wide <- dcast(all_harms_merged,
 setcolorder(all_harms_wide, 
             c("gene", 
               paste("scale_to", all_genes, sep = "_")))
-all_harms_wide <- all_harms_wide[order(scale_to_500,
-                                       scale_to_2000,
-                                       scale_to_4000,
-                                       scale_to_11165)]
+
+true_harms <- fread("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/true_harm_cents_bc.csv")
+all_harms_wide <- merge(all_harms_wide, true_harms, by = "gene", all.x = T)
+all_harms_wide <- all_harms_wide[order(-scale_to_500,
+                                       -scale_to_2000,
+                                       -scale_to_4000,
+                                       -scale_to_11165)]
+
 print(all_harms_wide)
 
 write.csv(all_harms_wide,

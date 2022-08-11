@@ -2,7 +2,6 @@ import sys
 import os
 import numpy as np
 import csv 
-import math 
 
 try:
     from torchdiffeq.__init__ import odeint_adjoint as odeint
@@ -18,7 +17,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
 import numpy as np
-import torch
 
 import warnings
 from torch.serialization import SourceChangeWarning
@@ -40,8 +38,8 @@ if __name__ == "__main__":
 
 
     #Plotting setup
-    fig_breast_cancer = plt.figure(figsize=(10,18), tight_layout=True)
-    gs = fig_breast_cancer.add_gridspec(10, 3, hspace = 0)
+    fig_breast_cancer = plt.figure(figsize=(13,25), tight_layout=True)
+    gs = fig_breast_cancer.add_gridspec(11, 6, hspace = 0.03, wspace = 0.02) #
     border_width = 1.5
     tick_lab_size = 14
     ax_lab_size = 15
@@ -51,14 +49,13 @@ if __name__ == "__main__":
 
     this_data = "breast_cancer"
 
-    ax = fig_breast_cancer.add_subplot(gs[1:10, :])
+    ax = fig_breast_cancer.add_subplot(gs[1:11, 0:5])
     ax.spines['bottom'].set_linewidth(border_width)
     ax.spines['left'].set_linewidth(border_width)
     ax.spines['top'].set_linewidth(border_width)
     ax.spines['right'].set_linewidth(border_width)
     ax.cla()
-    ax.set_xlim(0,4)
-
+    
     print("making heatmap")
     z = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_harm_cent_wide.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
@@ -67,27 +64,26 @@ if __name__ == "__main__":
     num_models = z.shape[1]
     z[z == ""] = "0"                
     z = z.astype(float)
-    z[ z == 0] = np.nanmax(z)
+    z[ z == 0] = np.nanmin(z)
     z = z.transpose()
-    ind = np.arange(num_models) +0.5
     
+    ind = np.arange(num_models) +0.5
+    ax.set_xlim(0,num_models)
+    ax.set_ylim(0,num_tops)
+
     gene_names = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_harm_cent_wide.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (0))
     gene_names = np.char.strip(gene_names, '"')
 
     z_min, z_max = np.nanmin(z), np.nanmax(z)
-    c = ax.pcolormesh(z.transpose(), cmap='Blues_r', vmin=z_min, vmax=120, 
-            norm = colors.PowerNorm(gamma = 0.4),
+    c = ax.pcolormesh(z.transpose(), cmap='Blues', vmin=z_min, vmax= z_max, #120
+            norm = colors.PowerNorm(gamma = 2),
             shading = "nearest") 
     #ax.axis([x.min(), x.max(), y.min(), y.max()]) 
 
     #fig_breast_cancer.canvas.draw()
     #labels_y = [item.get_text() for item in ax.get_yticklabels()]
     #labels_x = [item.get_text() for item in ax.get_xticklabels()]
-
-    ax.set_yticks(np.arange(num_tops)+0.5)    
-    ax.set_yticklabels(gene_names)
-    ax.tick_params(axis='y', labelsize= tick_lab_size)
 
     for idx in range(num_tops):
         ax.axhline(y=idx, xmin=0, xmax=num_models, linestyle='dotted', color = "black", alpha = 0.3)
@@ -102,18 +98,14 @@ if __name__ == "__main__":
                             ha="center", va="center", color="w",
                             size = 13, weight = "bold")
 
-    cbar =  fig_breast_cancer.colorbar(c, ax=ax, 
-                            shrink=0.7, orientation = "horizontal", pad = 0.05,
-                            extend = "max")
-    cbar.set_ticks([1, 5, 20, 60, 120])
-    cbar.set_ticklabels(['1', '5', '20', '60', '120 or more'])
-    cbar.ax.tick_params(labelsize = tick_lab_size) 
-    #cbar.set_label(r'$\widetilde{D_{ij}}$= '+'Estimated effect of '+ r'$g_j$'+ ' on ' +r"$\frac{dg_i}{dt}$" +' in SIM350', size = ax_lab_size)
-    cbar.outline.set_linewidth(2)
+    
+    #fig_breast_cancer.subplots_adjust(bottom=0.1)
+    #cbar_ax = fig_breast_cancer.add_axes([0, 0, 0.80, 0.05]) 
+   
 
     print("......")
     print("overlaying performance metrics")
-    ax1 = fig_breast_cancer.add_subplot(gs[0, :], sharex = ax)
+    ax1 = fig_breast_cancer.add_subplot(gs[0, 0:5], sharex = ax)
     #ax1.spines['bottom'].set_linewidth(border_width)
     #ax1.spines['left'].set_linewidth(border_width)
     #ax1.spines['top'].set_linewidth(border_width)
@@ -125,11 +117,12 @@ if __name__ == "__main__":
     
     perf_info = {}
     metrics = ['var_explained', 'AUC','runtime_cost' ]
-    metric_cols = {'var_explained': 'green', 'AUC': 'orange','runtime_cost':'purple' }
-    metric_labels = {'var_explained': r'$R^2$', 'AUC': 'AUC','runtime_cost':'AWS ($)' }
+    metric_cols = {'var_explained': 'green', 'AUC': 'orange','runtime_cost':'purple', 'true_harm_cent': "darkred"}
+    metric_labels = {'var_explained': r'$R^2$', 'AUC': 'AUC','runtime_cost':'AWS ($)', 'true_harm_cent': r"$HC_{ChIPSeq}$" }
+    metrics_extended = ['var_explained', 'AUC','runtime_cost', 'true_harm_cent' ]
 
-    leg_general_info = [Patch(facecolor=metric_cols[this_metric], edgecolor= "black", 
-                            alpha = 0.7, label= metric_labels[this_metric]) for this_metric in metrics]
+    leg_general_info = [Patch(facecolor=metric_cols[this_metric], edgecolor= "black", linewidth = 1.5,
+                            alpha = 0.7, label= metric_labels[this_metric]) for this_metric in metrics_extended]
 
     for this_gene in all_genes:
         if this_gene not in perf_info:
@@ -163,9 +156,49 @@ if __name__ == "__main__":
     ax1.legend(handles = leg_general_info, loc='upper left', prop={'size': tick_lab_size}, 
                         ncol = 1,  handleheight=1.5, frameon = False, bbox_to_anchor = (-0.15,1.2))
 
+    print("......")
+    print("overlaying true centralities")
+    ax2 = fig_breast_cancer.add_subplot(gs[1:11, 5], sharey = ax)     
+    ax2.set_frame_on(True)
+    ax2.axes.get_yaxis().set_visible(False)
+    ax2.spines['top'].set_linewidth(border_width)
+    ax2.spines['bottom'].set_linewidth(border_width)
+    ax2.spines['right'].set_visible(False)
+    ax2.cla()
+
+    true_vals = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_harm_cent_wide.csv", "rb"), 
+        dtype = "str",delimiter=",", skiprows=1, usecols = (num_models +1))
+    true_vals[true_vals == ""] = "0"
+    #true_vals[true_vals == "0"] = "1"
+    true_vals = true_vals.astype(float)
+
+    ax2.barh(np.arange(num_tops)+0.5, true_vals, height = 1, 
+                       color = metric_cols['true_harm_cent'], alpha = 0.7, align = 'center', 
+                       edgecolor = "black", linewidth = 1.5)
+
+    
+    #ax2.set_xticklabels(ax2.get_xticks(), ax2.get_xticklabels() ,rotation = 45)
+    ax2.set_xscale("log")
+    ax2.xaxis.tick_top()
+    ax2.grid(visible = True, which = "both", axis = "x", color = "black", 
+            linestyle = "--", alpha = 0.3)
+
+    ax.set_yticks(np.arange(num_tops)+0.5)    
+    ax.set_yticklabels(gene_names)
+    ax.tick_params(axis='y', labelsize= tick_lab_size+1)
     
     ax.set_xticks(ind)    
     ax.set_xticklabels(all_genes)
     ax.tick_params(axis='x', labelsize= tick_lab_size + 3)
     
+
+    cbar =  fig_breast_cancer.colorbar(c, ax= [ax, ax2], use_gridspec = False,  
+                            shrink=0.6, orientation = "horizontal", pad = 0.03)
+    
+    cbar.set_ticks([0 , 10, 15, 20])
+    cbar.ax.tick_params(labelsize = tick_lab_size) 
+    #cbar.set_label(r'$\widetilde{D_{ij}}$= '+'Estimated effect of '+ r'$g_j$'+ ' on ' +r"$\frac{dg_i}{dt}$" +' in SIM350', size = ax_lab_size)
+    cbar.outline.set_linewidth(2)
+    #plt.subplots_adjust(wspace=0, hspace=0)
+
     fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer.png'.format(output_root_dir), bbox_inches='tight')
