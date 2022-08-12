@@ -117,8 +117,8 @@ if __name__ == "__main__":
     
     perf_info = {}
     metrics = ['var_explained', 'AUC','runtime_cost' ]
-    metric_cols = {'var_explained': 'green', 'AUC': 'orange','runtime_cost':'purple', 'true_harm_cent': "darkred"}
-    metric_labels = {'var_explained': r'$R^2$', 'AUC': 'AUC','runtime_cost':'AWS ($)', 'true_harm_cent': r"$HC_{ChIPSeq}$" }
+    metric_cols = {'var_explained': 'green', 'AUC': 'orange','runtime_cost':'purple', 'true_harm_cent': "plum"}
+    metric_labels = {'var_explained': r'$R^2$', 'AUC': 'AUC','runtime_cost':'AWS ($)', 'true_harm_cent': r"$\log(\mathcal{HC}_{ChIPSeq})$" } 
     metrics_extended = ['var_explained', 'AUC','runtime_cost', 'true_harm_cent' ]
 
     leg_general_info = [Patch(facecolor=metric_cols[this_metric], edgecolor= "black", linewidth = 1.5,
@@ -137,10 +137,11 @@ if __name__ == "__main__":
 
     width= 0.17  # the width of the bars
     deltas = [-1, 0, 1]
+    cost_shrinker = 1.8
     
     for this_metric in metrics:
         this_delta = deltas[metrics.index(this_metric)] 
-        this_perf_vals = [perf_info[this_gene][this_metric] for this_gene in all_genes]
+        this_perf_vals = [perf_info[this_gene][this_metric]/cost_shrinker if this_metric == "runtime_cost" else perf_info[this_gene][this_metric] for this_gene in all_genes ]
         ax1.bar(ind  + width*this_delta, this_perf_vals, width = width, 
                         capsize = 5, color = metric_cols[this_metric], alpha = 0.7,  edgecolor = "black", 
                         linewidth = 1.5, align = 'center')
@@ -150,20 +151,27 @@ if __name__ == "__main__":
         this_perf_vals = [perf_info[this_gene][this_metric] for this_gene in all_genes]
         for this_idx in range(len(this_perf_vals)):
             this_val = this_perf_vals[this_idx]
-            ax1.text(this_idx + 0.5 + width*this_delta, this_val + 0.1 , this_val, 
+            this_text = this_val
+            this_height = this_val
+            if this_metric == "runtime_cost":
+                this_text = "${:,.2f}".format(this_val)
+                this_height = this_val/cost_shrinker
+            ax1.text(this_idx + 0.5 + width*this_delta, this_height + 0.1 , this_text, 
                      ha="center", va="bottom", color="black",size = 15, rotation = 90)
     
-    ax1.legend(handles = leg_general_info, loc='upper left', prop={'size': tick_lab_size}, 
-                        ncol = 1,  handleheight=1.5, frameon = False, bbox_to_anchor = (-0.15,1.2))
+    ax1.legend(handles = leg_general_info, loc='upper right', prop={'size': tick_lab_size+1}, 
+                        ncol = 1,  handleheight=1.5, frameon = False,  bbox_to_anchor = (1.25,1.2)) #
 
     print("......")
     print("overlaying true centralities")
     ax2 = fig_breast_cancer.add_subplot(gs[1:11, 5], sharey = ax)     
     ax2.set_frame_on(True)
     ax2.axes.get_yaxis().set_visible(False)
-    ax2.spines['top'].set_linewidth(border_width)
-    ax2.spines['bottom'].set_linewidth(border_width)
+    ax2.axes.get_xaxis().set_visible(False)
     ax2.spines['right'].set_visible(False)
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['bottom'].set_visible(False)
+
     ax2.cla()
 
     true_vals = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_harm_cent_wide.csv", "rb"), 
@@ -176,20 +184,25 @@ if __name__ == "__main__":
                        color = metric_cols['true_harm_cent'], alpha = 0.7, align = 'center', 
                        edgecolor = "black", linewidth = 1.5)
 
-    
-    #ax2.set_xticklabels(ax2.get_xticks(), ax2.get_xticklabels() ,rotation = 45)
+    for this_top in range(num_tops):
+        this_val = true_vals[this_top]
+        if this_val >0: 
+            ax2.text(this_val + 100, this_top + 0.5, "{:.2f}".format(np.log(this_val)), 
+            ha="left", va="center", color="black",size = 15, rotation = 0)
     ax2.set_xscale("log")
-    ax2.xaxis.tick_top()
-    ax2.grid(visible = True, which = "both", axis = "x", color = "black", 
-            linestyle = "--", alpha = 0.3)
+    
+    #ax2.xaxis.tick_top()
+    
+    #ax2.grid(visible = True, which = "both", axis = "x", color = "black", 
+    #        linestyle = "--", alpha = 0.3)
 
     ax.set_yticks(np.arange(num_tops)+0.5)    
     ax.set_yticklabels(gene_names)
     ax.tick_params(axis='y', labelsize= tick_lab_size+1)
     
     ax.set_xticks(ind)    
-    ax.set_xticklabels(all_genes)
-    ax.tick_params(axis='x', labelsize= tick_lab_size + 3)
+    ax.set_xticklabels([ r"$n=$ "+str(this_tot_gene) for this_tot_gene in all_genes])
+    ax.tick_params(axis='x', labelsize= tick_lab_size + 5)
     
 
     cbar =  fig_breast_cancer.colorbar(c, ax= [ax, ax2], use_gridspec = False,  
@@ -197,7 +210,7 @@ if __name__ == "__main__":
     
     cbar.set_ticks([0 , 10, 15, 20])
     cbar.ax.tick_params(labelsize = tick_lab_size) 
-    #cbar.set_label(r'$\widetilde{D_{ij}}$= '+'Estimated effect of '+ r'$g_j$'+ ' on ' +r"$\frac{dg_i}{dt}$" +' in SIM350', size = ax_lab_size)
+    cbar.set_label("Inferred harmonic centrality " + r'$(\mathcal{HC}_{inferred})$', size = ax_lab_size+3)
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
