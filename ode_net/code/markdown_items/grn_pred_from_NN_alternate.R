@@ -16,7 +16,7 @@ gene_eff <- melt(gene_eff,
                  variable.name = "aff", value.name = "effect")
 gene_eff[,aff := gsub("V","",aff)]
 
-cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/desmedt_gene_names_500.csv",
+cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/desmedt_gene_names_11165.csv",
                          sep = ",",
                          header = T))
 #cell_names[,x:= gsub("_input","", x)]
@@ -31,7 +31,6 @@ print("calculating prop_effects")
 gene_eff[, prop_effect := abs(effect)/(sum(abs(effect))), by = aff]
 gene_eff[is.na(prop_effect), prop_effect :=0 ]
 gene_eff[, effect := NULL]
-#print(gene_eff)
 
 print("getting true edges")
 true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/otter_chip_val_clean.csv")
