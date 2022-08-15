@@ -37,13 +37,15 @@ true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/otter_c
 
 #true_edges <- true_edges[p_val < 0.001,]
 #true_edges[, num_edges_for_this_TF := .N, by = from]
-#true_edges <- true_edges[num_edges_for_this_TF > 1,]
+#true_edges <- true_edges[num_edges_for_this_TF > 4000,]
+#print(true_edges[order(-num_edges_for_this_TF)])
 
 setnames(true_edges, 
          old = c("from","to"),
          new = c("reg","aff"))
 true_edges[, activation_sym := "known_edge"]
 gene_eff <- merge(gene_eff, true_edges, by = c("reg","aff"), all.x = TRUE)
+
 #gene_eff[,reg:= NULL]
 #gene_eff[,aff:= NULL]
 
@@ -73,30 +75,32 @@ print(PRROC_obj$auc)
 # abline(0,1)
 # dev.off()
 
-print("doing centrality stuff now")
-library(igraph)
-library(CINNA)
+# print("doing centrality stuff now")
+# library(igraph)
+# library(CINNA)
 
- inferred_edges <- gene_eff[, .(reg, aff, prop_effect)]
- rm(gene_eff)
- prop_cut_off <- as.numeric(inferred_edges[, 
-                                           quantile(prop_effect, 
-                                                    0.995, 
-                                                    na.rm = T)])
- inferred_edges_main <- inferred_edges[prop_effect > prop_cut_off]
+#  inferred_edges <- gene_eff[, .(reg, aff, prop_effect)]
+#  rm(gene_eff)
+#  prop_cut_off <- as.numeric(inferred_edges[, 
+#                                            quantile(prop_effect, 
+#                                                     0.995, 
+#                                                     na.rm = T)])
+#  inferred_edges_main <- inferred_edges[prop_effect > prop_cut_off]
 
- G_inferred <- graph_from_data_frame(inferred_edges_main, 
-                                 directed = TRUE, 
-                                 vertices = NULL)
+#  G_inferred <- graph_from_data_frame(inferred_edges_main, 
+#                                  directed = TRUE, 
+#                                  vertices = NULL)
 
- h_cent_all <- harmonic_centrality(G_inferred,
-                                   mode = "out",
-                                   weights = 1/inferred_edges_main$prop_effect)
+#  h_cent_all <- harmonic_centrality(G_inferred,
+#                                    mode = "out",
+#                                    weights = 1/inferred_edges_main$prop_effect)
 
- harm_cent_plot <- data.table(gene = names(h_cent_all), h_cent = h_cent_all)
+#  harm_cent_plot <- data.table(gene = names(h_cent_all), h_cent = h_cent_all)
 
- harm_cent_to_write <- harm_cent_plot[order(-h_cent),][1:100]
- write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/harm_cents.csv", row.names = F)
+#  harm_cent_to_write <- harm_cent_plot[order(-h_cent),][1:100]
+#  write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/harm_cents.csv", row.names = F)
+
+
 #  plot_subset <- harm_cent_plot[order(-h_cent)][1:15]
 
 #  png(file = "cent_plot.png")

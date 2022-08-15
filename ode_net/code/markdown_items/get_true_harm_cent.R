@@ -24,7 +24,7 @@ gene_eff[,reg := cell_names[as.numeric(reg),gene]]
 gene_eff[,aff := cell_names[as.numeric(aff),gene]]
 
 print("getting true edges")
-true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/otter_clean_harmonized_full_prior.csv")
+true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/otter_chip_val_clean.csv")
 
 setnames(true_edges, 
          old = c("from","to"),
@@ -48,10 +48,10 @@ G_inferred <- graph_from_data_frame(inferred_edges_main,
                                  vertices = NULL)
 
 h_cent_all <- harmonic_centrality(G_inferred,
-                                   mode = "out")
+                                   mode = "in")
 
 harm_cent_to_write <- data.table(gene = names(h_cent_all), h_cent = h_cent_all)
 harm_cent_to_write <- harm_cent_to_write[order(-h_cent),]
 print(harm_cent_to_write)
 
-write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/prior_harm_cents_bc.csv", row.names = F)
+write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/true_harm_cents_bc_in.csv", row.names = F)
