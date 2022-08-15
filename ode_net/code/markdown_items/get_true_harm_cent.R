@@ -1,6 +1,6 @@
 library(data.table)
-library(ggplot2)
-library(stringr)
+#library(ggplot2)
+#library(stringr)
 
 print("reading in files")
 effects_mat <- fread("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat.csv")
@@ -25,11 +25,16 @@ gene_eff[,aff := cell_names[as.numeric(aff),gene]]
 
 print("getting true edges")
 true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/otter_chip_val_clean.csv")
+true_edges[, num_edges_for_this_TF := .N, by = from]
+true_edges <- true_edges[num_edges_for_this_TF > 4000,]
 
 setnames(true_edges, 
          old = c("from","to"),
          new = c("reg","aff"))
 true_edges[, activation_sym := "known_edge"]
+
+
+
 gene_eff <- merge(gene_eff, true_edges, by = c("reg","aff"), all.x = TRUE)
 gene_eff[,true_effect := "no_effect"]
 gene_eff[!is.na(activation_sym), true_effect := "true_effect"]
@@ -48,10 +53,10 @@ G_inferred <- graph_from_data_frame(inferred_edges_main,
                                  vertices = NULL)
 
 h_cent_all <- harmonic_centrality(G_inferred,
-                                   mode = "in")
+                                   mode = "out")
 
 harm_cent_to_write <- data.table(gene = names(h_cent_all), h_cent = h_cent_all)
 harm_cent_to_write <- harm_cent_to_write[order(-h_cent),]
 print(harm_cent_to_write)
 
-write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/true_harm_cents_bc_in.csv", row.names = F)
+write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/true_harm_cents_bc_out_4000co.csv", row.names = F)
