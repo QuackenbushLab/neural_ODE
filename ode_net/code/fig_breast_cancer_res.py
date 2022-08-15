@@ -57,50 +57,43 @@ if __name__ == "__main__":
     ax.cla()
     
     print("making heatmap")
-    z = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_harm_cent_wide.csv", "rb"), 
+    z = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_inferred_influences_wide.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
     print("The analysis contains", num_tops, "genes.")
     num_models = z.shape[1]
     z[z == ""] = "0"                
     z = z.astype(float)
-    z[ z == 0] = np.nanmin(z)
+    z[ z == 0] = np.nanmin(z)#np.nanmin(z)
     z = z.transpose()
     
     ind = np.arange(num_models) +0.5
     ax.set_xlim(0,num_models)
     ax.set_ylim(0,num_tops)
 
-    gene_names = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_harm_cent_wide.csv", "rb"), 
+    gene_names = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_inferred_influences_wide.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (0))
     gene_names = np.char.strip(gene_names, '"')
 
     z_min, z_max = np.nanmin(z), np.nanmax(z)
     c = ax.pcolormesh(z.transpose(), cmap='Blues', vmin=z_min, vmax= z_max, #120
-            norm = colors.PowerNorm(gamma = 2),
+            norm = colors.PowerNorm(gamma = 1.3), #gamma = 2
             shading = "nearest") 
-    #ax.axis([x.min(), x.max(), y.min(), y.max()]) 
-
-    #fig_breast_cancer.canvas.draw()
-    #labels_y = [item.get_text() for item in ax.get_yticklabels()]
-    #labels_x = [item.get_text() for item in ax.get_xticklabels()]
-
+    
     for idx in range(num_tops):
         ax.axhline(y=idx, xmin=0, xmax=num_models, linestyle='dotted', color = "black", alpha = 0.3)
 
     for idx in range(num_models):
         ax.axvline(x=idx, ymin=0, ymax=num_tops, linestyle='dotted', color = "black", alpha = 0.3)    
 
-    for i in range(num_tops):
-        for j in range(num_models):
-            if z[j,i] <= 5:
-                text = ax.text(j + 0.5, i + 0.5, int(z[j, i]),
-                            ha="center", va="center", color="w",
-                            size = 13, weight = "bold")
+    # for i in range(num_tops):
+    #     for j in range(num_models):
+    #         if z[j,i] <= 5:
+    #             text = ax.text(j + 0.5, i + 0.5, int(z[j, i]),
+    #                         ha="center", va="center", color="w",
+    #                         size = 13, weight = "bold")
 
     
-    #fig_breast_cancer.subplots_adjust(bottom=0.1)
-    #cbar_ax = fig_breast_cancer.add_axes([0, 0, 0.80, 0.05]) 
    
 
     print("......")
@@ -174,7 +167,7 @@ if __name__ == "__main__":
 
     ax2.cla()
 
-    true_vals = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_harm_cent_wide.csv", "rb"), 
+    true_vals = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_inferred_influences_wide.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (num_models +1))
     true_vals[true_vals == ""] = "0"
     #true_vals[true_vals == "0"] = "1"
@@ -208,9 +201,9 @@ if __name__ == "__main__":
     cbar =  fig_breast_cancer.colorbar(c, ax= [ax, ax2], use_gridspec = False,  
                             shrink=0.6, orientation = "horizontal", pad = 0.03)
     
-    cbar.set_ticks([0 , 10, 15, 20])
+    #cbar.set_ticks([0 , 10, 15, 20])
     cbar.ax.tick_params(labelsize = tick_lab_size) 
-    cbar.set_label("Inferred harmonic centrality " + r'$(\mathcal{HC}_{inferred})$', size = ax_lab_size+3)
+    cbar.set_label("Inferred influence score " + r'$(\mathcal{IS}_{inferred})$', size = ax_lab_size+3)
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
