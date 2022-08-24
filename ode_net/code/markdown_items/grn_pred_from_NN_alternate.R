@@ -54,20 +54,20 @@ print("getting confusion-matrix values")
 library(PRROC)
 PRROC_obj <- roc.curve(scores.class0 = gene_eff$prop_effect,
                       weights.class0 = !is.na(gene_eff$activation_sym),
-                       curve= TRUE) #curve = TRUE
+                       curve= F) #curve = TRUE
 
-best_index <- which.max(1-PRROC_obj$curve[,1]+PRROC_obj$curve[,2])
-prop_cut_off <- PRROC_obj$curve[best_index,3]
-gene_eff[, .(avg_pred_effect = mean(prop_effect), .N),
-          by = .(activation_sym)]
+#  best_index <- which.max(1-PRROC_obj$curve[,1]+PRROC_obj$curve[,2])
+#  prop_cut_off <- PRROC_obj$curve[best_index,3]
+#  gene_eff[, .(avg_pred_effect = mean(prop_effect), .N),
+#            by = .(activation_sym)]
 
-gene_eff[,pred_effect := "no_effect"]
-gene_eff[prop_effect > prop_cut_off, 
-          pred_effect := "pred_effect"]
-gene_eff[,true_effect := "no_effect"]
-gene_eff[!is.na(activation_sym), true_effect := "true_effect"]
+#  gene_eff[,pred_effect := "no_effect"]
+#  gene_eff[prop_effect > prop_cut_off, 
+#            pred_effect := "pred_effect"]
+#  gene_eff[,true_effect := "no_effect"]
+#  gene_eff[!is.na(activation_sym), true_effect := "true_effect"]
 
-gene_eff[,prop.table(table(true_effect, pred_effect), margin = 1)]
+#  gene_eff[,prop.table(table(true_effect, pred_effect), margin = 1)]
 
 print(PRROC_obj$auc)
 # png(file = "AUC_plot.png")
@@ -97,7 +97,7 @@ print(PRROC_obj$auc)
 
 #  harm_cent_plot <- data.table(gene = names(h_cent_all), h_cent = h_cent_all)
 
-#  harm_cent_to_write <- harm_cent_plot[order(-h_cent),][1:100]
+#  harm_cent_to_write <- harm_cent_plot[order(-h_cent),]#[1:100]
 #  write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/harm_cents.csv", row.names = F)
 
 

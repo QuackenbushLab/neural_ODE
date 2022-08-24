@@ -49,7 +49,10 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+        #self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+        
+        #breast cancer genes 
+        self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093] + sorted(random.sample(range(self.data_handler.dim),21)) #desmedt genes
         
         #spellman ID'ed genes
         #self.genes_to_viz = [2, 146, 157, 322, 562, 1088, 1360, 1712, 1794, 1885, 1886, 2112, 2151, 2366, 2376, 2491, 2499, 2520, 2571, 2792, 2972, 2976, 3157, 3395, 4023, 4664, 4840, 5092, 5313, 5423]
@@ -89,7 +92,7 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
-        self.time_span = (0.0, 11)
+        self.time_span = (0.0, 2)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     

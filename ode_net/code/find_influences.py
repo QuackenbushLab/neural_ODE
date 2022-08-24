@@ -32,7 +32,7 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "desmedt_4000genes_1sample_186T" 
+clean_name =  "desmedt_11165genes_1sample_186T" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
@@ -62,13 +62,13 @@ if __name__ == "__main__":
     print(odenet)
 
     time_pts_to_project = torch.from_numpy(np.arange(0,1,0.1))
-    n_random_inputs_per_gene = 200
+    n_random_inputs_per_gene = 60
     all_scores = []
     #Read in the prior matrix
     for this_gene in range(data_handler.dim):
-        this_init = 4*(torch.rand(n_random_inputs_per_gene,1,data_handler.dim, device = data_handler.device) - 0.5)
+        this_init = 1*(torch.rand(n_random_inputs_per_gene,1,data_handler.dim, device = data_handler.device) - 0.5)
         unpert_out = odeint(odenet,this_init, time_pts_to_project, method= settings['method'])
-        this_pert_col =  4*(torch.rand(n_random_inputs_per_gene,device = data_handler.device) - 0.5)
+        this_pert_col =  1*(torch.rand(n_random_inputs_per_gene,device = data_handler.device) - 0.5)
         this_init[:,0, this_gene] = this_pert_col 
         pert_out = odeint(odenet,this_init, time_pts_to_project, method= settings['method']) 
         all_other_genes = [idx for idx in range(data_handler.dim) if idx != this_gene]
@@ -77,5 +77,5 @@ if __name__ == "__main__":
         print(this_gene)
 
     print("done, saving now!")
-    np.savetxt('/home/ubuntu/neural_ODE/ode_net/code/model_inspect/inferred_influence_4000.csv', 
+    np.savetxt('/home/ubuntu/neural_ODE/ode_net/code/model_inspect/inferred_influence_11165.csv', 
                     all_scores, delimiter=',') 

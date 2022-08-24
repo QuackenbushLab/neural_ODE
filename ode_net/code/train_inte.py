@@ -194,8 +194,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" 
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+clean_name =  "desmedt_11165genes_1sample_186T" 
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -252,13 +252,15 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_690_noise_{}.csv'.format(settings['noise'])
-    prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
-    batch_for_prior = 4*(torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5)
+    #prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_690_noise_{}.csv'.format(settings['noise'])
+    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
+    batch_for_prior = (torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5)
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
     del prior_mat
-    loss_lambda = 0.99
-
+    loss_lambda_at_start = 1
+    loss_lambda_at_end = 0.999
+    
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
                     log_scale = settings['log_scale'], init_bias_y = settings['init_bias_y'])
@@ -268,7 +270,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -277,7 +279,9 @@ if __name__ == "__main__":
         net_file.write('\n\n\n')
         net_file.write(inspect.getsource(ODENet.forward))
         net_file.write('\n')
-        net_file.write('lambda = {}'.format(loss_lambda))
+        net_file.write('lambda at start (first 5 epochs) = {}'.format(loss_lambda_at_start))
+        net_file.write('\n')
+        net_file.write('and then lambda = {}'.format(loss_lambda_at_end))
         
 
     #quit()
@@ -305,7 +309,7 @@ if __name__ == "__main__":
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-06, 
+    factor=0.9, patience=3, threshold=1e-09, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-09, verbose=True)
 
     
@@ -313,7 +317,6 @@ if __name__ == "__main__":
     if settings['viz']:
         visualizer = Visualizator1D(data_handler, odenet, settings)
 
-    
     # Training loop
     #batch_times = [] 
     epoch_times = []
@@ -343,7 +346,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [1, 5, 15, 25, 40, 50, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
+    rep_epochs = [1, 5, 7, 10, 15, 25, 30, 40, 50, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
     viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
@@ -354,12 +357,13 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 15
+    epochs_to_fail_to_terminate = 40#15
     all_lrs_used = []
 
     #print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
     
     for epoch in range(1, tot_epochs + 1):
+            
         start_epoch_time = perf_counter()
         iteration_counter = 1
         data_handler.reset_epoch()
@@ -368,10 +372,19 @@ if __name__ == "__main__":
         this_epoch_total_prior_loss = 0
         print()
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
+
+        if epoch <= 5:
+            loss_lambda = loss_lambda_at_start
+        else:
+            loss_lambda = loss_lambda_at_end    
+        print("current loss_lambda =",loss_lambda)
+        
+        
         if settings['verbose']:
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
+            
             loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], batch_for_prior, prior_grad, loss_lambda)
             loss = loss_list[0]
             prior_loss = loss_list[1]
