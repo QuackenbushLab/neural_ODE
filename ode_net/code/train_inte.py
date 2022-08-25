@@ -259,7 +259,7 @@ if __name__ == "__main__":
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
     del prior_mat
     loss_lambda_at_start = 1
-    loss_lambda_at_end = 0.999
+    loss_lambda_at_end = 0.99
     
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
@@ -346,7 +346,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [1, 5, 7, 10, 15, 25, 30, 40, 50, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
+    rep_epochs = [1, 5, 7, 10, 15, 25, 30, 40, 50, 60, 70, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
     viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
@@ -373,11 +373,11 @@ if __name__ == "__main__":
         print()
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
 
-        if epoch <= 5:
+        if epoch <= 10:
             loss_lambda = loss_lambda_at_start
         else:
             loss_lambda = loss_lambda_at_end    
-        print("current loss_lambda =",loss_lambda)
+        print("current loss_lambda =", loss_lambda)
         
         
         if settings['verbose']:
@@ -526,8 +526,8 @@ if __name__ == "__main__":
                 np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
             
             print("Saving best intermediate val model..")
-            interm_model_file_name = 'best_val_model_epoch_' + str(epoch)
-            save_model(best_vaL_model_so_far, interm_models_save_dir , interm_model_file_name)
+            interm_model_file_name = 'trained_model_epoch_' + str(epoch)
+            save_model(odenet, interm_models_save_dir , interm_model_file_name)
                 
             
             #else:
