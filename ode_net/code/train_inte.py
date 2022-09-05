@@ -259,7 +259,7 @@ if __name__ == "__main__":
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
     del prior_mat
     loss_lambda_at_start = 1
-    loss_lambda_at_end = 0.99
+    loss_lambda_at_end = 1
     
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
@@ -270,7 +270,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/trained_model_epoch_100.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
