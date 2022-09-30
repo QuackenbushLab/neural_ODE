@@ -26,9 +26,9 @@ if __name__ == "__main__":
                     "ootb_tanh" : "saddlebrown", "ootb_relu" : "sandybrown", "ootb_sigmoid" : "peachpuff"} 
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX",
-                    "ootb_tanh" : "OOTB NeuralODE (tanh)",
-                    "ootb_relu" : "OOTB NeuralODE (ReLU)",
-                    "ootb_sigmoid" : "OOTB NeuralODE (sigmoid)"} 
+                    "ootb_tanh" : "OOTB (tanh)",
+                    "ootb_relu" : "OOTB (ReLU)",
+                    "ootb_sigmoid" : "OOTB (sigmoid)"} 
 
     model_hatch = {"phoenix":"", "phoenix_noprior" :"", 
                     "ootb_tanh" : "//", "ootb_relu" : "..", "ootb_sigmoid" : "xx"}                
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                 perf_info[line['dataset'].lower()][line['model']][float(line['noise'])][this_metric] = float(line[this_metric])
 
     #Plotting setup
-    fig_ootb_mse = plt.figure(figsize=(13,6))
+    fig_ootb_mse = plt.figure(figsize=(13,7.7))
     #plt.grid(visible = True)
     axes_ootb_mse = fig_ootb_mse.subplots(ncols= len(datasets),nrows = 1,  
     sharex=False, sharey=False, 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     #fig_ootb_mse.subplots_adjust(hspace=0.0, wspace=0.0)
     border_width = 1.5
     tick_lab_size = 11
-    ax_lab_size = 15
+    ax_lab_size = 20
     ind = np.arange(len(noises))  # the x locations for the groups
     height= 0.15  # the width of the bars
     deltas = [-2, -1, 0, 1, 2]
@@ -81,7 +81,7 @@ if __name__ == "__main__":
             ax.set_yticks(ind)
             ax.set_yticklabels(['No noise', 'High (20%) noise'], rotation=90, va = "center")
             ax.tick_params(axis='x', labelsize= tick_lab_size)
-            ax.tick_params(axis='y', labelsize= tick_lab_size)
+            ax.tick_params(axis='y', labelsize= 17)
             
             this_delta = deltas[models.index(this_model)] 
             this_model_mses =  [np.mean([perf_info[this_data][this_model][this_noise][true_val_col] 
@@ -96,10 +96,11 @@ if __name__ == "__main__":
             ax.grid(visible = True, which = "both", axis = "x", color = "black", 
             linestyle = "--", alpha = 0.3)
             
-        ax.set_xlabel('validation MSE ({})'.format(this_data.upper()), fontsize=ax_lab_size)
+        ax.set_xlabel('validation MSE ({})'.format(this_data.upper()), fontsize=ax_lab_size+5)
         if col_num == 0:
-            ax.set_ylabel('Noise level', fontsize=ax_lab_size)
-    fig_ootb_mse.legend(handles = leg_general_info, loc='upper center', prop={'size': 12}, 
+            ax.set_ylabel('Noise level', fontsize=ax_lab_size+5)
+    
+    fig_ootb_mse.legend(handles = leg_general_info, loc='upper center', prop={'size': 16}, 
                         ncol = 3,  handleheight=1.5, frameon = False)
     fig_ootb_mse.savefig('{}/manuscript_fig_ootb_mse.png'.format(output_root_dir), bbox_inches='tight')
     
