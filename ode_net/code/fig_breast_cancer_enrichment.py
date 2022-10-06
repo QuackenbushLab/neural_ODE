@@ -57,7 +57,7 @@ if __name__ == "__main__":
     ax.cla()
     
     print("making heatmap")
-    z = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_enrichments_go_molec_200central_wide.csv", "rb"), 
+    z = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_enrichments_go_molec_100central_wide.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
     print("The analysis contains", num_tops, "pathways.")
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     ax.set_xlim(0,num_models)
     ax.set_ylim(0,num_tops)
 
-    path_names = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_enrichments_go_molec_200central_wide.csv", "rb"), 
+    path_names = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_enrichments_go_molec_100central_wide.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (0))
     path_names = np.char.strip(path_names, '"')
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     
     perf_info = {}
     metrics = ['var_explained', 'AUC','runtime_cost' ]
-    metric_cols = {'var_explained': 'green', 'AUC': 'orange','runtime_cost':'blue', 'true_harm_cent': "plum"}
+    metric_cols = {'var_explained': 'green', 'AUC': 'orange','runtime_cost':'mediumblue', 'true_harm_cent': "plum"}
     metric_labels = {'var_explained': r'$R^2$', 'AUC': 'AUC','runtime_cost':'AWS ($)', 'true_harm_cent': r"$\log(\mathcal{HC}_{ChIPSeq})$" } 
     metrics_extended = ['var_explained', 'AUC','runtime_cost', 'true_harm_cent' ]
 
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         
     ax.set_yticks(np.arange(num_tops)+0.5)    
     ax.set_yticklabels(path_names)
-    ax.tick_params(axis='y', labelsize= tick_lab_size+1, rotation = 0)
+    ax.tick_params(axis='y', labelsize= tick_lab_size+3, rotation = 0)
     
     ax.set_xticks(ind)    
     ax.set_xticklabels([ r"$n=$ "+str(this_tot_gene) for this_tot_gene in all_genes])
@@ -171,9 +171,9 @@ if __name__ == "__main__":
     
     #cbar.set_ticks([0 , 10, 15, 20])
     cbar.ax.tick_params(labelsize = tick_lab_size) 
-    cbar.set_label("Fold enrichment", size = ax_lab_size+3)
+    cbar.set_label("Fold enrichment (100 most influential genes)", size = ax_lab_size+3)
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
-    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_enrichment_go_molec_200central.png'.format(output_root_dir), bbox_inches='tight')
+    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_enrichment_go_molec_100central.png'.format(output_root_dir), bbox_inches='tight')
 
