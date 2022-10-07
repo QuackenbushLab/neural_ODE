@@ -32,7 +32,7 @@ get_path_dot_product <- function(path_binaries, phoenix_influence_scores){
 }
 
 
-analysis_type <- "cancmod"
+analysis_type <- "reactome"
 pathway_binary_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/",
                               analysis_type,
                               "_pathway_binary_wide.csv")
@@ -44,7 +44,7 @@ for(num_genes in all_num_genes){
   phnx_inf_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/inferred_influences/inferred_influence_", # nolint
                           num_genes,
                           ".csv") 
-  output_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/cancmod_permtests/permtest_aws_",
+  output_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/reactome_permtests/permtest_aws_",
                         num_genes,
                         ".csv") 
   phoenix_influence_scores <- fread(phnx_inf_file)
@@ -88,6 +88,6 @@ for(num_genes in all_num_genes){
                                           phoenix_influence_scores), 
                     by = pathway]
   names(X) <- c("pathway", "phnx_z_score", "mean_path_score", "sd_path_score")
-  write.csv(X, output_file,row.names = F)
+  write.csv(X, output_file, row.names = F)
 }
 
