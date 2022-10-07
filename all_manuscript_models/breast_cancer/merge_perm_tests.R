@@ -2,13 +2,17 @@ library(data.table)
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
-num_tops <- 20
-all_genes <- c(500, 2000)
+num_tops <- 15
+all_genes <- c(500, 2000, 4000, 11165)
 all_top_paths <- c()
+
+analysis_type <- "onco"
 
 print(paste0("collecting top ", num_tops," pathways from each set"))
 for(this_gene in all_genes){
-  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/go_mf_permtests/permtest_",
+  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/",
+                           analysis_type,
+                           "_permtests/permtest_",
                            this_gene,".csv")
   
   D <- fread(this_gene_file)
@@ -35,7 +39,9 @@ all_permtest_merged <- data.table(pathway = character(),
                                z_score = numeric(),
                                num_gene = numeric())
 for(this_gene in all_genes){
-  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/go_mf_permtests/permtest_",
+  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/",
+                           analysis_type,
+                           "_permtests/permtest_",
                            this_gene,".csv")
   
   D <- fread(this_gene_file)
@@ -49,7 +55,9 @@ for(this_gene in all_genes){
   all_permtest_merged <- rbind(all_permtest_merged, D_to_take)
 }
 
+#all_permtest_merged <- all_permtest_merged[z_score > 5, ]
 all_permtest_merged[ , .N , by = num_gene]
+
 
 all_permtest_wide <- dcast(all_permtest_merged, 
                           pathway ~ num_gene, value.var = "z_score")
@@ -57,6 +65,7 @@ setcolorder(all_permtest_wide,
             c("pathway", 
               paste("scale_to", all_genes, sep = "_")))
 #all_permtest_wide[,pathway := gsub(",",";", pathway)]
+
 
 all_permtest_wide <- all_permtest_wide[order(-scale_to_500,
                                        -scale_to_2000,
@@ -68,6 +77,8 @@ all_permtest_wide <- all_permtest_wide[order(-scale_to_500,
 print(all_permtest_wide)
 
 write.csv(all_permtest_wide,
-          "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtestments_go_mf.csv",
+          paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_",
+                 analysis_type,
+                 "_wide.csv"),
           row.names = F,
           na = "")
