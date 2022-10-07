@@ -18,7 +18,7 @@ get_path_dot_product <- function(path_binaries, phoenix_influence_scores){
                              simple_dot_prod,
                              this_path_binaries = path_binaries,
                              this_phoenix_influence_scores = phoenix_influence_scores,
-                             mc.cores = 34)
+                             mc.cores = 35)
   all_perm_results <- unlist(all_perm_results)                          
   mean_path_score <- mean(all_perm_results)
   sd_path_score <- sd(all_perm_results)
@@ -32,16 +32,16 @@ get_path_dot_product <- function(path_binaries, phoenix_influence_scores){
 }
 
 
-analysis_type <- "go_mf"
+analysis_type <- "onco"
 pathway_binary_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/",
                               analysis_type,
                               "_pathway_binary_wide.csv")
 path_DB <- fread(pathway_binary_file)
 
-all_num_genes <- c(4000, 11165)
+all_num_genes <- c(500, 2000, 4000, 11165)
 for(num_genes in all_num_genes){
   
-  phnx_inf_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/inferred_influence_", # nolint
+  phnx_inf_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/inferred_influences/inferred_influence_", # nolint
                           num_genes,
                           ".csv") 
   output_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/permtest_aws_",
