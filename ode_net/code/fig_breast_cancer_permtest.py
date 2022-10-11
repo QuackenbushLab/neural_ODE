@@ -56,7 +56,7 @@ if __name__ == "__main__":
     ax.spines['right'].set_linewidth(border_width)
     ax.cla()
 
-    analysis_type = "onco"
+    analysis_type = "go_slim_mf"
     
     print("making heatmap")
     wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide.csv"

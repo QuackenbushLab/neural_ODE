@@ -2,11 +2,11 @@ library(data.table)
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
-num_tops <- 15
+num_tops <- 25#basically all
 all_genes <- c(500, 2000, 4000, 11165)
 all_top_paths <- c()
 
-analysis_type <- "onco"
+analysis_type <- "go_slim_mf"
 
 print(paste0("collecting top ", num_tops," pathways from each set"))
 for(this_gene in all_genes){
@@ -55,7 +55,7 @@ for(this_gene in all_genes){
   all_permtest_merged <- rbind(all_permtest_merged, D_to_take)
 }
 
-#all_permtest_merged <- all_permtest_merged[z_score > 5, ]
+all_permtest_merged <- all_permtest_merged[z_score > 3, ]
 all_permtest_merged[ , .N , by = num_gene]
 
 
@@ -64,7 +64,7 @@ all_permtest_wide <- dcast(all_permtest_merged,
 setcolorder(all_permtest_wide, 
             c("pathway", 
               paste("scale_to", all_genes, sep = "_")))
-#all_permtest_wide[,pathway := gsub(",",";", pathway)]
+all_permtest_wide[,pathway := gsub(",",";", pathway)]
 
 
 all_permtest_wide <- all_permtest_wide[order(-scale_to_500,
