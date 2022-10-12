@@ -218,12 +218,36 @@ simDataset <- function(simulation, numsamples, cor.strength, externalInputs,time
   res <- lapply(1:numsamples, function(i){
     message(paste("solving",i,"of",numsamples))
     times <- timeStamps
-    soln <- deSolve::ode(y = exprs[i, ], times = times, 
-                func = my_ode, parms = externalInputs[i, ])
-    soln_DT <- data.table(soln)
-    soln_DT[,sample:=i ]
-    input_col_names <- paste(names(externalInputs[i, ]),"input", sep = "_")
-    soln_DT[,(input_col_names) := as.list(externalInputs[i, ])]
+    
+    
+    get_derivative_instead = TRUE
+    if(get_derivative_instead){
+      print("getting derivative instead!")
+      basic_soln <- deSolve::ode(y = exprs[i, ], 
+                                 times = times,
+                                 func = my_ode, 
+                                 parms = externalInputs[i, ])
+      basic_soln_DT <- data.table( basic_soln)
+      this_deriv <- lapply(times, function(this_time){
+        my_ode( t = this_time, 
+                state = as.matrix(basic_soln_DT[time == this_time, -1, with = F])[1,], 
+                parameters =  externalInputs[i, ])[[1]]
+      }) 
+      soln_DT <- data.table(do.call(rbind, this_deriv))
+      soln_DT[, time := times]
+      soln_DT[,sample:=i ]
+      input_col_names <- paste(names(externalInputs[i, ]),"input", sep = "_")
+      soln_DT[,(input_col_names) := 0]
+      
+    }else{
+      soln <- deSolve::ode(y = exprs[i, ], times = times, 
+                           func = my_ode, parms = externalInputs[i, ])
+      soln_DT <- data.table(soln)
+      soln_DT[,sample:=i ]
+      input_col_names <- paste(names(externalInputs[i, ]),"input", sep = "_")
+      soln_DT[,(input_col_names) := as.list(externalInputs[i, ])]
+    }
+    
     return(soln_DT)
   })
     
