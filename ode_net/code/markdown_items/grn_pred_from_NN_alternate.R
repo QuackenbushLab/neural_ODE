@@ -16,11 +16,11 @@ gene_eff <- melt(gene_eff,
                  variable.name = "aff", value.name = "effect")
 gene_eff[,aff := gsub("V","",aff)]
 
-cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/desmedt_gene_names_11165.csv",
+cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/gene_names_350.csv",
                          sep = ",",
                          header = T))
-#cell_names[,x:= gsub("_input","", x)]
-#setnames(cell_names, old = "x", new = "gene")
+cell_names[,x:= gsub("_input","", x)]
+setnames(cell_names, old = "x", new = "gene")
 
 
 print(dim(effects_mat)[1] ==nrow(cell_names))
@@ -33,7 +33,7 @@ gene_eff[is.na(prop_effect), prop_effect :=0 ]
 gene_eff[, effect := NULL]
 
 print("getting true edges")
-true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/otter_chip_val_clean.csv")
+true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/edge_properties_350.csv")
 
 #true_edges <- true_edges[p_val < 0.001,]
 #true_edges[, num_edges_for_this_TF := .N, by = from]
@@ -56,10 +56,12 @@ PRROC_obj <- roc.curve(scores.class0 = gene_eff$prop_effect,
                       weights.class0 = !is.na(gene_eff$activation_sym),
                        curve= T) #curve = TRUE
 
-print(PRROC_obj$auc)
+print(paste("AUC =", PRROC_obj$auc))
 
  best_index <- which.max(1-PRROC_obj$curve[,1]+PRROC_obj$curve[,2])
+
  prop_cut_off <- PRROC_obj$curve[best_index,3]
+ 
  gene_eff[, .(avg_pred_effect = mean(prop_effect), .N),
            by = .(activation_sym)]
 
@@ -76,9 +78,12 @@ plot(PRROC_obj, main = "", legend = F, col = "red")
 abline(0,1)
 dev.off()
 
+print(paste("Sparsity (avg out degree):" , 
+            gene_eff[pred_effect == "pred_effect", .N, by = reg][, sum(N)/num_genes]))
+
 print("doing centrality stuff now")
-library(igraph)
-library(CINNA)
+library(igraph, quietly = T,  warn.conflicts = F)
+library(CINNA, quietly = T,  warn.conflicts = F)
 
  inferred_edges <- gene_eff[, .(reg, aff, prop_effect)]
  rm(gene_eff)
