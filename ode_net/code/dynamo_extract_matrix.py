@@ -31,9 +31,10 @@ from visualization_inte import *
 
 def get_true_val_velocities(odenet, data_handler, method, batch_type):
     data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
+    data_pw = data_pw + 0*torch.randn(size = data_pw.shape) 
     true_velo_pw, velo_t_pw, velo_target_pw = data_handler_velo.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
     pred_vels = odenet.forward(t_pw,data_pw)
-    
+
     data_pw = torch.squeeze(data_pw).detach().numpy() #convert to NP array for dynamo VF alg
     true_velo_pw = torch.squeeze(true_velo_pw).detach().numpy() #convert to NP array for dynamo VF alg
     pred_vels = torch.squeeze(pred_vels).detach().numpy() #convert to NP array for dynamo VF alg
@@ -44,33 +45,7 @@ def get_true_val_velocities(odenet, data_handler, method, batch_type):
     return {'x': data_pw, 'true_velo_x': true_velo_pw, 'phx_velo_x' : pred_vels} 
 
 
-def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error, batch_for_prior, prior_grad, loss_lambda):
-    #print("Using {} threads training_step".format(torch.get_num_threads()))
-    batch, t, target = data_handler.get_batch(batch_size)
-    
-    '''
-    not_nan_idx = [i for i in range(len(t)) if not torch.any(torch.isnan(t[i]))]
-    t = t[not_nan_idx]
-    batch = batch[not_nan_idx]
-    target = target[not_nan_idx]
-    '''
 
-    init_bias_y = data_handler.init_bias_y
-    opt.zero_grad()
-    predictions = torch.zeros(batch.shape).to(data_handler.device)
-    for index, (time, batch_point) in enumerate(zip(t, batch)):
-        predictions[index, :, :] = odeint(odenet, batch_point, time, method= method  )[1] + init_bias_y #IH comment
-    
-    loss_data = torch.mean((predictions - target)**2) 
-    
-    pred_grad = odenet.prior_only_forward(t,batch_for_prior)
-    loss_prior = torch.mean((pred_grad - prior_grad)**2)
-    #loss_prior = loss_data
-
-    composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
-    composed_loss.backward() #MOST EXPENSIVE STEP!
-    opt.step()
-    return [loss_data, loss_prior]
 
 def _build_save_file_name(save_path, epochs):
     return 'dynamo_{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -135,7 +110,7 @@ if __name__ == "__main__":
     data_handler = DataHandler.fromcsv(args.data, device, settings['val_split'], normalize=settings['normalize_data'], 
                                         batch_type=settings['batch_type'], batch_time=settings['batch_time'], 
                                         batch_time_frac=settings['batch_time_frac'],
-                                        noise = settings['noise'],
+                                        noise = 0,
                                         img_save_dir = img_save_dir,
                                         scale_expression = settings['scale_expression'],
                                         log_scale = settings['log_scale'],
@@ -184,7 +159,7 @@ if __name__ == "__main__":
     dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, settings['method'], settings['batch_type'])
     X = dynamo_vf_inputs['x']
     obs_velos = dynamo_vf_inputs['true_velo_x']
-    my_vf = dyn.vf.SvcVectorField(X = X, V = obs_velos, gamma = 1, M = 50, lambda_ = 3) #gamma = 1 since we dont think there are any outliers
+    my_vf = dyn.vf.SvcVectorField(X = X, V = obs_velos, gamma = 1, M = 300, lambda_ = 3) #gamma = 1 since we dont think there are any outliers
     trained_results = my_vf.train(normalize = False)
     pred_velos = trained_results['V']
     
@@ -192,7 +167,6 @@ if __name__ == "__main__":
     print("The fitted correlation is:", corr_coeff)
     print(trained_results['C'].shape)
 
-    #quit()
     #Jacobian analysis
     jac = my_vf.get_Jacobian()
     n_iter = 50000
