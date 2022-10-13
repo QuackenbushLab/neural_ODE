@@ -39,10 +39,10 @@ def make_mask(X):
 
 
 
-sums_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model_sums.pt')
-prods_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model_prods.pt')
-alpha_comb = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model_alpha_comb.pt')
-gene_mult = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model_gene_multipliers.pt')
+sums_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model_sums.pt')
+prods_model = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model_prods.pt')
+alpha_comb = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model_alpha_comb.pt')
+gene_mult = torch.load('/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model_gene_multipliers.pt')
 
 Wo_sums = np.transpose(sums_model.linear_out.weight.detach().numpy())
 Bo_sums = np.transpose(sums_model.linear_out.bias.detach().numpy())

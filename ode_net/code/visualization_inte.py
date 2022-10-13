@@ -49,19 +49,11 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        #self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
         #breast cancer genes 
-        self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093] + sorted(random.sample(range(self.data_handler.dim),21)) #desmedt genes
+        #self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093] + sorted(random.sample(range(self.data_handler.dim),21)) #desmedt genes
         
-        #spellman ID'ed genes
-        #self.genes_to_viz = [2, 146, 157, 322, 562, 1088, 1360, 1712, 1794, 1885, 1886, 2112, 2151, 2366, 2376, 2491, 2499, 2520, 2571, 2792, 2972, 2976, 3157, 3395, 4023, 4664, 4840, 5092, 5313, 5423]
-        
-        #LOWVAR : 
-        #self.genes_to_viz = [271, 1705, 4724, 1219, 5794, 3334, 4264, 2732, 4676, 1661, 4484, 3681, 2507, 2072, 5417, 5632, 5204, 3989, 5279, 6102, 3103, 5685, 6163, 273, 2742, 272, 3136, 1698, 5745, 1362]
-        
-        #HIGHVAR : 
-        #self.genes_to_viz = [3214, 902, 2762, 903, 981, 1498, 3438, 1781, 1780, 1778, 2990, 5357, 4332, 1053, 877, 1612, 1288, 4334, 4725, 3847, 2983, 1488, 1335, 235, 4525, 3133, 1513, 2999, 1769, 628]
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
@@ -92,7 +84,7 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
-        self.time_span = (0.0, 2)
+        self.time_span = (0.0, 15)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
