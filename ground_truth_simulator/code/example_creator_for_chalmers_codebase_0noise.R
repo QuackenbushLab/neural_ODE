@@ -55,8 +55,8 @@ simseed = simseeds[102]
 
 #----1: sample network and create simulation----
 set.seed(simseed)
-grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
-#grnSmall = grnFull
+#grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
+grnSmall = grnFull
 
 
 if(edge_removal == T){
@@ -160,7 +160,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
