@@ -11,6 +11,7 @@ from time import perf_counter, process_time
 
 import torch
 import torch.optim as optim
+
 import dynamo as dyn
 
 try:
@@ -25,24 +26,35 @@ from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
-
-
-
-
 def get_true_val_velocities(odenet, data_handler, method, batch_type):
     data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
-    data_pw = data_pw + 0*torch.randn(size = data_pw.shape) 
+    data_pw = data_pw + 0.025*torch.randn(size = data_pw.shape) 
     true_velo_pw, velo_t_pw, velo_target_pw = data_handler_velo.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
-    pred_vels = odenet.forward(t_pw,data_pw)
-
-    data_pw = torch.squeeze(data_pw).detach().numpy() #convert to NP array for dynamo VF alg
-    true_velo_pw = torch.squeeze(true_velo_pw).detach().numpy() #convert to NP array for dynamo VF alg
-    pred_vels = torch.squeeze(pred_vels).detach().numpy() #convert to NP array for dynamo VF alg
     
-    print("PHX fitted corr to true velocities (w/o access!):", 
-    np.corrcoef(true_velo_pw.flatten(), pred_vels.flatten())[0,1])
+    num_samples = data_pw.shape[0]
+    n_dyn_val = int(num_samples*0.10)
+    dyn_val_set = np.random.choice(range(num_samples), n_dyn_val, replace=False)
+    dyn_train_set = np.setdiff1d(range(600), dyn_val_set)
 
-    return {'x': data_pw, 'true_velo_x': true_velo_pw, 'phx_velo_x' : pred_vels} 
+    data_pw_train = data_pw[dyn_train_set, :, :]
+    t_pw_train = t_pw[dyn_train_set, : ] #not used
+    data_pw_val = data_pw[dyn_val_set, :, :]
+    t_pw_val = t_pw[dyn_val_set, : ]
+
+    true_velo_train = true_velo_pw[dyn_train_set, :, :]
+    true_velo_val = true_velo_pw[dyn_val_set, :, :]
+
+    phx_val_set_pred = odenet.forward(t_pw_val,data_pw_val)
+    
+    data_pw_train = torch.squeeze(data_pw_train).detach().numpy() #convert to NP array for dynamo VF alg
+    data_pw_val = torch.squeeze(data_pw_val).detach().numpy() #convert to NP array for dynamo VF alg
+    true_velo_train = torch.squeeze(true_velo_train).detach().numpy() #convert to NP array for dynamo VF alg
+    true_velo_val = torch.squeeze(true_velo_val).detach().numpy() #convert to NP array for dynamo VF alg
+    phx_val_set_pred = torch.squeeze(phx_val_set_pred).detach().numpy() #convert to NP array for dynamo VF alg
+ 
+    return {'x_train': data_pw_train, 'true_velo_x_train': true_velo_train, 
+            'x_val': data_pw_val, 'true_velo_x_val': true_velo_val, 
+            'phx_val_set_pred' : phx_val_set_pred} 
 
 
 
@@ -56,8 +68,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" 
-clean_name_velo =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES" 
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" 
+clean_name_velo =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--velo_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name_velo))
 
@@ -157,19 +169,53 @@ if __name__ == "__main__":
     
     #DYNAMO vector field RKHS regression
     dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, settings['method'], settings['batch_type'])
-    X = dynamo_vf_inputs['x']
-    obs_velos = dynamo_vf_inputs['true_velo_x']
-    my_vf = dyn.vf.SvcVectorField(X = X, V = obs_velos, gamma = 1, M = 300, lambda_ = 3) #gamma = 1 since we dont think there are any outliers
-    trained_results = my_vf.train(normalize = False)
-    pred_velos = trained_results['V']
     
-    corr_coeff = np.corrcoef(obs_velos.flatten(), pred_velos.flatten())[0,1]
-    print("The fitted correlation is:", corr_coeff)
-    print(trained_results['C'].shape)
+    X_train = dynamo_vf_inputs['x_train']
+    X_val = dynamo_vf_inputs['x_val']
+    true_velos_train = dynamo_vf_inputs['true_velo_x_train']
+    true_velos_val = dynamo_vf_inputs['true_velo_x_val']
+    phx_val_set_pred = dynamo_vf_inputs['phx_val_set_pred']
+
+    print("..................................")
+    print("PHX val corr vs true velos (w/o access!):", 
+    round(np.corrcoef(true_velos_val.flatten(), phx_val_set_pred.flatten())[0,1], 4))
+    print("..................................")
+    
+    best_val_corr = 0
+    best_M = None
+    best_vf = None
+
+    for this_M in [30, 50, 100, 150, 200, 300, 400, 600]:
+
+        print("Dynamo, M:", this_M)
+        my_vf = dyn.vf.SvcVectorField(X = X_train, V = true_velos_train, 
+                                        Grid = X_val,
+                                        gamma = 1, M = this_M, lambda_ = 3) #gamma = 1 since we dont think there are any outliers
+        trained_results = my_vf.train(normalize = False)
+        dyn_pred_velos_train = trained_results['V']
+        dyn_pred_velos_val = trained_results['grid_V']
+        
+        corr_coeff_train = round(np.corrcoef(true_velos_train.flatten(), 
+                                        dyn_pred_velos_train.flatten())[0,1], 4)
+        corr_coeff_val = round(np.corrcoef(true_velos_val.flatten(), 
+                                        dyn_pred_velos_val.flatten())[0,1], 4)
+
+        print("train corr:", corr_coeff_train, ", val_corr:", corr_coeff_val)
+        if corr_coeff_val > best_val_corr:
+            print("updating best VF!")
+            best_val_corr = corr_coeff_val
+            best_M = this_M
+            best_vf = my_vf
+        print("..................................")
+        #print(trained_results['C'].shape)
+    
+    print("Best M:", best_M,"best val corr:", best_val_corr)
+    print("obtaining Jacobian now..")
 
     #Jacobian analysis
-    jac = my_vf.get_Jacobian()
-    n_iter = 50000
+
+    jac = best_vf.get_Jacobian()
+    n_iter = 10000
     jac_sum = np.abs(jac(np.random.uniform(low=0.0, high=1.0, size=data_handler.dim)))
     for iter in range(n_iter -1):
         jac_sum = jac_sum + np.abs(jac(np.random.uniform(low=0.0, high=1.0, size=data_handler.dim)))

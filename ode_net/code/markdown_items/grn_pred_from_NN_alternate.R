@@ -3,7 +3,7 @@ library(ggplot2)
 library(stringr)
 
 print("reading in files")
-effects_mat <- fread("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat.csv")
+effects_mat <- fread("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat_0.025.csv")
 gene_eff <- as.data.table(effects_mat)
 num_genes <- dim(effects_mat)[1]
 print(dim(effects_mat))
