@@ -59,6 +59,7 @@ grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
 #grnSmall = grnFull
 
 
+
 if(edge_removal == T){
   #make target network
   #grnSmall = copy(grnFull)
@@ -130,7 +131,7 @@ bimgenes = unlist(lapply(simSmall$inputModels, function(x) length(x$prop)))
 bimgenes = names(bimgenes)[bimgenes == 2]
   
   #simulate dataset
-time_stamps <- c(0,2,3,7,9) #0:9
+time_stamps <- 0:9 #c(0,2,3,7,9) #0:9
 simu_list = simulateDataset(simSmall, nsamp, 
                             timeStamps = time_stamps,
                             cor.strength = 0,
@@ -138,6 +139,10 @@ simu_list = simulateDataset(simSmall, nsamp,
                             outputGeneVar = 1) #1
 
 datamat = simu_list$emat
+
+datamat[, id:= paste0("cell_", .I)]
+write.csv(datamat, "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/prescient_input_350.csv", row.names = F)
+
 edgepropmat = get_edge_params(grnSmall@edgeset)
 ode_system_function = getODEFunc_modified(grnSmall)
 
