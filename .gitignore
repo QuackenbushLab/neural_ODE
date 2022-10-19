@@ -8,3 +8,5 @@ ode_net/code/output/_pretrained_best_model/
 ode_net/code/markdown_items/
 ode_net/code/data/DentateGyrus.loom
 all_manuscript_models/breast_cancer/go_slim_mf_pathway_binary_wide.csv
+ode_net/code/output/_prescient_data/prescient_350_data.pt
+ode_net/code/output/_prescient_data/prescient_350_true_vel.pt
