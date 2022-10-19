@@ -220,7 +220,7 @@ simDataset <- function(simulation, numsamples, cor.strength, externalInputs,time
     times <- timeStamps
     
     
-    get_derivative_instead = FALSE
+    get_derivative_instead = TRUE
     if(get_derivative_instead){
       print("getting derivative instead!")
       basic_soln <- deSolve::ode(y = exprs[i, ], 
