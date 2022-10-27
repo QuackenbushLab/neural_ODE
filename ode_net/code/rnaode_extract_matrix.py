@@ -32,6 +32,7 @@ from sklearn.ensemble import RandomForestRegressor
 #from sklearn.tree import BaseDecisionTree
 
 from GRN_rnaode import *
+from helper_true_velo import *
 
 def BUILD_MODEL(counts, velocity, genes=None, tfs=None, method='rf', n_estimators=10, max_depth=10, lasso_alpha=1, train_size=0.7):
     '''
@@ -44,7 +45,7 @@ def BUILD_MODEL(counts, velocity, genes=None, tfs=None, method='rf', n_estimator
         tfs = genes
     x, x_val, y, y_val = train_test_split(counts[:, tfs], velocity[:, genes], 
                                           test_size=1-train_size, random_state=42)
-    
+
     # Build model
     if method == 'lasso':
         model = linear_model.Lasso(alpha=lasso_alpha)
@@ -54,50 +55,10 @@ def BUILD_MODEL(counts, velocity, genes=None, tfs=None, method='rf', n_estimator
         model = RandomForestRegressor(n_estimators=n_estimators, max_depth=max_depth, random_state=9, n_jobs=-1)  
     model = model.fit(x, y)    
     train_score = (model.score(x, y))**0.5
-    test_score = (model.score(x_val, y_val))**0.5
+    #test_score = (model.score(x_val, y_val))**0.5
     
-    print('Fitted model | Training Corr: %.4f; Test Corr: %.4f' % (train_score, test_score))
-    return model, train_score, test_score
-
-def get_true_val_velocities(odenet, data_handler, method, batch_type):
-    data_pw, unimportant_t_pw, _unused3 = data_handler.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
-    true_velo_pw, _unused1, _unused2 = data_handler_velo.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
-    
-    noise = 0.0
-    scale_factor_for_counts = 1
-    val_split = 0.10
-
-    data_pw = (data_pw+ noise*torch.randn(size = data_pw.shape))  * scale_factor_for_counts
-    true_velo_pw = true_velo_pw * scale_factor_for_counts
-
-    num_samples = data_pw.shape[0]
-    n_dyn_val = int(num_samples*val_split)
-    dyn_val_set = np.random.choice(range(num_samples), n_dyn_val, replace=False)
-    dyn_train_set = np.setdiff1d(range(num_samples), dyn_val_set)
-
-    data_pw_train = data_pw[dyn_train_set, :, :]
-    data_pw_val = data_pw[dyn_val_set, :, :]
-    t_pw_val = unimportant_t_pw[dyn_val_set, : ]
-
-    true_velo_train = true_velo_pw[dyn_train_set, :, :]
-    true_velo_val = true_velo_pw[dyn_val_set, :, :]
-
-    phx_val_set_pred = scale_factor_for_counts* odenet.forward(t_pw_val,data_pw_val/scale_factor_for_counts)
-    
-    data_pw_train = torch.squeeze(data_pw_train).detach().numpy() #convert to NP array for dynamo VF alg
-    data_pw_val = torch.squeeze(data_pw_val).detach().numpy() #convert to NP array for dynamo VF alg
-    true_velo_train = torch.squeeze(true_velo_train).detach().numpy() #convert to NP array for dynamo VF alg
-    true_velo_val = torch.squeeze(true_velo_val).detach().numpy() #convert to NP array for dynamo VF alg
-    phx_val_set_pred = torch.squeeze(phx_val_set_pred).detach().numpy() #convert to NP array for dynamo VF alg
-    data_pw = torch.squeeze(data_pw).detach().numpy()
-    true_velo_pw = torch.squeeze(true_velo_pw).detach().numpy()
-
-    return {'x_train': data_pw_train, 'true_velo_x_train': true_velo_train, 
-            'x_val': data_pw_val, 'true_velo_x_val': true_velo_val, 
-            'phx_val_set_pred' : phx_val_set_pred,
-            'x_full': data_pw, 'true_velo_x_full': true_velo_pw} 
-
-
+    print('Fitted model | Training Corr: %.4f;' % (train_score))
+    return model, train_score
 
 
 def _build_save_file_name(save_path, epochs):
@@ -208,52 +169,63 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     
     
-    #DYNAMO vector field RKHS regression
-    dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, settings['method'], settings['batch_type'])
+    #RNAODE Rndom forest regression
+    noise_to_check = 0.025
+    dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, data_handler_velo, settings['method'], settings['batch_type'], noise_for_training= noise_to_check)
     
-    #X_train = dynamo_vf_inputs['x_train']
-    #X_val = dynamo_vf_inputs['x_val']
-    #true_velos_train = dynamo_vf_inputs['true_velo_x_train']
+    X_train = dynamo_vf_inputs['x_train']
+    X_val = dynamo_vf_inputs['x_val']
+    X_val_target = dynamo_vf_inputs['x_target_val']
+    t_val = dynamo_vf_inputs['t_val']
+    true_velos_train = dynamo_vf_inputs['true_velo_x_train']
     true_velos_val = dynamo_vf_inputs['true_velo_x_val']
     phx_val_set_pred = dynamo_vf_inputs['phx_val_set_pred']
+    X_full = dynamo_vf_inputs['x_full']
+    true_velos_full = dynamo_vf_inputs['true_velo_x_full']
+
 
     print("..................................")
     print("PHX val corr vs true velos (w/o access!):", 
     round(np.corrcoef(true_velos_val.flatten(), phx_val_set_pred.flatten())[0,1], 4))
     print("..................................")
     
-    X_full = dynamo_vf_inputs['x_full']
-    true_velos_full = dynamo_vf_inputs['true_velo_x_full']
-
+    
     #quit()
     best_val_corr = 0
     best_n_trees = None
     best_rf = None
-
-
-
     
-    for this_num_trees in [50, 100, 200, 500, 1000, 2000]: #100, 250, 500, 1000,
+    for this_num_trees in [2000]: #100, 250, 500, 1000, , 1000, 2000
         time_start = time.time()
         print("RNA ODE, num_trees:", this_num_trees)
-        rf_mod, train_score, test_score = BUILD_MODEL(counts = X_full, 
-                                                        velocity = true_velos_full,
-                                                        n_estimators=this_num_trees, 
-                                                        max_depth=None, 
-                                                        train_size=0.9)
-        if test_score > best_val_corr:
-            print("updating best RF!")
-            best_val_corr = test_score 
-            best_n_trees = this_num_trees
-            best_rf = rf_mod
+        rf_mod, train_score = BUILD_MODEL(counts = X_train, 
+                                            velocity = true_velos_train,
+                                            n_estimators=this_num_trees, 
+                                            max_depth=None, 
+                                            train_size=0.99)
+        # if test_score > best_val_corr:
+        #     print("updating best RF!")
+        #     best_val_corr = test_score 
+        #     best_n_trees = this_num_trees
+        #     best_rf = rf_mod
         
         time_end = time.time()
         print("Elapsed time: %.2f seconds" % (time_end - time_start))
         print("..................................")
 
     
-    print("Best num trees:", best_n_trees ,"best val corr:", best_val_corr)
+    # print("Best num trees:", best_n_trees ,"best val corr:", best_val_corr)
     
+    velo_fun_x = lambda t,x : rf_mod.predict(x.reshape(1, -1))
+       
+    pred_next_pts = pred_traj_given_ode(my_ode_func = velo_fun_x, 
+                                                    X_val = X_val, 
+                                                    t_val = t_val)
+    
+    mse_val_traj = np.mean((X_val_target - pred_next_pts)**2)
+    print("MSE val traj = {:.3E}".format(mse_val_traj)) 
+    
+    quit()
     print("obtaining GRN now..\n")
     my_GRN = GET_GRN(counts = X_full, velocity = true_velos_full, model_to_test = best_rf)
     np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat.csv", my_GRN, delimiter=",")

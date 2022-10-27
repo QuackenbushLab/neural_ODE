@@ -7,61 +7,18 @@ from datetime import datetime
 import numpy as np
 
 import torch
-import sklearn
 import scipy
 import tensorflow as tf
 from tensorflow import keras
 
 from scipy.integrate import odeint, solve_ivp
-import umap
-import pandas as pd
 
 #from datagenerator import DataGenerator
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
 from visualization_inte import *
-
-
-
-
-def get_true_val_velocities(odenet, data_handler, method, batch_type, noise = 0):
-    data_pw, unimportant_t_pw, _unused3 = data_handler.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
-    true_velo_pw, _unused1, _unused2 = data_handler_velo.get_true_mu_set_pairwise(val_only = False, batch_type =  batch_type)
-    
-    scale_factor_for_counts = 1
-    val_split = 0.10
-
-    data_pw = (data_pw+ noise*torch.randn(size = data_pw.shape))  * scale_factor_for_counts
-    true_velo_pw = true_velo_pw * scale_factor_for_counts
-
-    num_samples = data_pw.shape[0]
-    n_dyn_val = int(num_samples*val_split)
-    dyn_val_set = np.random.choice(range(num_samples), n_dyn_val, replace=False)
-    dyn_train_set = np.setdiff1d(range(num_samples), dyn_val_set)
-
-    data_pw_train = data_pw[dyn_train_set, :, :]
-    data_pw_val = data_pw[dyn_val_set, :, :]
-    t_pw_val = unimportant_t_pw[dyn_val_set, : ]
-
-    true_velo_train = true_velo_pw[dyn_train_set, :, :]
-    true_velo_val = true_velo_pw[dyn_val_set, :, :]
-
-    phx_val_set_pred = scale_factor_for_counts* odenet.forward(t_pw_val,data_pw_val/scale_factor_for_counts)
-    
-    data_pw_train = torch.squeeze(data_pw_train).detach().numpy() #convert to NP array for dynamo VF alg
-    data_pw_val = torch.squeeze(data_pw_val).detach().numpy() #convert to NP array for dynamo VF alg
-    true_velo_train = torch.squeeze(true_velo_train).detach().numpy() #convert to NP array for dynamo VF alg
-    true_velo_val = torch.squeeze(true_velo_val).detach().numpy() #convert to NP array for dynamo VF alg
-    phx_val_set_pred = torch.squeeze(phx_val_set_pred).detach().numpy() #convert to NP array for dynamo VF alg
-    data_pw = torch.squeeze(data_pw).detach().numpy()
-    true_velo_pw = torch.squeeze(true_velo_pw).detach().numpy()
-
-    return {'x_train': data_pw_train, 'true_velo_x_train': true_velo_train, 
-            'x_val': data_pw_val, 'true_velo_x_val': true_velo_val, 
-            'phx_val_set_pred' : phx_val_set_pred,
-            'x_full': data_pw, 'true_velo_x_full': true_velo_pw} 
-
+from helper_true_velo import *
 
 
 
@@ -74,8 +31,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" 
-clean_name_velo =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES" 
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" 
+clean_name_velo =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--velo_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name_velo))
 
@@ -174,21 +131,24 @@ if __name__ == "__main__":
     
     
     #DYNAMO vector field RKHS regression
-    for noise_level in [0.1]: #0.025, 0.05, 0.1
-        dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, settings['method'], settings['batch_type'], noise = noise_level)
+    for train_noise_level in [0 ,0.025, 0.05, 0.1]:
+        dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, data_handler_velo, settings['method'], settings['batch_type'], noise_for_training= train_noise_level)
         
         X_train = dynamo_vf_inputs['x_train']
         X_val = dynamo_vf_inputs['x_val']
+        X_val_target = dynamo_vf_inputs['x_target_val']
         X_full = dynamo_vf_inputs['x_full']
         Y_train = dynamo_vf_inputs['true_velo_x_train']
         Y_val = dynamo_vf_inputs['true_velo_x_val']
         Y_full = dynamo_vf_inputs['true_velo_x_full']
+        t_val = dynamo_vf_inputs['t_val']
         phx_val_set_pred = dynamo_vf_inputs['phx_val_set_pred']
+        
 
         print("..................................")
         print("PHX val corr vs true velos (w/o access!):", 
         round(np.corrcoef(Y_val.flatten(), phx_val_set_pred.flatten())[0,1], 4))
-        print("..................................")
+        #print("PHX val MSE vs true velos (w/o access!): {:.3E}".format(np.mean((Y_val.flatten() - phx_val_set_pred.flatten())**2)))
         
         
         print("creating scDVF VAE model..")
@@ -229,69 +189,83 @@ if __name__ == "__main__":
                                             pred_train)[0,1], 4)
         print("")
         print("train corr:", corr_coeff_train, ", val_corr:", corr_coeff_val)
+        print("..................................")
+        print("Now doing trajectory work...")
 
-        print("obtaining GRN now..\n")
-
-        def reverse_raw_ae(t, in_x):
-            input_x = tf.convert_to_tensor(np.expand_dims(in_x, axis=0))
-            dx = autoencoder.predict(input_x, verbose = 0).flatten() 
-            return dx                                
-
-
-        def short_reverse_interpolate(y0, X_full, neigh, pca, umap_reducer, steps, intermediate_steps, noise_sd):
-            solution = []
-            for step in range(steps):
-                # Interpolate using autoencoder
-                t_eval = list(range(intermediate_steps))
-                noise = np.random.normal(0, noise_sd)
-                sol = solve_ivp(reverse_raw_ae, [min(t_eval), max(t_eval)], y0+noise, method="RK23", t_eval=t_eval)
-                y = sol.y.T
-                
-                # Lower dimensionality
-                ending_pt_pca = pca.transform(np.nan_to_num(np.log1p(y)))
-                
-                # Find knn reference points
-                interp_neigh = neigh.kneighbors(ending_pt_pca)
-                
-                # New reference point
-                y0 = np.median(X_full[interp_neigh[1][-1, :], :], axis=0)
-                solution.append(y0)
             
-            return np.array(solution)
+        velo_fun_x = lambda t,x :  np.squeeze(autoencoder.predict(np.expand_dims(x, axis = 0), 
+                                                        verbose = 0))
+
+        pred_next_pts = pred_traj_given_ode(my_ode_func = velo_fun_x, 
+                                                    X_val = X_val, 
+                                                    t_val = t_val)
+
+        mse_val_traj = np.mean((X_val_target - pred_next_pts)**2)
+        print("MSE val traj = {:.3E}".format(mse_val_traj))                                           
+        print("..................................")
+        
+        # print("obtaining GRN now..\n")
+
+        # def reverse_raw_ae(t, in_x):
+        #     input_x = tf.convert_to_tensor(np.expand_dims(in_x, axis=0))
+        #     dx = autoencoder.predict(input_x, verbose = 0).flatten() 
+        #     return dx                                
 
 
-        # PCA the count data
-        pca = sklearn.decomposition.PCA(n_components=30)
-        adata_pca = pca.fit_transform(np.log1p(X_full))
-        # Further reduce the dim with UMAP
-        umap_reducer = umap.UMAP(random_state=42)
-        adata_umap = umap_reducer.fit_transform(adata_pca)
-        # Construct KNN with PCA
-        neigh = sklearn.neighbors.NearestNeighbors(n_neighbors=30)
-        neigh.fit(adata_pca)
+        # def short_reverse_interpolate(y0, X_full, neigh, pca, umap_reducer, steps, intermediate_steps, noise_sd):
+        #     solution = []
+        #     for step in range(steps):
+        #         # Interpolate using autoencoder
+        #         t_eval = list(range(intermediate_steps))
+        #         noise = np.random.normal(0, noise_sd)
+        #         sol = solve_ivp(reverse_raw_ae, [min(t_eval), max(t_eval)], y0+noise, method="RK23", t_eval=t_eval)
+        #         y = sol.y.T
+                
+        #         # Lower dimensionality
+        #         ending_pt_pca = pca.transform(np.nan_to_num(np.log1p(y)))
+                
+        #         # Find knn reference points
+        #         interp_neigh = neigh.kneighbors(ending_pt_pca)
+                
+        #         # New reference point
+        #         y0 = np.median(X_full[interp_neigh[1][-1, :], :], axis=0)
+        #         solution.append(y0)
+            
+        #     return np.array(solution)
 
-        n_cells = 200
-        num_steps = 15
-        cell_path = np.zeros((n_cells, num_steps, X_full.shape[1]))
-        for i in range(n_cells):
-            print(i)
-            y0 = np.random.rand(X_full.shape[1])
-            y0_noise = 0
-            # Solve for the cell with initial & velocity noise
-            y_solution = short_reverse_interpolate(y0+y0_noise, X_full = X_full, 
-                                                                neigh = neigh, pca = pca,
-                                                                umap_reducer = umap_reducer, 
-                                                                steps = num_steps,
-                                                                intermediate_steps = 5, 
-                                                                noise_sd = 0)
-            cell_path[i] = y_solution
+
+        # # PCA the count data
+        # pca = sklearn.decomposition.PCA(n_components=30)
+        # adata_pca = pca.fit_transform(np.log1p(X_full))
+        # # Further reduce the dim with UMAP
+        # umap_reducer = umap.UMAP(random_state=42)
+        # adata_umap = umap_reducer.fit_transform(adata_pca)
+        # # Construct KNN with PCA
+        # neigh = sklearn.neighbors.NearestNeighbors(n_neighbors=30)
+        # neigh.fit(adata_pca)
+
+        # n_cells = 200
+        # num_steps = 15
+        # cell_path = np.zeros((n_cells, num_steps, X_full.shape[1]))
+        # for i in range(n_cells):
+        #     print(i)
+        #     y0 = np.random.rand(X_full.shape[1])
+        #     y0_noise = 0
+        #     # Solve for the cell with initial & velocity noise
+        #     y_solution = short_reverse_interpolate(y0+y0_noise, X_full = X_full, 
+        #                                                         neigh = neigh, pca = pca,
+        #                                                         umap_reducer = umap_reducer, 
+        #                                                         steps = num_steps,
+        #                                                         intermediate_steps = 5, 
+        #                                                         noise_sd = 0)
+        #     cell_path[i] = y_solution
         
         
-        cell_path = pd.DataFrame(data=cell_path[:,2,:])
-        corr = cell_path.corr(method='pearson').fillna(0)
-        corr = corr.loc[:, (corr != 0).any(axis=0)]
-        corr = corr.loc[(corr != 0).any(axis=1), :]
-        np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat_{}.csv".format(noise_level), corr, delimiter=",")
+        # cell_path = pd.DataFrame(data=cell_path[:,2,:])
+        # corr = cell_path.corr(method='pearson').fillna(0)
+        # corr = corr.loc[:, (corr != 0).any(axis=0)]
+        # corr = corr.loc[(corr != 0).any(axis=1), :]
+        # np.savetxt("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat_{}.csv".format(noise_level), corr, delimiter=",")
 
         
     
