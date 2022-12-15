@@ -15,7 +15,7 @@ from collections import OrderedDict
 from types import SimpleNamespace
 
 
-def prescient_read_data(data_path, meta_path, out_dir, tp_col, celltype_col):
+def prescient_read_data(data_path, meta_path, out_dir, tp_col, celltype_col, val_set, train_set, noise_sd =0):
     """
     - Load csv preprocessed with scanpy or Seurat.
     - Must be a csv with format n_cells x n_genes with normalized (not scaled!) expression.
@@ -60,8 +60,11 @@ def prescient_read_data(data_path, meta_path, out_dir, tp_col, celltype_col):
 
     y = list(np.sort(np.unique(tps)))
 
-    x_ = [torch.from_numpy(x[(meta[tp_col] == d),:]).float() for d in y]
-    xp_ = [torch.from_numpy(xp[(meta[tp_col] == d),:]).float() for d in y]
+    #make noisy training trajectories
+    x_train = [torch.from_numpy(x[(meta[tp_col] == d),:][train_set, :] ).float() + noise_sd*torch.randn(size = (len(train_set), len(genes))) for d in y]
+    #make noise-free val trajectories 
+    x_val = [torch.from_numpy(x[(meta[tp_col] == d),:][val_set, :] ).float() + 0*torch.randn(size = (len(val_set), len(genes))) for d in y]
+    
     xu_ = [torch.from_numpy(xu[(meta[tp_col] == d),:]).float() for d in y]
 
     #w_pt = torch.load(growth_path)
@@ -75,8 +78,9 @@ def prescient_read_data(data_path, meta_path, out_dir, tp_col, celltype_col):
      "genes": genes,
      "celltype": celltype,
      "tps": tps,
-     "x":x_,
-     "xp":x_, #xp_
+     "x":x_train,
+     "xp":x_train, #xp_
+     "x_val": x_val,
      "xu": xu_,
      "y": y,
      "pca": pca,
