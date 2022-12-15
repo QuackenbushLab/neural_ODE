@@ -76,9 +76,8 @@ if __name__ == "__main__":
     gene_names = np.char.strip(gene_names, '"')
 
     z_min, z_max = np.nanmin(z), np.nanmax(z)
-    c = ax.pcolormesh(z.transpose(), cmap='Blues', vmin=z_min, vmax= z_max, #120
-            norm = colors.PowerNorm(gamma = 1.3), #gamma = 2
-            shading = "nearest") 
+    c = ax.pcolormesh(z.transpose(), cmap='Blues',# vmin=z_min, vmax= z_max, #120
+            norm = colors.PowerNorm(gamma = 1.3)) #, #gamma = 2 shading = "nearest"
     
     for idx in range(num_tops):
         ax.axhline(y=idx, xmin=0, xmax=num_models, linestyle='dotted', color = "black", alpha = 0.3)
@@ -95,7 +94,7 @@ if __name__ == "__main__":
 
     
    
-
+    '''
     print("......")
     print("overlaying performance metrics")
     ax1 = fig_breast_cancer.add_subplot(gs[0, 0:5], sharex = ax)
@@ -154,7 +153,7 @@ if __name__ == "__main__":
     
     ax1.legend(handles = leg_general_info, loc='upper right', prop={'size': tick_lab_size+1}, 
                         ncol = 1,  handleheight=1.5, frameon = False,  bbox_to_anchor = (1.25,1.2)) #
-
+    
     print("......")
     print("overlaying true centralities")
     ax2 = fig_breast_cancer.add_subplot(gs[1:11, 5], sharey = ax)     
@@ -188,17 +187,18 @@ if __name__ == "__main__":
     
     #ax2.grid(visible = True, which = "both", axis = "x", color = "black", 
     #        linestyle = "--", alpha = 0.3)
-
+    
+    '''
     ax.set_yticks(np.arange(num_tops)+0.5)    
     ax.set_yticklabels(gene_names)
     ax.tick_params(axis='y', labelsize= tick_lab_size+1)
     
     ax.set_xticks(ind)    
-    ax.set_xticklabels([ r"$n=$ "+str(this_tot_gene) for this_tot_gene in all_genes])
+    ax.set_xticklabels([ r"$n_g=$ "+str(this_tot_gene) for this_tot_gene in all_genes])
     ax.tick_params(axis='x', labelsize= tick_lab_size + 5)
     
 
-    cbar =  fig_breast_cancer.colorbar(c, ax= [ax, ax2], use_gridspec = False,  
+    cbar =  fig_breast_cancer.colorbar(c, ax= [ax], use_gridspec = False,  #[ax, ax2]
                             shrink=0.6, orientation = "horizontal", pad = 0.03)
     
     #cbar.set_ticks([0 , 10, 15, 20])
