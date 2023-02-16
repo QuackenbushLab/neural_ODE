@@ -2,11 +2,19 @@ library(data.table)
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
-num_tops <- 25#basically all
+num_tops <- 11#basically all
 all_genes <- c(500, 2000, 4000, 11165)
 all_top_paths <- c()
 
-analysis_type <- "go_slim_mf"
+analysis_type <- "reactome"
+
+if (analysis_type == "reactome"){
+  reactome_filter <- fread("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/reactome_child_to_parent.csv")
+  reactome_filter[, child_descriptor := tolower(gsub("-"," ",child_descriptor))]
+  reactome_filter[, child_descriptor := tolower(gsub(",","",child_descriptor))]
+}
+
+
 
 print(paste0("collecting top ", num_tops," pathways from each set"))
 for(this_gene in all_genes){
@@ -16,6 +24,10 @@ for(this_gene in all_genes){
                            this_gene,".csv")
   
   D <- fread(this_gene_file)
+  if (analysis_type == "reactome"){
+    D <- D[pathway %in% reactome_filter$child_descriptor]
+  }
+  D <- D[phnx_z_score > 5, ]
   all_top_paths <- c(all_top_paths,
                      trimws(D[order(-phnx_z_score),][1:num_tops, pathway]))
   
@@ -69,8 +81,8 @@ all_permtest_wide[,pathway := gsub(",",";", pathway)]
 
 all_permtest_wide <- all_permtest_wide[order(-scale_to_500,
                                        -scale_to_2000,
-                                       #-scale_to_4000,
-                                       #-scale_to_11165
+                                       -scale_to_4000,
+                                       -scale_to_11165
                                        )]
 #all_permtest_wide <- all_permtest_wide[order(pathway)]
 
@@ -79,6 +91,6 @@ print(all_permtest_wide)
 write.csv(all_permtest_wide,
           paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_",
                  analysis_type,
-                 "_wide.csv"),
+                 "_wide_NEW.csv"),
           row.names = F,
           na = "")

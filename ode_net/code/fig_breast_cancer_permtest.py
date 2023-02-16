@@ -56,10 +56,10 @@ if __name__ == "__main__":
     ax.spines['right'].set_linewidth(border_width)
     ax.cla()
 
-    analysis_type = "go_mf"
+    analysis_type = "reactome"
     
     print("making heatmap")
-    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide.csv"
+    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide_NEW.csv"
     z = np.loadtxt(open(wide_file, "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
@@ -173,5 +173,5 @@ if __name__ == "__main__":
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
-    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
+    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_NEW.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
 
