@@ -59,7 +59,7 @@ if __name__ == "__main__":
     analysis_type = "reactome"
     
     print("making heatmap")
-    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide_NEW.csv"
+    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide_20230216.csv"
     z = np.loadtxt(open(wide_file, "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
@@ -67,6 +67,7 @@ if __name__ == "__main__":
     num_models = z.shape[1]
     z[z == ""] = "0"                
     z = z.astype(float)
+    z[ z < 0] = 0 #set negative values to 0
     z = z.transpose()
     
     ind = np.arange(num_models) +0.5
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     z_min, z_max = np.nanmin(z), np.nanmax(z)
     print(z.transpose())
     c = ax.pcolormesh(z.transpose(), cmap='RdPu', #z.transpose() #vmin=0, vmax= z_max, #120
-            norm = colors.PowerNorm(gamma = 0.6))  #, #gamma = 2 shading = "nearest"
+            norm = colors.PowerNorm(gamma = 0.65))  #, #gamma = 2 shading = "nearest"
            
 #    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}.png'.format(output_root_dir, analysis_type), bbox_inches='tight')
     
@@ -173,5 +174,5 @@ if __name__ == "__main__":
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
-    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_NEW.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
+    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_20230216.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
 

@@ -48,7 +48,9 @@ print(paste0("Collected ", length(all_top_paths), " paths!"))
 
 print("Now merging data for all these pathways")
 all_permtest_merged <- data.table(pathway = character(),
-                               z_score = numeric(),
+                               z = numeric(),
+                               mu_0 = numeric(), 
+                               sd_0 = numeric(),
                                num_gene = numeric())
 for(this_gene in all_genes){
   this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/",
@@ -59,39 +61,54 @@ for(this_gene in all_genes){
   D <- fread(this_gene_file)
   D <-  D[order(-phnx_z_score),]
   D_to_take <- D[trimws(pathway) %in% all_top_paths, 
-                 .(pathway = trimws(pathway), z_score = phnx_z_score)]
-  D_to_take[, num_gene := paste0("scale_to_", this_gene)]
+                 .(pathway = trimws(pathway),
+                   z = round(phnx_z_score, 3),
+                   mu_0 = round(mean_path_score,3),
+                   sd_0 = round(sd_path_score,3))]
+  D_to_take[, num_gene := paste0("scl2_", this_gene)]
   #D_to_take[, fold_permtest:= fold_permtest/this_gene] #.I
   #D_to_take[, fold_permtest:= range01(fold_permtest)] #.I
   
   all_permtest_merged <- rbind(all_permtest_merged, D_to_take)
 }
 
-#all_permtest_merged <- all_permtest_merged[z_score > 3, ]
-all_permtest_merged <- all_permtest_merged[z_score!=0, ]
+all_permtest_merged <- all_permtest_merged[!(z == 0 & mu_0 == 0 & sd_0 == 0), ]
 all_permtest_merged[ , .N , by = num_gene]
 
 
 all_permtest_wide <- dcast(all_permtest_merged, 
-                          pathway ~ num_gene, value.var = "z_score")
+                          pathway ~ num_gene, 
+                          value.var = c("z", "mu_0", "sd_0"))
+
+
+all_permtest_wide[,pathway := gsub(",",";", pathway)]
+all_permtest_wide[,pathway := gsub("\\&","and", pathway)]
+
+
+all_permtest_wide <- all_permtest_wide[order(-z_scl2_500,
+                                       -z_scl2_2000,
+                                       -z_scl2_4000,
+                                       -z_scl2_11165
+                                       )]
 setcolorder(all_permtest_wide, 
             c("pathway", 
-              paste("scale_to", all_genes, sep = "_")))
-all_permtest_wide[,pathway := gsub(",",";", pathway)]
+              paste(rep( c("z", "mu_0", "sd_0"), 4),
+                    rep(paste("scl2", all_genes, sep = "_"), each = 3),
+                    sep = "_"
+              )
+            )
+)
 
-
-all_permtest_wide <- all_permtest_wide[order(-scale_to_500,
-                                       -scale_to_2000,
-                                       -scale_to_4000,
-                                       -scale_to_11165
-                                       )]
 #all_permtest_wide <- all_permtest_wide[order(pathway)]
 
 print(all_permtest_wide)
 
-write.csv(all_permtest_wide,
+write.table(all_permtest_wide,
           paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_",
                  analysis_type,
-                 "_wide_20230216.csv"),
+                 "_supplement.txt"),
+          sep = " & ",
           row.names = F,
-          na = "")
+          na = "",
+          quote = F, 
+          eol = "\\\\ \n")
