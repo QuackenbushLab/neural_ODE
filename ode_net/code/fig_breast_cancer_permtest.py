@@ -147,7 +147,7 @@ if __name__ == "__main__":
                 this_text = "${:,.2f}".format(this_val)
                 this_height = this_val/cost_shrinker
             ax1.text(this_idx + 0.5 + width*this_delta, this_height + 0.1 , this_text, 
-                     ha="center", va="bottom", color="black",size = 15, rotation = 90)
+                     ha="center", va="bottom", color="black",size = 20, rotation = 90)
     
     ax.legend(handles = leg_general_info, loc='center left', prop={'size': tick_lab_size+3}, 
                         ncol = 1,  handleheight=1.5, frameon = False, bbox_to_anchor = (-0.4,1.1),
