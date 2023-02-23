@@ -73,7 +73,7 @@ def pred_traj_given_ode(my_ode_func, X_val, t_val, method = None):
     all_preds = np.copy(X_val)
     if method != "rnaode":
         for val_idx in range(len(X_val)):
-            print("predicting val_idx:", val_idx)
+            #print("predicting val_idx:", val_idx)
             s = solve_ivp(fun = my_ode_func, 
                             t_span = t_val[val_idx,], 
                             y0 = X_val[val_idx,], 
