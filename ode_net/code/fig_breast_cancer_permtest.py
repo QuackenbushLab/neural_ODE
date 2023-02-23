@@ -56,10 +56,10 @@ if __name__ == "__main__":
     ax.spines['right'].set_linewidth(border_width)
     ax.cla()
 
-    analysis_type = "go_slim_mf"
+    analysis_type = "reactome"
     
     print("making heatmap")
-    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide.csv"
+    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide_20230216.csv"
     z = np.loadtxt(open(wide_file, "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
@@ -67,6 +67,7 @@ if __name__ == "__main__":
     num_models = z.shape[1]
     z[z == ""] = "0"                
     z = z.astype(float)
+    z[ z < 0] = 0 #set negative values to 0
     z = z.transpose()
     
     ind = np.arange(num_models) +0.5
@@ -78,9 +79,11 @@ if __name__ == "__main__":
     path_names = np.char.strip(path_names, '"')
 
     z_min, z_max = np.nanmin(z), np.nanmax(z)
-    c = ax.pcolormesh(z.transpose(), cmap='RdPu', vmin=0, vmax= z_max, #120
-            norm = colors.PowerNorm(gamma = 0.6), #gamma = 2
-            shading = "nearest") 
+    print(z.transpose())
+    c = ax.pcolormesh(z.transpose(), cmap='RdPu', #z.transpose() #vmin=0, vmax= z_max, #120
+            norm = colors.PowerNorm(gamma = 0.65))  #, #gamma = 2 shading = "nearest"
+           
+#    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}.png'.format(output_root_dir, analysis_type), bbox_inches='tight')
     
     for idx in range(num_tops):
         ax.axhline(y=idx, xmin=0, xmax=num_models, linestyle='dotted', color = "black", alpha = 0.3)
@@ -88,15 +91,7 @@ if __name__ == "__main__":
     for idx in range(num_models):
         ax.axvline(x=idx, ymin=0, ymax=num_tops, linestyle='dotted', color = "black", alpha = 0.3)    
 
-    # for i in range(num_tops):
-    #     for j in range(num_models):
-    #         if z[j,i] <= 5:
-    #             text = ax.text(j + 0.5, i + 0.5, int(z[j, i]),
-    #                         ha="center", va="center", color="w",
-    #                         size = 13, weight = "bold")
-
-    
-   
+        
 
     print("......")
     print("overlaying performance metrics")
@@ -111,7 +106,7 @@ if __name__ == "__main__":
     ax1.cla()
     
     perf_info = {}
-    metrics = ['var_explained', 'AUC','runtime_cost' ]
+    metrics = ['var_explained', 'AUC' ] #','runtime_cost'
     metric_cols = {'var_explained': 'green', 'AUC': 'orange','runtime_cost':'mediumblue', 'true_harm_cent': "plum"}
     metric_labels = {'var_explained': r'$R^2$', 'AUC': 'AUC','runtime_cost':'AWS ($)', 'true_harm_cent': r"$\log(\mathcal{HC}_{ChIPSeq})$" } 
     metrics_extended = ['var_explained', 'AUC','runtime_cost', 'true_harm_cent' ]
@@ -131,7 +126,7 @@ if __name__ == "__main__":
     print(perf_info)
 
     width= 0.17  # the width of the bars
-    deltas = [-1, 0, 1]
+    deltas = [-0.5,0.5]
     cost_shrinker = 1.8
     
     for this_metric in metrics:
@@ -152,19 +147,21 @@ if __name__ == "__main__":
                 this_text = "${:,.2f}".format(this_val)
                 this_height = this_val/cost_shrinker
             ax1.text(this_idx + 0.5 + width*this_delta, this_height + 0.1 , this_text, 
-                     ha="center", va="bottom", color="black",size = 15, rotation = 90)
+                     ha="center", va="bottom", color="black",size = 20, rotation = 90)
     
     ax.legend(handles = leg_general_info, loc='center left', prop={'size': tick_lab_size+3}, 
-                        ncol = 1,  handleheight=1.5, frameon = False, bbox_to_anchor = (-0.4,1.1)) #
+                        ncol = 1,  handleheight=1.5, frameon = False, bbox_to_anchor = (-0.4,1.1),
+                        title = "Performance metrics", title_fontsize=20) #
 
     print("......")
-        
+
+    
     ax.set_yticks(np.arange(num_tops)+0.5)    
     ax.set_yticklabels(path_names)
     ax.tick_params(axis='y', labelsize= tick_lab_size+3, rotation = 0)
     
     ax.set_xticks(ind)    
-    ax.set_xticklabels([ r"$n=$ "+str(this_tot_gene) for this_tot_gene in all_genes])
+    ax.set_xticklabels([ r"$n_g=$ "+str(this_tot_gene) for this_tot_gene in all_genes])
     ax.tick_params(axis='x', labelsize= tick_lab_size + 5)
     
 
@@ -177,5 +174,5 @@ if __name__ == "__main__":
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
-    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}.png'.format(output_root_dir, analysis_type), bbox_inches='tight')
+    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_20230216.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
 

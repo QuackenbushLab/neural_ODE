@@ -161,7 +161,7 @@ if __name__ == "__main__":
                             #ax.plot(times[sample_idx].flatten(), traj[:,:,gene].flatten() + np.random.normal(0,this_noise,5), markerfacecolor = this_col, markeredgecolor = 'black', marker = "o", linestyle = 'None', alpha=0.5, label = gene)
                             
                             #ax.plot(times[sample_idx].flatten(), true_mean[:,:,gene].flatten(),'g-', lw=1.5, alpha = 0.5) #
-                ax.text(10, 1.15, r'$\log_{10}$' +'(val MSE) = {:.2f}'.format(math.log10(true_val_mse)),
+                ax.text(10, 1.15, r'$\log_{10}$' +'(test MSE) = {:.2f}'.format(math.log10(true_val_mse)),
                     verticalalignment='top', horizontalalignment='right',
                    # transform=ax.transAxes,
                     color='black', fontsize=12)
