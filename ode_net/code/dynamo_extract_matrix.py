@@ -35,8 +35,8 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" 
-clean_name_velo =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES" 
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" 
+clean_name_velo =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
 parser.add_argument('--velo_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name_velo))
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
-    odenet.load(pretrained_model_file)
+    #odenet.load(pretrained_model_file)
         
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
         net_file.write(odenet.__str__())
@@ -134,7 +134,7 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     
     #DYNAMO vector field RKHS regression
-    noise_level_to_check = 0
+    noise_level_to_check = 0.1
     dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, data_handler_velo,settings['method'], settings['batch_type'], noise_for_training = noise_level_to_check)
     
     X_train = dynamo_vf_inputs['x_train']
@@ -154,12 +154,12 @@ if __name__ == "__main__":
     best_M = None
     best_vf = None
 
-    for this_M in [150, 200, 300, 400, 600]:
+    for this_M in [150, 200, 300]:
 
         print("Dynamo, M:", this_M)
         my_vf = dyn.vf.SvcVectorField(X = X_train, V = true_velos_train, 
                                         Grid = X_val,
-                                        gamma = 1, M = this_M, lambda_ = 3) #gamma = 1 since we dont think there are any outliers
+                                        gamma = 1, M = this_M, lambda_ =1) #gamma = 1 since we dont think there are any outliers, default lambda_ = 3 [0.5,2,3,6]
         trained_results = my_vf.train(normalize = False)
         dyn_pred_velos_train = trained_results['V']
         dyn_pred_velos_val = trained_results['grid_V']

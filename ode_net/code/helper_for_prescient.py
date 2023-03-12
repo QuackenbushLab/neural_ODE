@@ -63,8 +63,8 @@ def prescient_read_data(data_path, meta_path, out_dir, tp_col, celltype_col, val
     #make noisy training trajectories
     x_train = [torch.from_numpy(x[(meta[tp_col] == d),:][train_set, :] ).float() + noise_sd*torch.randn(size = (len(train_set), len(genes))) for d in y]
     #make noise-free val trajectories 
-    x_val = [torch.from_numpy(x[(meta[tp_col] == d),:][val_set, :] ).float() + 0*torch.randn(size = (len(val_set), len(genes))) for d in y]
-    
+    x_val = [torch.from_numpy(x[(meta[tp_col] == d),:][val_set, :] ).float() + 0 for d in y]
+    len_x_val = len(x_val)
     xu_ = [torch.from_numpy(xu[(meta[tp_col] == d),:]).float() for d in y]
 
     #w_pt = torch.load(growth_path)
@@ -81,6 +81,8 @@ def prescient_read_data(data_path, meta_path, out_dir, tp_col, celltype_col, val
      "x":x_train,
      "xp":x_train, #xp_
      "x_val": x_val,
+     "x_val_traj": x_val[0:(len_x_val-1)],
+     "x_val_traj_target": x_val[1:len_x_val],
      "xu": xu_,
      "y": y,
      "pca": pca,

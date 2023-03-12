@@ -147,8 +147,8 @@ if __name__ == "__main__":
     param_ratio = round(param_count/ (data_handler.dim)**2, 3)
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
-    pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
-    odenet.load(pretrained_model_file)
+    #pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+    #odenet.load(pretrained_model_file)
         
     with open('{}/network.txt'.format(output_root_dir), 'w') as net_file:
         net_file.write(odenet.__str__())
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     
     
     #RNAODE Rndom forest regression
-    noise_to_check = 0.025
+    noise_to_check = 0
     dynamo_vf_inputs = get_true_val_velocities(odenet, data_handler, data_handler_velo, settings['method'], settings['batch_type'], noise_for_training= noise_to_check)
     
     X_train = dynamo_vf_inputs['x_train']
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     best_n_trees = None
     best_rf = None
     
-    for this_num_trees in [2000]: #100, 250, 500, 1000, , 1000, 2000
+    for this_num_trees in [500]: #100, 250, 500, 1000, , 1000, 2000
         time_start = time.time()
         print("RNA ODE, num_trees:", this_num_trees)
         rf_mod, train_score = BUILD_MODEL(counts = X_train, 
@@ -214,16 +214,14 @@ if __name__ == "__main__":
         print("..................................")
 
     
-    # print("Best num trees:", best_n_trees ,"best val corr:", best_val_corr)
-    
-    velo_fun_x = lambda t,x : rf_mod.predict(x.reshape(1, -1))
-       
-    pred_next_pts = pred_traj_given_ode(my_ode_func = velo_fun_x, 
-                                                    X_val = X_val, 
-                                                    t_val = t_val)
-    
-    mse_val_traj = np.mean((X_val_target - pred_next_pts)**2)
-    print("MSE val traj = {:.3E}".format(mse_val_traj)) 
+        velo_fun_x = lambda t,x : rf_mod.predict(x.reshape(1, -1))
+        
+        pred_next_pts = pred_traj_given_ode(my_ode_func = velo_fun_x, 
+                                                        X_val = X_val, 
+                                                        t_val = t_val)
+        
+        mse_val_traj = np.mean((X_val_target - pred_next_pts)**2)
+        print("MSE val traj = {:.3E}".format(mse_val_traj)) 
     
     quit()
     print("obtaining GRN now..\n")
