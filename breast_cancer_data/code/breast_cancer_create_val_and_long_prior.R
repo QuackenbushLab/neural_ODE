@@ -48,3 +48,28 @@ otter_motif_prior <- unique(otter_motif_prior)
 write.csv(otter_motif_prior, "C:/STUDIES/RESEARCH/ODE_project_local_old/breast_cancer_data/otter_clean_harmonized_full_prior.csv",
           row.names = F)
 
+
+#### Clean PPI (OTTER)
+otter_PPI <- data.table(read.table("C:/STUDIES/RESEARCH/ODE_project_local_old/breast_cancer_data/PPI_matrix_breast.txt"))
+names(otter_PPI) <- otter_tf_names$tf
+otter_PPI <- cbind(otter_tf_names, otter_PPI)
+
+otter_PPI <- otter_PPI[n_desm_names >0 & desm_names != "",]
+
+otter_PPI <- melt(otter_PPI,
+                          id.vars = c("desm_names"),
+                          measure.vars = otter_tf_names$tf)
+
+otter_PPI <- otter_PPI[value > 0,]
+otter_PPI <- otter_PPI[, .(tf = variable, to = desm_names, value = value)]
+otter_PPI <- merge(otter_PPI, otter_tf_names,
+                           by = "tf")
+otter_PPI <- otter_PPI[n_desm_names >0 & desm_names != "",]
+otter_PPI[,c("n_desm_names","tf"):=NULL]
+otter_PPI <- otter_PPI[,.(from = desm_names, to = to, value = value)]
+
+otter_PPI <- unique(otter_PPI)
+
+write.csv(otter_PPI, "C:/STUDIES/RESEARCH/ODE_project_local_old/breast_cancer_data/otter_clean_harmonized_PPI.csv",
+          row.names = F)
+

@@ -59,7 +59,7 @@ if __name__ == "__main__":
     analysis_type = "reactome"
     
     print("making heatmap")
-    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide_20230216.csv"
+    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide_20230410.csv"
     z = np.loadtxt(open(wide_file, "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     
     ax.legend(handles = leg_general_info, loc='center left', prop={'size': tick_lab_size+3}, 
                         ncol = 1,  handleheight=1.5, frameon = False, bbox_to_anchor = (-0.4,1.1),
-                        title = "Performance metrics", title_fontsize=20) #
+                        title = "Performance", title_fontsize=20) #
 
     print("......")
 
@@ -174,5 +174,5 @@ if __name__ == "__main__":
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
-    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_20230216.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
+    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_20230410.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
 
