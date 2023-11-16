@@ -40,7 +40,7 @@ simseeds = sample.int(1E7, 1000)
 #----simulation parameters----
 #simulation parameters
 nsamp = 150 #number of samples
-netSize = 690 #network size of sampled networks
+netSize = 350 #network size of sampled networks
 minTFs = 15 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
 bionoise = 0 #biological noise standard deviation (superimposed log-normal)
@@ -55,8 +55,8 @@ simseed = simseeds[102]
 
 #----1: sample network and create simulation----
 set.seed(simseed)
-#grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
-grnSmall = grnFull
+grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
+#grnSmall = grnFull
 
 
 
@@ -140,8 +140,8 @@ simu_list = simulateDataset(simSmall, nsamp,
 
 datamat = simu_list$emat
 
-datamat[, id:= paste0("cell_", .I)]
-write.csv(datamat, "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/prescient_input_690.csv", row.names = F)
+#datamat[, id:= paste0("cell_", .I)]
+#write.csv(datamat, "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/prescient_input_690.csv", row.names = F)
 
 edgepropmat = get_edge_params(grnSmall@edgeset)
 ode_system_function = getODEFunc_modified(grnSmall)
