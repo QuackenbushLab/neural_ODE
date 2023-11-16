@@ -1,10 +1,10 @@
 library(data.table)
 library(PRROC)
 
-edges <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_350_causal_prune/edge_properties.csv")
+edges <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_chalmers_350_prior_40_0308/edge_properties.csv")
 edges <- edges[, .(from, to, activation, EC50, n)]
 
-genes <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_350_causal_prune/gene_names.csv")
+genes <- fread("C:/Users/Intekhab Hossain/Desktop/model_inspect_chalmers_350_prior_40_0308/gene_names.csv")
 genes[ ,x:= gsub("_input","",x)]
 genes[, gene_sl := .I]
 
@@ -28,7 +28,7 @@ all_pos_edges <- merge(all_pos_edges,
                        all.x = T)
 edges[, true_edge := NULL]
 
-noise <-  0
+noise <-  0.5
 noise_perc <- noise/0.5
 edges[,activation := as.integer(2*(activation - 0.5))]
 edges[, edge_to_flip:= 0]
@@ -73,16 +73,13 @@ print(paste(noise,
 edge_mat <- matrix(0, nrow = nrow(genes), ncol = nrow(genes))
 
 update_edge_mat <- function(edge_mat, from, to, activation, EC50, n){
-  beta  <- (EC50^n-1)/(2*EC50^n-1)
-  f_act_avg <- (beta * 0.5^n)/(beta - 1 + 0.5^n)
-  final <- ifelse(activation > 0, f_act_avg, 1 - f_act_avg)
-  edge_mat[from, to] <<- final #effect of row on column
+  edge_mat[from, to] <<- activation #effect of row on column
 }
 edges[,
       update_edge_mat(edge_mat,from, to, activation, EC50, n), 
       by= .(from, to)]
 
-prior_name <- paste0("edge_prior_matrix_chalmers_350_noise_",noise,"_EC50.csv")
+prior_name <- paste0("edge_prior_matrix_chalmers_350_noise_",noise,".csv")
 write.table(edge_mat,
           paste0("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/",
                  prior_name),
