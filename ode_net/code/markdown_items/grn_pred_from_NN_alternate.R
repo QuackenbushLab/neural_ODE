@@ -3,7 +3,7 @@ library(ggplot2)
 library(stringr)
 
 print("reading in files")
-effects_mat <- fread("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat_0.025.csv")
+effects_mat <- fread("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat.csv")
 gene_eff <- as.data.table(effects_mat)
 num_genes <- dim(effects_mat)[1]
 print(dim(effects_mat))
@@ -37,8 +37,6 @@ true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/edge_pr
 
 #true_edges <- true_edges[p_val < 0.001,]
 #true_edges[, num_edges_for_this_TF := .N, by = from]
-#true_edges <- true_edges[num_edges_for_this_TF > 4000,]
-#print(true_edges[order(-num_edges_for_this_TF)])
 
 setnames(true_edges, 
          old = c("from","to"),
@@ -54,24 +52,16 @@ print("getting confusion-matrix values")
 library(PRROC)
 PRROC_obj <- roc.curve(scores.class0 = gene_eff$prop_effect,
                       weights.class0 = !is.na(gene_eff$activation_sym),
-                       curve= T) #curve = TRUE
+                       curve= F) #curve = TRUE
+
+gene_eff[, .(avg_pred_effect = mean(prop_effect), .N),
+           by = .(activation_sym)]
 
 print(paste("AUC =", PRROC_obj$auc))
 
- best_index <- which.max(1-PRROC_obj$curve[,1]+PRROC_obj$curve[,2])
 
- prop_cut_off <- PRROC_obj$curve[best_index,3]
- 
- gene_eff[, .(avg_pred_effect = mean(prop_effect), .N),
-           by = .(activation_sym)]
+quit(status=1)
 
- gene_eff[,pred_effect := "no_effect"]
- gene_eff[prop_effect > prop_cut_off, 
-           pred_effect := "pred_effect"]
- gene_eff[,true_effect := "no_effect"]
- gene_eff[!is.na(activation_sym), true_effect := "true_effect"]
-
- gene_eff[,prop.table(table(true_effect, pred_effect), margin = 1)]
 
 png(file = "AUC_plot.png")
 plot(PRROC_obj, main = "", legend = F, col = "red")

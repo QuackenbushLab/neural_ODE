@@ -184,9 +184,12 @@ class DataHandler:
         self.n_val = int((self.datasize - self.ntraj) * val_split)
         all_indx = np.arange(len(self.indx))
         val_indx = np.random.choice(all_indx, size=self.n_val, replace=False)
-        #val_indx = np.array([5, 40, 45]) #for yeast
+        #print("picking FIXED yeast val set for 1Traj")
+        #val_indx = np.array([9, 10, 11]) #for yeast 1Traj
         #val_indx = np.array([ 16,  39,  42,  51,  55,  68,  78, 101, 107, 144, 160, 184, 208,233, 237, 318, 319, 320, 324, 335, 378, 393, 394, 422, 433, 434, 447, 469, 482, 491, 493, 495, 513, 529, 541, 546, 563, 570, 577])
         train_indx = np.setdiff1d(all_indx, val_indx, assume_unique=True)
+        self.n_val = len(val_indx)
+
         self.val_set_indx = [self.indx[x] for x in val_indx]
         self.train_set_original = [self.indx[x] for x in train_indx]
         self.train_data_length = len(self.train_set_original)
@@ -255,6 +258,7 @@ class DataHandler:
         if batch_type == "trajectory":
             if val_only:
                 all_indx = [self.indx[x] for x in np.arange(len(self.indx)) if self.indx[x][0] in  self.val_set_indx]
+                all_indx = sorted(all_indx, key=lambda x: np.where(self.val_set_indx == x[0]))
             else:
                 all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         if batch_type == "single":
@@ -303,10 +307,13 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None):
+    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None, yeast = False):
         #print(self.val_set_indx)
         #print(num_val_trajs)
         extrap_time_points = np.arange(0,15,0.05) 
+        if yeast:
+            print("Visualizing YEAST trajectories!\n")
+            extrap_time_points = np.arange(0,150,0.5) 
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
@@ -318,7 +325,11 @@ class DataHandler:
                 all_plotted_samples = fixed_traj_idx
         else:
             if num_val_trajs >0 :
-                all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot - num_val_trajs, replace=False))
+                try:
+                    all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, self.num_trajs_to_plot - num_val_trajs, replace=False))
+                except:
+                    all_plotted_samples = sorted(np.random.choice(self.val_set_indx, num_val_trajs, replace=False)) + sorted(np.random.choice(self.train_set_original, 1, replace=False)) #if very few samplesE (e.g pramila dataset)
+
             else:
                 if self.batch_type == "single":
                     try:
@@ -363,10 +374,11 @@ class DataHandler:
             for i in self.val_set_indx:
                 self.val_data.append(self.data_pt[i][0:-1]) 
                 self.val_target.append(self.data_pt[i][1::])
-                self.val_t.append(self.time_pt[i])
-            self.val_data = torch.stack(self.val_data, dim = 0).to(self.device) #IH addition
-            self.val_target = torch.stack(self.val_target, dim = 0).to(self.device) #IH addition
-            self.val_t = torch.stack(self.val_t, dim = 0).to(self.device) #IH addition
+                self.val_t.append(torch.stack([torch.stack((self.time_pt[i][s], self.time_pt[i][s +1])) for s in range(len(self.time_pt[i])-1)]))
+                #self.val_t.append(self.time_pt[i]) IH commented out and added line above for traj method 3/21/23
+            self.val_data = torch.cat(self.val_data, dim = 0).to(self.device) 
+            self.val_target = torch.cat(self.val_target, dim = 0).to(self.device) 
+            self.val_t = torch.cat(self.val_t, dim = 0).to(self.device) 
 
             
 
@@ -387,35 +399,4 @@ class DataHandler:
     def get_validation_set(self):
         return self.val_data, self.val_t, self.val_target, self.n_val
 
-    
-    def compare_train_val_plot(self):
-        self.fig_traj_split = plt.figure(figsize=(15,15), tight_layout=True)
-        self.fig_traj_split.canvas.set_window_title("Comparison of train and test data")
-        
-        self.TOT_ROWS = 5
-        self.TOT_COLS = 6
-        self.sample_plot_cutoff = self.num_trajs_to_plot
-        self.genes_to_viz = sorted(random.sample(range(self.dim),30)) #only plot 30 genes
-        self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=True, sharey=True, subplot_kw={'frameon':True})
-        
-        self.legend_traj = [Line2D([0], [0], marker='o', color='red', markerfacecolor='red', markersize=10, label='Validation set initial values'),Line2D([0], [0], marker='o', color='blue', markerfacecolor='blue', markersize=10, label='Training set initial values')]
-        self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=2)
-
-        for row_num,this_row_plots in enumerate(self.axes_traj_split):
-            for col_num, ax in enumerate(this_row_plots):
-                gene = self.genes_to_viz[row_num*self.TOT_COLS + col_num] #IH restricting to plot only few genes
-                ax.cla()
-                all_this_gene_vals_for_hist = []
-                all_this_gene_trains_for_hist = []
-
-                for val_samp in range(self.n_val):
-                    this_samp_gene_init_val = self.val_data[val_samp][0][0][gene].item()
-                    all_this_gene_vals_for_hist.append(this_samp_gene_init_val)
-                for train_samp in self.train_set_original:
-                    this_samp_gene_init_train = self.data_pt[train_samp][0][0][gene].item()
-                    all_this_gene_trains_for_hist.append(this_samp_gene_init_train)
-
-                ax.hist(x= all_this_gene_vals_for_hist, density = False, bins='auto', color='red',alpha=0.7, rwidth=0.85, label = 'Validation')
-                ax.hist(x= all_this_gene_trains_for_hist, density = False, bins='auto', color='blue',alpha=0.2, rwidth=0.85, label = 'Training')
-
-        self.fig_traj_split.savefig('{}train_val_compare.png'.format(self.img_save_dir))
+   

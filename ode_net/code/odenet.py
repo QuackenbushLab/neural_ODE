@@ -87,30 +87,16 @@ class ODENet(nn.Module):
         for n in self.net_sums.modules():
             if isinstance(n, nn.Linear):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) 
-                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-        
+                
         for n in self.net_prods.modules():
             if isinstance(n, nn.Linear):
                 nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
-                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05) #0.05
-                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
                 
         for n in self.net_alpha_combine.modules():
             if isinstance(n, nn.Linear):
-                nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
-                #nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
+                #nn.init.orthogonal_(n.weight, gain = calculate_gain("sigmoid"))
+                nn.init.sparse_(n.weight,  sparsity=0.95, std = 0.05)
                 
-        #self.net_prods.apply(off_diag_init)
-        #self.net_sums.apply(off_diag_init)
-        
-      
-        #creating masks and register the hooks
-        #mask_prods = torch.tril(torch.ones_like(self.net_prods.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_prods.linear_out.weight), diagonal = 1)
-        #mask_sums = torch.tril(torch.ones_like(self.net_sums.linear_out.weight), diagonal = -1) + torch.triu(torch.ones_like(self.net_sums.linear_out.weight), diagonal = 1)
-        
-        #self.net_prods.linear_out.weight.register_hook(get_zero_grad_hook(mask_prods))
-        #self.net_sums.linear_out.weight.register_hook(get_zero_grad_hook(mask_sums)) 
-
         
         self.net_prods.to(device)
         self.gene_multipliers.to(device)
@@ -123,7 +109,6 @@ class ODENet(nn.Module):
         prods = torch.exp(self.net_prods(y))
         sums_prods_concat = torch.cat((sums, prods), dim= - 1)
         joint = self.net_alpha_combine(sums_prods_concat)
-        #final = joint-torch.relu(self.gene_multipliers)*y
         final = torch.relu(self.gene_multipliers)*(joint-y)
         return(final) 
 

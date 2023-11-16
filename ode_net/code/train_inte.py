@@ -37,20 +37,33 @@ def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
     plt.legend(loc='upper right')
     plt.savefig("{}/LR_range_test.png".format(img_save_dir))
 
-def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses ,img_save_dir):
-    plt.figure()
-    plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
-    if len(validation_loss) > 0:
-        plt.plot(range(1, epoch_so_far + 1), validation_loss, color = "red", label = "Validation loss")
-    #plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
-    plt.plot(range(1, epoch_so_far + 1), prior_losses, color = "magenta", label = "Prior loss")
+def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir):
     
-    plt.yscale('log')
-    plt.xlabel("Epoch")
-    plt.legend(loc='upper right')
-    plt.ylabel("Error (MSE)")
+    # Create two subplots, one for the main MSE loss plot and one for the prior loss plot.
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=False)
+    fig.set_size_inches(12, 6)
+
+    ax1.plot(range(1, epoch_so_far + 1), training_loss, color="blue", label="Training loss")
+    if len(validation_loss) > 0:
+        ax1.plot(range(1, epoch_so_far + 1), validation_loss, color="red", label="Validation loss")
+
+    ax2.plot(range(1, epoch_so_far + 1), prior_losses, color="magenta", label="Prior loss")
+
+    ax1.set_yscale('log')
+    ax1.set_xlabel("Epoch")
+    ax1.set_ylabel("Error (MSE)")
+    ax1.legend(loc='upper right')
+
+    ax2.set_yscale('log')
+    ax2.set_xlabel("Epoch")
+    ax2.set_ylabel("Error (MSE)")
+    ax2.set_title("Prior Loss")
+
+    #plt.subplots_adjust(wspace=0.3)
+    fig.tight_layout()
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
     np.savetxt('{}full_loss_info.csv'.format(output_root_dir), np.c_[training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based], delimiter=',')
+
 
 def my_r_squared(output, target):
     x = output
@@ -78,6 +91,8 @@ def get_true_val_set_r2(odenet, data_handler, method, batch_type):
     return [var_explained_pw, true_val_mse]
 
 
+
+
 def read_prior_matrix(prior_mat_file_loc, sparse = False, num_genes = 11165):
     if sparse == False: 
         mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
@@ -89,21 +104,12 @@ def read_prior_matrix(prior_mat_file_loc, sparse = False, num_genes = 11165):
         mat_torch = sparse_mat.to_dense().float()
         return(mat_torch)
 
-'''
-def regulated_loss(predictions, target, time, val = False):
-    #return(torch.mean((predictions - target) ** 2))
-    if val == True:
-        pred_cost = torch.mean(((predictions - target) ** 2)[0], dim = 2)
-        t_cost = torch.unsqueeze(torch.tensor([8, 6.5, 4, 1]), dim = 1)
-        return(torch.mean(pred_cost * t_cost * t_cost))
 
-    t_cost = torch.unsqueeze(9 - torch.mean(time, 1),1)
-    pred_cost = torch.mean((predictions - target) ** 2, dim = 2)
-    return(torch.mean(pred_cost * t_cost * t_cost)) #the hope is that earlier points will get penalized more
-'''
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target_full, n_val = data_handler.get_validation_set()
+    if method == "trajectory":
+        False
 
     init_bias_y = data_handler.init_bias_y
     #odenet.eval()
@@ -114,12 +120,12 @@ def validation(odenet, data_handler, method, explicit_time):
         for index, (time, batch_point, target_point) in enumerate(zip(t, data, target_full)):
             #IH: 9/10/2021 - added these to handle unequal time availability 
             #comment these out when not requiring nan-value checking
+            #not_nan_idx = [i for i in range(len(time)) if not torch.isnan(time[i])]
+            #time = time[not_nan_idx]
+            #not_nan_idx.pop()
+            #batch_point = batch_point[not_nan_idx]
+            #target_point = target_point[not_nan_idx]
             
-            not_nan_idx = [i for i in range(len(time)) if not torch.isnan(time[i])]
-            time = time[not_nan_idx]
-            not_nan_idx.pop()
-            batch_point = batch_point[not_nan_idx]
-            target_point = target_point[not_nan_idx]
             # Do prediction
             predictions.append(odeint(odenet, batch_point, time, method=method)[1])
             targets.append(target_point) #IH comment
@@ -130,8 +136,7 @@ def validation(odenet, data_handler, method, explicit_time):
         targets = torch.cat(targets, dim = 0).to(data_handler.device) 
         #loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
         loss = torch.mean((predictions - targets)**2)
-        #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))
-        
+        #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))        
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -252,13 +257,32 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
+    abs_prior = True
+    random_prior_signs = False
+
+    if abs_prior and random_prior_signs:
+        sys.exit('You are asking for two opposite things. At most ONE of abs_prior and random_prior_signs can be True.')
+
     prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350_noise_{}.csv'.format(settings['noise'])
     prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
-    batch_for_prior = (torch.rand(10000,1,prior_mat.shape[0], device = data_handler.device) - 0.5)
+    
+    if random_prior_signs:
+        matrix_of_pm_1 = 2 * (torch.randint(low = 0, high=2, size =prior_mat.shape)-0.5)
+        prior_mat = prior_mat * matrix_of_pm_1
+    
+    if abs_prior:
+        prior_mat = torch.abs(prior_mat)
+
+    K = 10000
+    batch_for_prior = (torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)- 0.5)*2
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
-    del prior_mat
+    
+    #del prior_mat
+
     loss_lambda_at_start = 1#0.99
     loss_lambda_at_end = 1#0.99
+
+    loss_lambda = loss_lambda_at_start 
     
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
@@ -278,6 +302,13 @@ if __name__ == "__main__":
         net_file.write('\n\n\n')
         net_file.write(inspect.getsource(ODENet.forward))
         net_file.write('\n')
+        if abs_prior:
+            net_file.write('prior_mat = torch.abs(prior_mat)')
+            net_file.write('\n')
+        if random_prior_signs:
+            net_file.write('matrix_of_pm_1 = 2 * (torch.randint(low = 0, high=2, size =prior_mat.shape)-0.5)')
+            net_file.write('prior_mat = prior_mat * matrix_of_pm_1')
+            net_file.write('\n')    
         net_file.write('lambda at start (first 5 epochs) = {}'.format(loss_lambda_at_start))
         net_file.write('\n')
         net_file.write('and then lambda = {}'.format(loss_lambda_at_end))
@@ -372,10 +403,7 @@ if __name__ == "__main__":
         print()
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
 
-        if epoch <= 10:
-            loss_lambda = loss_lambda_at_start
-        else:
-            loss_lambda = loss_lambda_at_end    
+
         print("current loss_lambda =", loss_lambda)
         
         
