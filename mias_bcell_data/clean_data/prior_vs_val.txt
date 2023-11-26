@@ -1,0 +1,5 @@
+          val_pred
+prior_pred         0         1
+         0 211557311    110425
+         1   3982611    175154
+[1] "AUC =  0.797 , num vals found = 285579"
