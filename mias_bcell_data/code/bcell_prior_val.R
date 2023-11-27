@@ -4,7 +4,7 @@ library(PRROC)
 
 
 ### will want genes to also have prior info so...
-long_prior <- fread("C:/STUDIES/RESEARCH/ODE_project_local_old/mias_bcell_data/otter_clean_harmonized_full_prior.csv")
+long_prior <- fread("/home/ubuntu/neural_ODE/mias_bcell_data/code/otter_clean_harmonized_full_prior.csv")
 long_prior[,prior_pred := 1]
 all_prior_affiliated_genes <- unique(c(long_prior$from, long_prior$to))
 edges <- data.table(expand.grid(all_prior_affiliated_genes, all_prior_affiliated_genes))
@@ -18,7 +18,7 @@ edges <- merge(edges, long_prior,
 rm(long_prior)
 gc()
 
-long_val <- fread("C:/STUDIES/RESEARCH/neural_ODE/mias_bcell_data/clean_data/otter_chip_val_clean.csv")
+long_val <- fread("/home/ubuntu/neural_ODE/mias_bcell_data/clean_data/otter_chip_val_clean.csv")
 long_val[, val_pred := 1]
 edges <- merge(edges, long_val[,.(from,to, val_pred)],
                by = c("from", "to"),

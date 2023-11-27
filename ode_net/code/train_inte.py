@@ -257,7 +257,7 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'])
     
     #Read in the prior matrix
-    abs_prior = True
+    abs_prior = False
     random_prior_signs = False
 
     if abs_prior and random_prior_signs:
@@ -306,7 +306,7 @@ if __name__ == "__main__":
             net_file.write('prior_mat = torch.abs(prior_mat)')
             net_file.write('\n')
         if random_prior_signs:
-            net_file.write('matrix_of_pm_1 = 2 * (torch.randint(low = 0, high=2, size =prior_mat.shape)-0.5)')
+            net_file.write('matrix_of_pm_1 = 2 * (torch.randint(low = 0, high=2, size =prior_mat.shape)-0.5)\n')
             net_file.write('prior_mat = prior_mat * matrix_of_pm_1')
             net_file.write('\n')    
         net_file.write('lambda at start (first 5 epochs) = {}'.format(loss_lambda_at_start))

@@ -312,8 +312,8 @@ class DataHandler:
         #print(num_val_trajs)
         extrap_time_points = np.arange(0,15,0.05) 
         if yeast:
-            print("Visualizing YEAST trajectories!\n")
-            extrap_time_points = np.arange(0,150,0.5) 
+            print("Calculating YEAST trajectories!\n")
+            extrap_time_points = np.arange(0,300,0.5) 
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()
