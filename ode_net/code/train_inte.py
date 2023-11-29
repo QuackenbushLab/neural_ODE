@@ -44,6 +44,8 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, tru
     fig.set_size_inches(12, 6)
 
     ax1.plot(range(1, epoch_so_far + 1), training_loss, color="blue", label="Training loss")
+    ax1.plot(range(1, epoch_so_far + 1), true_mean_losses, color="green", label="Noiseless test loss")
+    
     if len(validation_loss) > 0:
         ax1.plot(range(1, epoch_so_far + 1), validation_loss, color="red", label="Validation loss")
 
@@ -201,6 +203,8 @@ parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
 clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
+test_data_name = "chalmers_350genes_10samples_for_testing" 
+parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
 
@@ -255,7 +259,7 @@ if __name__ == "__main__":
                                         scale_expression = settings['scale_expression'],
                                         log_scale = settings['log_scale'],
                                         init_bias_y = settings['init_bias_y'],
-                                        fp_test = None)
+                                        fp_test = args.test_data)
     
     #Read in the prior matrix
     abs_prior = False
@@ -488,8 +492,8 @@ if __name__ == "__main__":
 
         print("Overall training loss {:.5E}".format(train_loss))
 
-        print("True MSE of val traj (pairwise): {:.5E}".format(mu_loss[1]))
-        print("True R^2 of val traj (pairwise): {:.2%}".format(mu_loss[0]))
+        print("Noiseless test traj (pairwise) MSE: {:.5E}".format(mu_loss[1]))
+        print("Noiseless test traj (pairwise) R^2: {:.2%}".format(mu_loss[0]))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
