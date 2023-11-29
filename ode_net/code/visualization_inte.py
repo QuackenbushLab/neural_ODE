@@ -49,10 +49,10 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+        #self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
         #breast cancer genes 
-        #self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093] + sorted(random.sample(range(self.data_handler.dim),21)) #desmedt genes
+        self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093] + sorted(random.sample(range(self.data_handler.dim),21)) #desmedt genes
         
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
@@ -84,7 +84,7 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
-        self.time_span = (0.0, 15)
+        self.time_span = (0.0, 2)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -116,7 +116,8 @@ class Visualizator1D(Visualizator):
     def visualize(self):
         self.trajectories, self.all_plotted_samples, self.extrap_timepoints = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], 
                                                                                                                      num_val_trajs = self.sample_plot_val_cutoff,
-                                                                                                                     yeast = False)
+                                                                                                                     yeast = False,
+                                                                                                                     breast = True)
         self._visualize_trajectories_split()
         #self._visualize_dynamics()
         self._set_ax_limits()

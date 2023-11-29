@@ -57,9 +57,13 @@ class DataHandler:
         
 
     @classmethod
-    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0, img_save_dir = "", scale_expression = 1, log_scale = False, init_bias_y = 0):
+    def fromcsv(cls, fp, device, val_split, normalize=False, batch_type='single', batch_time=1, batch_time_frac=1.0, noise = 0, img_save_dir = "", scale_expression = 1, log_scale = False, init_bias_y = 0, fp_test = None):
         ''' Create a datahandler from a CSV file '''
-        data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise, data_pt_0noise = readcsv(fp, device, noise_to_add = noise, scale_expression = scale_expression, log_scale = log_scale)
+        if fp_test is None:
+            data_np, data_pt, t_np, t_pt, dim, ntraj, data_np_0noise, data_pt_0noise = readcsv(fp, device, noise_to_add = noise, scale_expression = scale_expression, log_scale = log_scale)
+        else:
+            data_np, data_pt, t_np, t_pt, dim, ntraj, _, _ = readcsv(fp, device, noise_to_add = noise, scale_expression = scale_expression, log_scale = log_scale)    
+            _, _, _, _, _, _, data_np_0noise, data_pt_0noise = readcsv(fp_test, device, noise_to_add = noise, scale_expression = scale_expression, log_scale = log_scale)
         return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y)
 
     @classmethod
@@ -186,7 +190,6 @@ class DataHandler:
         val_indx = np.random.choice(all_indx, size=self.n_val, replace=False)
         #print("picking FIXED yeast val set for 1Traj")
         #val_indx = np.array([9, 10, 11]) #for yeast 1Traj
-        #val_indx = np.array([ 16,  39,  42,  51,  55,  68,  78, 101, 107, 144, 160, 184, 208,233, 237, 318, 319, 320, 324, 335, 378, 393, 394, 422, 433, 434, 447, 469, 482, 491, 493, 495, 513, 529, 541, 546, 563, 570, 577])
         train_indx = np.setdiff1d(all_indx, val_indx, assume_unique=True)
         self.n_val = len(val_indx)
 
@@ -307,13 +310,17 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None, yeast = False):
+    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None, yeast = False, breast = False):
         #print(self.val_set_indx)
         #print(num_val_trajs)
         extrap_time_points = np.arange(0,15,0.05) 
         if yeast:
             print("Calculating YEAST trajectories!\n")
             extrap_time_points = np.arange(0,300,0.5) 
+        if breast:
+            print("Calculating BREAST trajectories!\n")
+            extrap_time_points = np.arange(0,2,0.05) 
+            
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
         mu0 = self.get_mu0()

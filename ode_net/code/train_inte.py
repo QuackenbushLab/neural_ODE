@@ -254,7 +254,8 @@ if __name__ == "__main__":
                                         img_save_dir = img_save_dir,
                                         scale_expression = settings['scale_expression'],
                                         log_scale = settings['log_scale'],
-                                        init_bias_y = settings['init_bias_y'])
+                                        init_bias_y = settings['init_bias_y'],
+                                        fp_test = None)
     
     #Read in the prior matrix
     abs_prior = False
