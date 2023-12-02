@@ -55,26 +55,13 @@ class ODENet(nn.Module):
         #in general should be num_tf = ndim
         self.num_tf = 73 
         
-        # Create a new sequential model with ndim inputs and outputs
-        if explicit_time:
-            self.net = nn.Sequential(
-                nn.Linear(ndim + 1, neurons),
-                nn.LeakyReLU(),
-                nn.Linear(neurons, neurons),
-                nn.LeakyReLU(),
-                nn.Linear(neurons, neurons),
-                nn.LeakyReLU(),
-                nn.Linear(neurons, ndim)
-            )
-        else: #6 layers
-           
             
-            self.net_ootb = nn.Sequential()
-            self.net_ootb.add_module('activation_0', nn.Tanh())
-            self.net_ootb.add_module('linear_1', nn.Linear(ndim, 2*neurons, bias = True))
-            self.net_ootb.add_module('activation_1', nn.Tanh())
-            self.net_ootb.add_module('linear_out', nn.Linear(2*neurons,ndim, bias = True))
-        
+        self.net_ootb = nn.Sequential()
+        self.net_ootb.add_module('activation_0', nn.Tanh())
+        self.net_ootb.add_module('linear_1', nn.Linear(ndim, 2*neurons, bias = True))
+        self.net_ootb.add_module('activation_1', nn.Tanh())
+        self.net_ootb.add_module('linear_out', nn.Linear(2*neurons,ndim, bias = True))
+    
 
                 
         # Initialize the layers of the model
