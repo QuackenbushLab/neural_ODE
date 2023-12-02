@@ -274,7 +274,8 @@ class DataHandler:
                 else:
                     all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         else:
-            all_indx = [self.indx[x] for x in np.arange(10)]
+            n_test_samples = len(self.data_pt_0noise_test) * (self.data_pt_0noise_test[0].shape[0] - 1)
+            all_indx = [self.indx[x] for x in np.arange( n_test_samples)]
         mean_data = []
         mean_target = []
         mean_t = []
