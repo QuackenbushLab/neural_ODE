@@ -49,10 +49,10 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        #self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
         #breast cancer genes 
-        self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093] + sorted(random.sample(range(self.data_handler.dim),21)) #desmedt genes
+        #self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093, 198, 1419, 1571, 4013, 5242, 5783,6526, 6652, 8095, 8784] + sorted(random.sample(range(self.data_handler.dim),11)) #desmedt genes
         
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         

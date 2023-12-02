@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from math import ceil
 from time import perf_counter, process_time
+from scipy.stats import gaussian_kde
 
 import torch
 import torch.optim as optim
@@ -33,9 +34,9 @@ def my_r_squared(output, target):
     my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
     return(my_corr**2)
 
-def get_true_val_set_r2(odenet, data_handler, method):
+def get_true_val_set_r2(odenet, data_handler, method, img_save_dir):
    # data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
-    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True)
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type = "single")
     #odenet.eval()
     with torch.no_grad():
         predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
@@ -44,11 +45,28 @@ def get_true_val_set_r2(odenet, data_handler, method):
         var_explained_pw = my_r_squared(predictions_pw, target_pw)
         true_val_mse = torch.mean((predictions_pw - target_pw)**2)
         
+        print(predictions_pw.shape)
         #predictions = torch.zeros(target.shape).to(data_handler.device)
         #for index, (time, batch_point) in enumerate(zip(t, data)):
         #    predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
         #var_explained_init_val_based = my_r_squared(predictions, target)
+    # Calculate the point density
+    
+    x = predictions_pw.view(-1)
+    y = target_pw.view(-1)
+    xy = np.vstack([x,y])
+    z = gaussian_kde(xy)(xy)
+    idx = z.argsort()
+    x, y, z = x[idx], y[idx], z[idx]
 
+    plt.figure()
+    plt.scatter(x,y, c = z, s = 1)
+    plt.xlabel('Predictions')
+    plt.ylabel('Observations')
+    plt.title('BRCA PHX performance on test set')
+    plt.colorbar()
+    plt.savefig("{}/test_set_perf.png".format(img_save_dir))
+    
     return [var_explained_pw, true_val_mse]    
 
 def validation(odenet, data_handler, method, explicit_time):
@@ -105,9 +123,9 @@ def _build_save_file_name(save_path, epochs):
 #    odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "pramila_3551genes_1VALsample_24T" #"
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
+clean_name =  "desmedt_11165genes_1sample_186T" 
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
 
 args = parser.parse_args()
 
@@ -150,7 +168,7 @@ if __name__ == "__main__":
         print("Running on CPU")
         device = 'cpu'
     
-    data_handler = DataHandler.fromcsv(args.data, device, 1, normalize=settings['normalize_data'], 
+    data_handler = DataHandler.fromcsv(args.data, device,settings['val_split'] , normalize=settings['normalize_data'], 
                                         batch_type=settings['batch_type'], batch_time=settings['batch_time'], 
                                         batch_time_frac=settings['batch_time_frac'],
                                         noise = settings['noise'],
@@ -181,7 +199,7 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     
     #val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    loss_calcs = get_true_val_set_r2(odenet, data_handler, settings['method'])
+    loss_calcs = get_true_val_set_r2(odenet, data_handler, settings['method'], img_save_dir)
     
     #print(val_loss_list)
     #print("Validation loss {:.2%}, using {} points".format(val_loss_list[0], val_loss_list[1]))
