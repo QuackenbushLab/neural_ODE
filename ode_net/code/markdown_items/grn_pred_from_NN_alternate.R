@@ -16,7 +16,7 @@ gene_eff <- melt(gene_eff,
                  variable.name = "aff", value.name = "effect")
 gene_eff[,aff := gsub("V","",aff)]
 
-cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/gene_names_350.csv",
+cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/pramila_gene_names.csv",
                          sep = ",",
                          header = T))
 cell_names[,x:= gsub("_input","", x)]
@@ -33,10 +33,10 @@ gene_eff[is.na(prop_effect), prop_effect :=0 ]
 gene_eff[, effect := NULL]
 
 print("getting true edges")
-true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/edge_properties_350.csv")
+true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/harbison_chip_orf.csv")
 
-#true_edges <- true_edges[p_val < 0.001,]
-#true_edges[, num_edges_for_this_TF := .N, by = from]
+true_edges <- true_edges[p_val < 0.001,]
+true_edges[, num_edges_for_this_TF := .N, by = from]
 
 setnames(true_edges, 
          old = c("from","to"),
@@ -59,53 +59,22 @@ gene_eff[, .(avg_pred_effect = mean(prop_effect), .N),
 
 print(paste("AUC =", PRROC_obj$auc))
 
-
 quit(status=1)
 
+this_curve <- PRROC_obj$curve
 
-png(file = "AUC_plot.png")
-plot(PRROC_obj, main = "", legend = F, col = "red")
-abline(0,1)
-dev.off()
+idx <- c(1:100, 
+         sort(sample(100:(nrow(this_curve)-100), 100, replace = F)),
+         (nrow(this_curve)-100): nrow(this_curve)
+         )
 
-print(paste("Sparsity (avg out degree):" , 
-            gene_eff[pred_effect == "pred_effect", .N, by = reg][, sum(N)/num_genes]))
-
-print("doing centrality stuff now")
-library(igraph, quietly = T,  warn.conflicts = F)
-library(CINNA, quietly = T,  warn.conflicts = F)
-
- inferred_edges <- gene_eff[, .(reg, aff, prop_effect)]
- rm(gene_eff)
- prop_cut_off <- as.numeric(inferred_edges[, 
-                                           quantile(prop_effect, 
-                                                    0.995, 
-                                                    na.rm = T)])
- inferred_edges_main <- inferred_edges[prop_effect > prop_cut_off]
-
- G_inferred <- graph_from_data_frame(inferred_edges_main, 
-                                 directed = TRUE, 
-                                 vertices = NULL)
-
- h_cent_all <- harmonic_centrality(G_inferred,
-                                   mode = "out",
-                                   weights = 1/inferred_edges_main$prop_effect)
-
- harm_cent_plot <- data.table(gene = names(h_cent_all), h_cent = h_cent_all)
-
-#  harm_cent_to_write <- harm_cent_plot[order(-h_cent),]#[1:100]
-#  write.csv(harm_cent_to_write, "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/harm_cents.csv", row.names = F)
+curve_to_write <- this_curve[idx,]
+curve_to_write[,1] <- curve_to_write[,1]
+colnames(curve_to_write) <- c("fpr", "tpr", "cutoff")
+write.csv(curve_to_write, 
+          "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/auc_curve.csv",
+          row.names = F)
 
 
- plot_subset <- harm_cent_plot[order(-h_cent)][1:15]
+#
 
- png(file = "cent_plot.png")
- ggplot(plot_subset, 
-        aes(x = factor(gene,
-                       levels = plot_subset$gene), 
-            y = h_cent)) + 
-   geom_col(fill = "dodgerblue") +
-   theme_bw() + 
-   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-   xlab("most influential genes")
-dev.off()

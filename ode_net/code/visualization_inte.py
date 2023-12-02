@@ -116,7 +116,8 @@ class Visualizator1D(Visualizator):
     def visualize(self):
         self.trajectories, self.all_plotted_samples, self.extrap_timepoints = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], 
                                                                                                                      num_val_trajs = self.sample_plot_val_cutoff,
-                                                                                                                     yeast = False)
+                                                                                                                     yeast = False,
+                                                                                                                     breast = False)
         self._visualize_trajectories_split()
         #self._visualize_dynamics()
         self._set_ax_limits()
