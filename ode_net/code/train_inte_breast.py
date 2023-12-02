@@ -26,17 +26,6 @@ from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
 
-def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
-    plt.figure()
-    plt.plot(all_lrs_used, training_loss, color = "blue", label = "Training loss")
-    plt.plot(all_lrs_used, true_mean_losses, color = "green", label = r'True $\mu$ loss')
-    #plt.yscale('log')
-    plt.xscale('log')
-    plt.xlabel("Learning rate")
-    plt.ylabel("Error (MSE)")
-    plt.legend(loc='upper right')
-    plt.savefig("{}/LR_range_test.png".format(img_save_dir))
-
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir):
     
     # Create two subplots, one for the main MSE loss plot and one for the prior loss plot.
@@ -44,6 +33,8 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, tru
     fig.set_size_inches(12, 6)
 
     ax1.plot(range(1, epoch_so_far + 1), training_loss, color="blue", label="Training loss")
+    ax1.plot(range(1, epoch_so_far + 1), true_mean_losses, color="green", label="Noiseless test loss")
+    
     if len(validation_loss) > 0:
         ax1.plot(range(1, epoch_so_far + 1), validation_loss, color="red", label="Validation loss")
 
@@ -64,7 +55,6 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, tru
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
     np.savetxt('{}full_loss_info.csv'.format(output_root_dir), np.c_[training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based], delimiter=',')
 
-
 def my_r_squared(output, target):
     x = output
     y = target
@@ -74,7 +64,7 @@ def my_r_squared(output, target):
     return(my_corr**2)
 
 def get_true_val_set_r2(odenet, data_handler, method, batch_type):
-    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  batch_type)
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  "single")
     with torch.no_grad():
         predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
@@ -199,8 +189,10 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_breast.cfg')
-clean_name =  "desmedt_11165genes_1sample_186T" 
+clean_name =  "desmedt_11165genes_1sample_178T" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
+test_data_name = "desmedt_11165genes_1TESTsample_8T" 
+parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
 
@@ -254,13 +246,14 @@ if __name__ == "__main__":
                                         img_save_dir = img_save_dir,
                                         scale_expression = settings['scale_expression'],
                                         log_scale = settings['log_scale'],
-                                        init_bias_y = settings['init_bias_y'])
+                                        init_bias_y = settings['init_bias_y'],
+                                        fp_test = args.test_data)
     
     abs_prior = True
     
     #Read in the prior matrix
     prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
-    prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
     
     if abs_prior:
         prior_mat = torch.abs(prior_mat)
