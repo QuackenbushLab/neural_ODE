@@ -327,7 +327,8 @@ class DataHandler:
             extrap_time_points = np.arange(0,300,0.5) 
         if breast:
             print("Calculating BREAST trajectories!\n")
-            extrap_time_points = np.arange(0,2,0.05) 
+            #extrap_time_points = np.arange(0,2,0.05) 
+            extrap_time_points = np.arange(0.93878,2,0.05) 
             
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []

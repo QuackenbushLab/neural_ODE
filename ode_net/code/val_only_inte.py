@@ -54,13 +54,13 @@ def get_true_val_set_r2(odenet, data_handler, method, img_save_dir):
     
     x = predictions_pw.view(-1)
     y = target_pw.view(-1)
-    xy = np.vstack([x,y])
-    z = gaussian_kde(xy)(xy)
-    idx = z.argsort()
-    x, y, z = x[idx], y[idx], z[idx]
+    #xy = np.vstack([x,y])
+    #z = gaussian_kde(xy)(xy)
+    #idx = z.argsort()
+    #x, y, z = x[idx], y[idx], z[idx]
 
     plt.figure()
-    plt.scatter(x,y, c = z, s = 1)
+    plt.scatter(x,y, c = "blue", s = 1)
     plt.xlabel('Predictions')
     plt.ylabel('Observations')
     plt.title('BRCA PHX performance on test set')
@@ -124,8 +124,11 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name =  "desmedt_11165genes_1sample_186T" 
+clean_name =  "desmedt_11165genes_1TESTsample_8T" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
+test_data_name = "desmedt_11165genes_1TESTsample_8T" 
+parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
+
 
 args = parser.parse_args()
 
@@ -173,7 +176,8 @@ if __name__ == "__main__":
                                         batch_time_frac=settings['batch_time_frac'],
                                         noise = settings['noise'],
                                         img_save_dir = img_save_dir,
-                                        scale_expression = settings['scale_expression'])
+                                        scale_expression = settings['scale_expression'],
+                                        fp_test = args.test_data)
 
     
     # Initialization

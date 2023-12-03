@@ -26,6 +26,12 @@ from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
 
+def soft_sign_mod(this_x):
+    shift = 0.5
+    shifted_input =(this_x- shift) #500*
+    abs_shifted_input = torch.abs(shifted_input)
+    return(shifted_input/(1+abs_shifted_input))   #
+
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir):
     
     # Create two subplots, one for the main MSE loss plot and one for the prior loss plot.
@@ -261,12 +267,19 @@ if __name__ == "__main__":
     K = 10000
     batch_for_prior = (torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)- 0.5)*1
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
+
+    #batch_for_prior = torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)
+    #prior_grad = torch.matmul(soft_sign_mod(batch_for_prior),prior_mat) #can be any model here that predicts the derivative
     
     del prior_mat
 
-    loss_lambda_at_start = 1#0.999 #curriculum learning
-    loss_lambda_at_end =0.9995
-    curriculum_epochs = 7
+    loss_lambda_at_start = 0.999 #curriculum learning
+    loss_lambda_at_middle = 0.9995
+    loss_lambda_at_end = 0.99995
+
+    curriculum_epochs_1 = 7
+    curriculum_epochs_2 = 15
+    
     
     
     # Initialization
@@ -278,7 +291,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -290,9 +303,14 @@ if __name__ == "__main__":
         if abs_prior:
             net_file.write('prior_mat = torch.abs(prior_mat)')
             net_file.write('\n')
-        net_file.write('lambda at start (first {} epochs) = {}'.format(curriculum_epochs, loss_lambda_at_start))
+        net_file.write('lambda at start (first {} epochs) = {}'.format(curriculum_epochs_1, loss_lambda_at_start))
+        net_file.write('\n')
+        net_file.write('lambda in middle (upto {} epochs) = {}'.format(curriculum_epochs_2, loss_lambda_at_middle))
         net_file.write('\n')
         net_file.write('and then lambda = {}'.format(loss_lambda_at_end))
+        net_file.write('\n')
+        #net_file.write('SPECIAL SOFTSIGN-transformed inputs to prior!')
+        
         
 
     #quit()
@@ -357,7 +375,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [1, 5, 7, 10, 15, 20, 30, 50, 75, 90, 100, 120, 150, 180, 200, tot_epochs]
+    rep_epochs = [1, 5, 7, 10, 15, 20, 30, 40, 50, 75, 90, 100, 120, 150, 180, 200, tot_epochs]
     viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
@@ -385,8 +403,10 @@ if __name__ == "__main__":
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
 
         
-        if epoch < curriculum_epochs:
+        if epoch < curriculum_epochs_1:
             loss_lambda = loss_lambda_at_start 
+        elif epoch >= curriculum_epochs_1 and epoch < curriculum_epochs_2:
+            loss_lambda = loss_lambda_at_middle
         else:
             loss_lambda = loss_lambda_at_end    
         print("current loss_lambda =", loss_lambda)
