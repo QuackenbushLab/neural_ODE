@@ -141,20 +141,6 @@ def validation(odenet, data_handler, method, explicit_time):
         #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))        
     return [loss, n_val]
 
-def true_loss(odenet, data_handler, method):
-    return [0,0]
-    data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
-    init_bias_y = data_handler.init_bias_y
-    #odenet.eval()
-    with torch.no_grad():
-        predictions = torch.zeros(data.shape).to(data_handler.device)
-        for index, (time, batch_point) in enumerate(zip(t, data)):
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
-        
-        # Calculate true mean loss
-        loss =  [torch.mean(torch.abs((predictions - target)/target)),torch.mean((predictions - target) ** 2)] #regulated_loss(predictions, target, t)
-    return loss
-
 
 def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
     dir_string = "Decreasing"
@@ -284,8 +270,8 @@ if __name__ == "__main__":
     
     #del prior_mat
 
-    loss_lambda_at_start = 1#0.99
-    loss_lambda_at_end = 1#0.99
+    loss_lambda_at_start = 1
+    loss_lambda_at_end = 1
 
     loss_lambda = loss_lambda_at_start 
     
@@ -559,7 +545,7 @@ if __name__ == "__main__":
             
             print("Saving best intermediate val model..")
             interm_model_file_name = 'trained_model_epoch_' + str(epoch)
-            save_model(odenet, interm_models_save_dir , interm_model_file_name)
+            #save_model(odenet, interm_models_save_dir , interm_model_file_name)
                 
             
             #else:
