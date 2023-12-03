@@ -19,27 +19,41 @@ except ImportError:
 
 #from datagenerator import DataGenerator
 from datahandler import DataHandler
-from odenet_ootb import ODENet
+from odenet import ODENet
 from read_config import read_arguments_from_file
 from solve_eq import solve_eq
 from visualization_inte import *
 
-#torch.set_num_threads(8) #CHANGE THIS!
+#torch.set_num_threads(16) #CHANGE THIS!
 
-def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, img_save_dir):
-    plt.figure()
-    plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
-    plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color="green", label="Noiseless test loss")
+def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir):
+    
+    # Create two subplots, one for the main MSE loss plot and one for the prior loss plot.
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=False)
+    fig.set_size_inches(12, 6)
+
+    ax1.plot(range(1, epoch_so_far + 1), training_loss, color="blue", label="Training loss")
+    ax1.plot(range(1, epoch_so_far + 1), true_mean_losses, color="green", label="Noiseless test loss")
+    
     if len(validation_loss) > 0:
-        plt.plot(range(1, epoch_so_far + 1), validation_loss, color = "red", label = "Validation loss")
-    #plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
-    plt.yscale('log')
-    plt.xlabel("Epoch")
-    plt.legend(loc='upper right')
-    plt.ylabel("Error (MSE)")
+        ax1.plot(range(1, epoch_so_far + 1), validation_loss, color="red", label="Validation loss")
+
+    ax2.plot(range(1, epoch_so_far + 1), prior_losses, color="magenta", label="Prior loss")
+
+    ax1.set_yscale('log')
+    ax1.set_xlabel("Epoch")
+    ax1.set_ylabel("Error (MSE)")
+    ax1.legend(loc='upper right')
+
+    ax2.set_yscale('log')
+    ax2.set_xlabel("Epoch")
+    ax2.set_ylabel("Error (MSE)")
+    ax2.set_title("Prior Loss")
+
+    #plt.subplots_adjust(wspace=0.3)
+    fig.tight_layout()
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
     np.savetxt('{}full_loss_info.csv'.format(output_root_dir), np.c_[training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based], delimiter=',')
-
 
 def my_r_squared(output, target):
     x = output
@@ -49,10 +63,8 @@ def my_r_squared(output, target):
     my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
     return(my_corr**2)
 
-def get_true_val_set_r2(odenet, data_handler, method):
-    data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
-    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True)
-    #odenet.eval()
+def get_true_val_set_r2(odenet, data_handler, method, batch_type):
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  "single")
     with torch.no_grad():
         predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
@@ -60,16 +72,34 @@ def get_true_val_set_r2(odenet, data_handler, method):
         var_explained_pw = my_r_squared(predictions_pw, target_pw)
         true_val_mse = torch.mean((predictions_pw - target_pw)**2)
         
+    #data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
         #predictions = torch.zeros(target.shape).to(data_handler.device)
         #for index, (time, batch_point) in enumerate(zip(t, data)):
         #    predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
         #var_explained_init_val_based = my_r_squared(predictions, target)
-
+    
     return [var_explained_pw, true_val_mse]
+
+
+
+
+def read_prior_matrix(prior_mat_file_loc, sparse = False, num_genes = 11165):
+    if sparse == False: 
+        mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
+        mat_torch = torch.from_numpy(mat)
+        return mat_torch.float()
+    else: #when scaling up >10000
+        mat = np.genfromtxt(prior_mat_file_loc,delimiter=',')
+        sparse_mat = torch.sparse_coo_tensor([mat[:,0].astype(int)-1, mat[:,1].astype(int)-1], mat[:,2], ( num_genes,  num_genes))
+        mat_torch = sparse_mat.to_dense().float()
+        return(mat_torch)
+
 
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target_full, n_val = data_handler.get_validation_set()
+    if method == "trajectory":
+        False
 
     init_bias_y = data_handler.init_bias_y
     #odenet.eval()
@@ -80,12 +110,12 @@ def validation(odenet, data_handler, method, explicit_time):
         for index, (time, batch_point, target_point) in enumerate(zip(t, data, target_full)):
             #IH: 9/10/2021 - added these to handle unequal time availability 
             #comment these out when not requiring nan-value checking
+            #not_nan_idx = [i for i in range(len(time)) if not torch.isnan(time[i])]
+            #time = time[not_nan_idx]
+            #not_nan_idx.pop()
+            #batch_point = batch_point[not_nan_idx]
+            #target_point = target_point[not_nan_idx]
             
-            not_nan_idx = [i for i in range(len(time)) if not torch.isnan(time[i])]
-            time = time[not_nan_idx]
-            not_nan_idx.pop()
-            batch_point = batch_point[not_nan_idx]
-            target_point = target_point[not_nan_idx]
             # Do prediction
             predictions.append(odeint(odenet, batch_point, time, method=method)[1])
             targets.append(target_point) #IH comment
@@ -96,8 +126,7 @@ def validation(odenet, data_handler, method, explicit_time):
         targets = torch.cat(targets, dim = 0).to(data_handler.device) 
         #loss = torch.mean((predictions - targets) ** 2) #regulated_loss(predictions, target, t, val = True)
         loss = torch.mean((predictions - targets)**2)
-        #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))
-        
+        #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))        
     return [loss, n_val]
 
 def true_loss(odenet, data_handler, method):
@@ -123,7 +152,7 @@ def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
         print(dir_string,"learning rate to: %f" % opt.param_groups[0]['lr'])
 
 
-def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error):
+def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, relative_error, batch_for_prior, prior_grad, loss_lambda):
     #print("Using {} threads training_step".format(torch.get_num_threads()))
     batch, t, target = data_handler.get_batch(batch_size)
     
@@ -139,10 +168,17 @@ def training_step(odenet, data_handler, opt, method, batch_size, explicit_time, 
     predictions = torch.zeros(batch.shape).to(data_handler.device)
     for index, (time, batch_point) in enumerate(zip(t, batch)):
         predictions[index, :, :] = odeint(odenet, batch_point, time, method= method  )[1] + init_bias_y #IH comment
+    
     loss_data = torch.mean((predictions - target)**2) 
-    loss_data.backward() #MOST EXPENSIVE STEP!
+    
+    pred_grad = odenet.prior_only_forward(t,batch_for_prior)
+    loss_prior = torch.mean((pred_grad - prior_grad)**2)
+    #loss_prior = loss_data
+
+    composed_loss = loss_lambda * loss_data + (1- loss_lambda) * loss_prior
+    composed_loss.backward() #MOST EXPENSIVE STEP!
     opt.step()
-    return [loss_data, loss_data-loss_data]
+    return [loss_data, loss_prior]
 
 def _build_save_file_name(save_path, epochs):
     return '{}-{}-{}({};{})_{}_{}epochs'.format(str(datetime.now().year), str(datetime.now().month),
@@ -152,11 +188,11 @@ def save_model(odenet, folder, filename):
     odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" 
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-test_data_name = "chalmers_350genes_10samples_for_testing" 
-parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(test_data_name))
+parser.add_argument('--settings', type=str, default='config_breast.cfg')
+clean_name =  "desmedt_11165genes_1sample_178T" 
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
+test_data_name = "desmedt_11165genes_1TESTsample_8T" 
+parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
 
@@ -213,6 +249,26 @@ if __name__ == "__main__":
                                         init_bias_y = settings['init_bias_y'],
                                         fp_test = args.test_data)
     
+    abs_prior = True
+    
+    #Read in the prior matrix
+    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
+    
+    if abs_prior:
+        prior_mat = torch.abs(prior_mat)
+
+    K = 10000
+    batch_for_prior = (torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)- 0.5)*1
+    prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
+    
+    del prior_mat
+
+    loss_lambda_at_start = 1#0.999 #curriculum learning
+    loss_lambda_at_end =0.9995
+    curriculum_epochs = 7
+    
+    
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
                     log_scale = settings['log_scale'], init_bias_y = settings['init_bias_y'])
@@ -222,7 +278,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -230,6 +286,14 @@ if __name__ == "__main__":
         net_file.write(odenet.__str__())
         net_file.write('\n\n\n')
         net_file.write(inspect.getsource(ODENet.forward))
+        net_file.write('\n')
+        if abs_prior:
+            net_file.write('prior_mat = torch.abs(prior_mat)')
+            net_file.write('\n')
+        net_file.write('lambda at start (first {} epochs) = {}'.format(curriculum_epochs, loss_lambda_at_start))
+        net_file.write('\n')
+        net_file.write('and then lambda = {}'.format(loss_lambda_at_end))
+        
 
     #quit()
 
@@ -242,24 +306,35 @@ if __name__ == "__main__":
     elif settings['optimizer'] == 'adagrad':
         opt = optim.Adagrad(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
     else:
-        opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
-        
+#       opt = optim.Adam(odenet.parameters(), lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+        num_gene = data_handler.dim
+        opt = optim.Adam([
+                {'params': odenet.net_sums.linear_out.weight}, 
+                {'params': odenet.net_sums.linear_out.bias},
+                {'params': odenet.net_prods.linear_out.weight},
+                {'params': odenet.net_prods.linear_out.bias},
+                {'params': odenet.net_alpha_combine.linear_out.weight},
+                {'params': odenet.gene_multipliers,'lr': 5*settings['init_lr']}
+                
+            ],  lr=settings['init_lr'], weight_decay=settings['weight_decay'])
+
+
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-09, 
-    threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-08, verbose=True)
+    factor=0.9, patience=6, threshold=1e-07, 
+    threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-09, verbose=True)
 
     
     # Init plot
     if settings['viz']:
         visualizer = Visualizator1D(data_handler, odenet, settings)
 
-    
     # Training loop
     #batch_times = [] 
     epoch_times = []
     total_time = 0
     validation_loss = []
     training_loss = []
+    prior_losses = []
     true_mean_losses = []
     true_mean_losses_init_val_based = []
     A_list = []
@@ -282,7 +357,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [5, 15, 25, 40, 50, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
+    rep_epochs = [1, 5, 7, 10, 15, 20, 30, 50, 75, 90, 100, 120, 150, 180, 200, tot_epochs]
     viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
@@ -293,29 +368,42 @@ if __name__ == "__main__":
     rep_epochs_time_so_far = []
     rep_epochs_so_far = []
     consec_epochs_failed = 0
-    epochs_to_fail_to_terminate = 20
+    epochs_to_fail_to_terminate = 40#15
     all_lrs_used = []
 
-    #print(get_true_val_set_r2(odenet, data_handler, settings['method']))
-
+    #print(get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type']))
+    
     for epoch in range(1, tot_epochs + 1):
+            
         start_epoch_time = perf_counter()
         iteration_counter = 1
         data_handler.reset_epoch()
         #visualizer.save(img_save_dir, epoch) #IH added to test
         this_epoch_total_train_loss = 0
+        this_epoch_total_prior_loss = 0
         print()
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
+
+        
+        if epoch < curriculum_epochs:
+            loss_lambda = loss_lambda_at_start 
+        else:
+            loss_lambda = loss_lambda_at_end    
+        print("current loss_lambda =", loss_lambda)
+        
+        
         if settings['verbose']:
             pbar = tqdm(total=iterations_in_epoch, desc="Training loss:")
         while not data_handler.epoch_done:
             start_batch_time = perf_counter()
-            loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'])
+            
+            loss_list = training_step(odenet, data_handler, opt, settings['method'], settings['batch_size'], settings['explicit_time'], settings['relative_error'], batch_for_prior, prior_grad, loss_lambda)
             loss = loss_list[0]
             prior_loss = loss_list[1]
             #batch_times.append(perf_counter() - start_batch_time)
 
             this_epoch_total_train_loss += loss.item()
+            this_epoch_total_prior_loss += prior_loss.item()
             # Print and update plots
             iteration_counter += 1
 
@@ -328,9 +416,10 @@ if __name__ == "__main__":
         #Epoch done, now handle training loss
         train_loss = this_epoch_total_train_loss/iterations_in_epoch
         training_loss.append(train_loss)
+        prior_losses.append(this_epoch_total_prior_loss/iterations_in_epoch)
         #print("Overall training loss {:.5E}".format(train_loss))
 
-        mu_loss = get_true_val_set_r2(odenet, data_handler, settings['method'])
+        mu_loss = get_true_val_set_r2(odenet, data_handler, settings['method'], settings['batch_type'])
         #mu_loss = true_loss(odenet, data_handler, settings['method'])
         true_mean_losses.append(mu_loss[1])
         true_mean_losses_init_val_based.append(mu_loss[0])
@@ -383,7 +472,6 @@ if __name__ == "__main__":
 
         print("Overall training loss {:.5E}".format(train_loss))
 
-        #print("True mu loss (absolute) {:.5E}".format(mu_loss[1]))
         print("True MSE of val traj (pairwise): {:.5E}".format(mu_loss[1]))
         print("True R^2 of val traj (pairwise): {:.2%}".format(mu_loss[0]))
 
@@ -391,6 +479,7 @@ if __name__ == "__main__":
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
             print("Saving plot")
             with torch.no_grad():
+                #print("nope..")
                 visualizer.visualize()
                 visualizer.plot()
                 visualizer.save(img_save_dir, epoch)
@@ -438,7 +527,7 @@ if __name__ == "__main__":
                 #print("True loss of best training model (MSE) = ", true_loss_of_min_train_model.item())
                 print("True loss of best training model (MSE) = ", 0)
             print("Saving MSE plot...")
-            plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, img_save_dir)    
+            plot_MSE(epoch, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir)    
             
             if settings['lr_range_test']:
                 plot_LR_range_test(all_lrs_used, training_loss, img_save_dir)
@@ -449,8 +538,8 @@ if __name__ == "__main__":
                 np.savetxt('{}rep_epoch_losses.csv'.format(output_root_dir), np.transpose(L), delimiter=',')    
             
             print("Saving best intermediate val model..")
-            interm_model_file_name = 'best_val_model_epoch_' + str(epoch)
-            save_model(best_vaL_model_so_far, interm_models_save_dir , interm_model_file_name)
+            interm_model_file_name = 'trained_model_epoch_' + str(epoch)
+            save_model(odenet, interm_models_save_dir , interm_model_file_name)
                 
             
             #else:
