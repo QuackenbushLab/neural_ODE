@@ -49,18 +49,22 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
-        #breast cancer genes 
-        self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093, 198, 1419, 1571, 4013, 5242, 5783,6526, 6652, 8095, 8784] + sorted(random.sample(range(self.data_handler.dim),11)) #desmedt genes
+        if self.data_handler.dim == 4000:
+            self.genes_to_viz = [ 776,  886, 1086,  633, 3176, 1170, 2895, 3175, 1133, 2783, 3109,  326, 757, 2535, 2904,  439, 1489,   97, 1869, 1871, 3862, 2217,  690,  100, 2564,  708, 3853, 3792,  355, 3133]
+        elif self.data_handler.dim == 11165:
+            self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093, 198, 1419, 1571, 4013, 5242, 5783,6526, 6652, 8095, 8784] + sorted(random.sample(range(self.data_handler.dim),11)) #desmedt genes
+        else:
+            self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
+
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
         #self.legend_traj = [Line2D([0], [0], color='blue', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], marker='o', color='grey', label='Observed data', markerfacecolor='red', markersize=5)]
         
         self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=3)
-
+       
         self._set_ax_limits()
 
         #plt.show()
@@ -84,7 +88,7 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
-        self.time_span = (0.93878, 1)
+        self.time_span = (0.50, 0.55)
         self.time_width = self.time_span[1] - self.time_span[0]
 
     

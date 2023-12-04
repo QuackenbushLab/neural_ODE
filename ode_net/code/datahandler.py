@@ -275,13 +275,7 @@ class DataHandler:
                     all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         else:
             n_test_samples = len(self.data_pt_0noise_test) * (self.data_pt_0noise_test[0].shape[0] - 1)
-<<<<<<< HEAD
             all_indx = [self.indx[x] for x in np.arange( n_test_samples)]
-=======
-            #print("Number of test set points: ", n_test_samples)
-            all_indx = [self.indx[x] for x in np.arange(n_test_samples)]
-            
->>>>>>> 5761f08f4213a9f5e284dc7d12194d077d25760e
         mean_data = []
         mean_target = []
         mean_t = []
@@ -303,15 +297,17 @@ class DataHandler:
         return mean_data, mean_t, mean_target
        
     def get_true_mu_set_init_val_based(self, val_only = False): 
+        
         batch = []
         t = []
         target = []
-
-        for indx in self.val_set_indx: #val only by default
+        num_traj = len(self.time_pt)
+        for indx in range(num_traj): #val only by default
             t.append(self.time_pt[indx])
-            batch.append(self.data_pt[indx][0])
-            target.append(self.data_pt[indx][1::])
+            batch.append(self.data_pt_0noise_test[indx][0])
+            target.append(self.data_pt_0noise_test[indx][1::])
 
+        
         t = torch.stack(t)
         batch = torch.stack(batch)
         target = torch.stack(target)
@@ -332,7 +328,7 @@ class DataHandler:
         if breast:
             print("Calculating BREAST trajectories!\n")
             #extrap_time_points = np.arange(0,2,0.05) 
-            extrap_time_points = np.arange(0.93878,2,0.05) 
+            extrap_time_points = np.arange(0.50,0.60,0.05) 
             
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []
