@@ -141,20 +141,6 @@ def validation(odenet, data_handler, method, explicit_time):
         #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))        
     return [loss, n_val]
 
-def true_loss(odenet, data_handler, method):
-    return [0,0]
-    data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
-    init_bias_y = data_handler.init_bias_y
-    #odenet.eval()
-    with torch.no_grad():
-        predictions = torch.zeros(data.shape).to(data_handler.device)
-        for index, (time, batch_point) in enumerate(zip(t, data)):
-            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
-        
-        # Calculate true mean loss
-        loss =  [torch.mean(torch.abs((predictions - target)/target)),torch.mean((predictions - target) ** 2)] #regulated_loss(predictions, target, t)
-    return loss
-
 
 def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
     dir_string = "Decreasing"
@@ -201,9 +187,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" 
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-test_data_name = "chalmers_350genes_10samples_for_testing" 
+test_data_name = "chalmers_690genes_10samples_for_testing" 
 parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
@@ -268,7 +254,7 @@ if __name__ == "__main__":
     if abs_prior and random_prior_signs:
         sys.exit('You are asking for two opposite things. At most ONE of abs_prior and random_prior_signs can be True.')
 
-    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_350_noise_{}.csv'.format(settings['noise'])
+    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_690_noise_{}.csv'.format(settings['noise'])
     prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
     
     if random_prior_signs:
@@ -284,8 +270,13 @@ if __name__ == "__main__":
     
     #del prior_mat
 
+<<<<<<< HEAD
     loss_lambda_at_start = 0.99
     loss_lambda_at_end = 0.99
+=======
+    loss_lambda_at_start = 1
+    loss_lambda_at_end = 1
+>>>>>>> 140b35a81a62973742fc6157d2a30845a2542990
 
     loss_lambda = loss_lambda_at_start 
     

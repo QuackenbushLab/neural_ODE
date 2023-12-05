@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from math import ceil
 from time import perf_counter, process_time
+from scipy.stats import gaussian_kde
 
 import torch
 import torch.optim as optim
@@ -33,23 +34,54 @@ def my_r_squared(output, target):
     my_corr = torch.sum(vx * vy) / (torch.sqrt(torch.sum(vx ** 2)) * torch.sqrt(torch.sum(vy ** 2)))
     return(my_corr**2)
 
-def get_true_val_set_r2(odenet, data_handler, method):
-   # data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
-    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True)
+
+def get_r2_across_top_N_genes(my_target_tensor, my_pred_tensor,  N):
+    variance = torch.var(my_target_tensor, dim=0)
+    # Flatten the variance tensor
+    flattened_variance = variance.view(-1)
+    # Find the indices of the top 5 genes with highest variance
+    topN_indices = torch.argsort(flattened_variance, descending=True)[:N]
+    subset_target = my_target_tensor[:,:,topN_indices]
+    subset_pred = my_pred_tensor[:,:,topN_indices]
+
+    return( my_r_squared(subset_pred, subset_target))
+    
+
+def get_true_val_set_r2(odenet, data_handler, method, img_save_dir, N_list):
+    data, t, target = data_handler.get_true_mu_set_init_val_based(val_only = True) 
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type = "single")
     #odenet.eval()
     with torch.no_grad():
         predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
             predictions_pw[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] 
-        var_explained_pw = my_r_squared(predictions_pw, target_pw)
-        true_val_mse = torch.mean((predictions_pw - target_pw)**2)
-        
-        #predictions = torch.zeros(target.shape).to(data_handler.device)
-        #for index, (time, batch_point) in enumerate(zip(t, data)):
-        #    predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
-        #var_explained_init_val_based = my_r_squared(predictions, target)
 
-    return [var_explained_pw, true_val_mse]    
+        var_explained_pw = [get_r2_across_top_N_genes(my_pred_tensor = predictions_pw, my_target_tensor = target_pw, N = n) for n in N_list]
+        true_val_mse = torch.mean((predictions_pw - target_pw)**2)
+        print(predictions_pw.shape)
+        
+        predictions = torch.zeros(target.shape).to(data_handler.device)
+        for index, (time, batch_point) in enumerate(zip(t, data)):
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1:] 
+        var_explained_init_val_based =[get_r2_across_top_N_genes(my_pred_tensor = predictions.squeeze(0), my_target_tensor = target.squeeze(0), N = n) for n in N_list]
+        true_val_mse_init_val_based = torch.mean((predictions - target)**2)
+     
+    #xy = np.vstack([x,y])
+    #z = gaussian_kde(xy)(xy)
+    #idx = z.argsort()
+    #x, y, z = x[idx], y[idx], z[idx]
+
+    plt.figure()
+    plt.plot(N_list,var_explained_init_val_based, c = "blue", label = "Predict entire traj based on $x(t_0)$")
+    plt.plot(N_list,var_explained_pw, c = "red", label = "Piecewise, i.e. predict $x(t_{i+1})$ using $x(t_{i})$")
+    plt.ylabel('Variance explained of $N$-most variable genes in test set')
+    plt.xlabel('$N$')
+    plt.ylim(0, 1.02)
+    plt.title('Predictive performance on BRCA test set')
+    plt.legend(loc='lower right')
+    plt.savefig("{}/test_set_R2_by_N.png".format(img_save_dir))
+    
+    return [var_explained_pw, true_val_mse, var_explained_init_val_based,  true_val_mse_init_val_based]    
 
 def validation(odenet, data_handler, method, explicit_time):
     data, t, target_full, n_val = data_handler.get_validation_set()
@@ -105,9 +137,12 @@ def _build_save_file_name(save_path, epochs):
 #    odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "pramila_3551genes_1VALsample_24T" #"
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
+parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
+clean_name =  "desmedt_500genes_1TESTsample_8middleT" 
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
+test_data_name = "desmedt_500genes_1TESTsample_8middleT" 
+parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
+
 
 args = parser.parse_args()
 
@@ -150,12 +185,13 @@ if __name__ == "__main__":
         print("Running on CPU")
         device = 'cpu'
     
-    data_handler = DataHandler.fromcsv(args.data, device, 1, normalize=settings['normalize_data'], 
+    data_handler = DataHandler.fromcsv(args.data, device,settings['val_split'] , normalize=settings['normalize_data'], 
                                         batch_type=settings['batch_type'], batch_time=settings['batch_time'], 
                                         batch_time_frac=settings['batch_time_frac'],
                                         noise = settings['noise'],
                                         img_save_dir = img_save_dir,
-                                        scale_expression = settings['scale_expression'])
+                                        scale_expression = settings['scale_expression'],
+                                        fp_test = args.test_data)
 
     
     # Initialization
@@ -171,23 +207,36 @@ if __name__ == "__main__":
     print("Loaded in pre-trained model!")
         
         
-    
+    my_range_tuple = (0.50, 0.60)
     # Init plot
     if settings['viz']:
-        visualizer = Visualizator1D(data_handler, odenet, settings)
+        visualizer = Visualizator1D(data_handler, odenet, settings, my_range_tuple)
         with torch.no_grad():
             visualizer.visualize()
             visualizer.plot()
             visualizer.save(img_save_dir, 0)
     
     #val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    loss_calcs = get_true_val_set_r2(odenet, data_handler, settings['method'])
+    N_list = [30, 50, 100, 250, 500]
+        
+    loss_calcs = get_true_val_set_r2(odenet, data_handler, settings['method'], img_save_dir, N_list)
     
     #print(val_loss_list)
     #print("Validation loss {:.2%}, using {} points".format(val_loss_list[0], val_loss_list[1]))
-    print("True MSE of val traj (pairwise): {:.5E}".format(loss_calcs[1]))
-    print("True R^2 of val traj (pairwise): {:.2%}".format(loss_calcs[0]))
     
+    f = open('{}/R2_by_Ngene.txt'.format(output_root_dir), 'w')
+    print("__________________\n", file = f)
+    print("True MSE of val traj (init-val), all genes: {:.5E} \n".format(loss_calcs[3]), file = f)
+    for n, r2 in zip(N_list, loss_calcs[2]):
+        print("True R^2 of val traj (init-val) for top {} genes: {:.2%}".format(n, r2), file = f)
+    
+    print("__________________\n", file = f)
+    print("True MSE of val traj (pairwise), all genes: {:.5E} \n".format(loss_calcs[1]), file = f)
+    for n, r2 in zip(N_list, loss_calcs[0]):
+        print("True R^2 of val traj (pairwise) for top {} genes: {:.2%}".format(n, r2), file = f)
+    print("__________________\n", file = f)
+
+
     #np.savetxt('{}val_loss.csv'.format(output_root_dir), [loss_calcs], delimiter=',')
     print("DONE!")
 

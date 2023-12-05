@@ -18,7 +18,7 @@ import random
 
 class DataHandler:
 
-    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test, data_np_0noise_test = None, data_pt_0noise_test = None):
+    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test = None, data_np_0noise_test = None, data_pt_0noise_test = None):
         self.data_np = data_np
         self.data_pt = data_pt
         self.data_np_0noise = data_np_0noise
@@ -67,7 +67,9 @@ class DataHandler:
         if fp_test is not None:
             print("separate test set provided!")
             _, _, _, _, _, _, data_np_0noise_test, data_pt_0noise_test = readcsv(fp_test, device, noise_to_add = 0, scale_expression = scale_expression, log_scale = log_scale)
-        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test, data_np_0noise_test, data_pt_0noise_test )
+            return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test, data_np_0noise_test, data_pt_0noise_test )
+        else:
+            return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y )
 
     @classmethod
     def fromgenerator(cls, generator, val_split, device, normalize=False):
@@ -275,7 +277,17 @@ class DataHandler:
                     all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         else:
             n_test_samples = len(self.data_pt_0noise_test) * (self.data_pt_0noise_test[0].shape[0] - 1)
+<<<<<<< HEAD
             all_indx = [self.indx[x] for x in np.arange( n_test_samples)]
+=======
+<<<<<<< HEAD
+            #print("Number of test set points: ", n_test_samples)
+            all_indx = [self.indx[x] for x in np.arange(n_test_samples)]
+            
+=======
+            all_indx = [self.indx[x] for x in np.arange( n_test_samples)]
+>>>>>>> d875771f42d450384cf80758dedff46523630111
+>>>>>>> 140b35a81a62973742fc6157d2a30845a2542990
         mean_data = []
         mean_target = []
         mean_t = []
@@ -297,15 +309,17 @@ class DataHandler:
         return mean_data, mean_t, mean_target
        
     def get_true_mu_set_init_val_based(self, val_only = False): 
+        
         batch = []
         t = []
         target = []
-
-        for indx in self.val_set_indx: #val only by default
+        num_traj = len(self.time_pt)
+        for indx in range(num_traj): #val only by default
             t.append(self.time_pt[indx])
-            batch.append(self.data_pt[indx][0])
-            target.append(self.data_pt[indx][1::])
+            batch.append(self.data_pt_0noise_test[indx][0])
+            target.append(self.data_pt_0noise_test[indx][1::])
 
+        
         t = torch.stack(t)
         batch = torch.stack(batch)
         target = torch.stack(target)
@@ -316,7 +330,7 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None, yeast = False, breast = False):
+    def calculate_trajectory(self, odenet, method, num_val_trajs, time_span, fixed_traj_idx = None, yeast = False, breast = False):
         #print(self.val_set_indx)
         #print(num_val_trajs)
         extrap_time_points = np.arange(0,15,0.05) 
@@ -325,7 +339,11 @@ class DataHandler:
             extrap_time_points = np.arange(0,300,0.5) 
         if breast:
             print("Calculating BREAST trajectories!\n")
-            extrap_time_points = np.arange(0,2,0.05) 
+            #extrap_time_points = np.arange(0,2,0.05)
+            if time_span is None:  
+                extrap_time_points = np.arange(0,1.50,0.005) 
+            else:
+                extrap_time_points = np.arange(time_span[0],time_span[1],0.005)     
             
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []

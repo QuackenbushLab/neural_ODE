@@ -27,13 +27,13 @@ class Visualizator():
 
 class Visualizator1D(Visualizator):
     
-    def __init__(self, data_handler, odenet, settings):
+    def __init__(self, data_handler, odenet, settings, my_range_tuple = None):
         super().__init__(data_handler, odenet, settings)
         # IH: uncomment this when vis dyn
         #self.fig_dyn = plt.figure(figsize=(6,6))
         #self.fig_dyn.canvas.set_window_title("Dynamics")
         #self.ax_dyn = self.fig_dyn.add_subplot(111, frameon=False)
-        
+        self.my_range_tuple = my_range_tuple
         self.fig_traj_split = plt.figure(figsize=(15,15), tight_layout=True)
         self.fig_traj_split.canvas.set_window_title("Trajectories in each dimension")
         
@@ -49,18 +49,29 @@ class Visualizator1D(Visualizator):
             else:
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
-        self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
         
+<<<<<<< HEAD
         #breast cancer genes 
-        #self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093] + sorted(random.sample(range(self.data_handler.dim),21)) #desmedt genes
+        #self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093, 198, 1419, 1571, 4013, 5242, 5783,6526, 6652, 8095, 8784] + sorted(random.sample(range(self.data_handler.dim),11)) #desmedt genes
+=======
+        if self.data_handler.dim == 4000:
+            self.genes_to_viz = [ 776,  886, 1086,  633, 3176, 1170, 2895, 3175, 1133, 2783, 3109,  326, 757, 2535, 2904,  439, 1489,   97, 1869, 1871, 3862, 2217,  690,  100, 2564,  708, 3853, 3792,  355, 3133]
+        elif self.data_handler.dim == 11165:
+            self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093, 198, 1419, 1571, 4013, 5242, 5783,6526, 6652, 8095, 8784] + sorted(random.sample(range(self.data_handler.dim),11)) #desmedt genes
+        if self.data_handler.dim == 2000:
+            self.genes_to_viz = [ 398, 1565, 1604,  552, 1417,  325,  461, 1464,  391, 1473, 1603, 1929, 171,  581,  958,  601,  956,  187, 1139,  227,   63, 1904,  351,  532, 360, 1005,  346,   62, 1902,   53]
+        else:
+            self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
+>>>>>>> d875771f42d450384cf80758dedff46523630111
         
+
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
         
         self.legend_traj = [Line2D([0], [0], color='black', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], color='green', linestyle='-', label='True dynamics'),Line2D([0], [0], marker='o', color='red', label='Observed data', markerfacecolor='red', markersize=5)]
         #self.legend_traj = [Line2D([0], [0], color='blue', linestyle='-.', label='NN approx. of dynamics'),Line2D([0], [0], marker='o', color='grey', label='Observed data', markerfacecolor='red', markersize=5)]
         
         self.fig_traj_split.legend(handles=self.legend_traj, loc='upper center', ncol=3)
-
+       
         self._set_ax_limits()
 
         #plt.show()
@@ -84,7 +95,14 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
+<<<<<<< HEAD
         self.time_span = (0.0, 15)
+=======
+        if self.my_range_tuple is not None:
+            self.time_span = self.my_range_tuple 
+        else:    
+            self.time_span = (0, 1.50)
+>>>>>>> d875771f42d450384cf80758dedff46523630111
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
@@ -116,6 +134,7 @@ class Visualizator1D(Visualizator):
     def visualize(self):
         self.trajectories, self.all_plotted_samples, self.extrap_timepoints = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], 
                                                                                                                      num_val_trajs = self.sample_plot_val_cutoff,
+                                                                                                                     time_span = self.time_span, 
                                                                                                                      yeast = False,
                                                                                                                      breast = False)
         self._visualize_trajectories_split()
