@@ -29,7 +29,7 @@ from visualization_inte import *
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, img_save_dir):
     plt.figure()
     plt.plot(range(1, epoch_so_far + 1), training_loss, color = "blue", label = "Training loss")
-    ax1.plot(range(1, epoch_so_far + 1), true_mean_losses, color="green", label="Noiseless test loss")
+    plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color="green", label="Noiseless test loss")
     if len(validation_loss) > 0:
         plt.plot(range(1, epoch_so_far + 1), validation_loss, color = "red", label = "Validation loss")
     #plt.plot(range(1, epoch_so_far + 1), true_mean_losses, color = "green", label = r'True $\mu$ loss')
@@ -450,7 +450,7 @@ if __name__ == "__main__":
             
             print("Saving best intermediate val model..")
             interm_model_file_name = 'best_val_model_epoch_' + str(epoch)
-            save_model(best_vaL_model_so_far, interm_models_save_dir , interm_model_file_name)
+            #save_model(best_vaL_model_so_far, interm_models_save_dir , interm_model_file_name)
                 
             
             #else:

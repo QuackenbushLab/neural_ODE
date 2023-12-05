@@ -262,7 +262,7 @@ if __name__ == "__main__":
                                         fp_test = args.test_data)
     
     #Read in the prior matrix
-    abs_prior = False
+    abs_prior = True
     random_prior_signs = False
 
     if abs_prior and random_prior_signs:
@@ -284,8 +284,8 @@ if __name__ == "__main__":
     
     #del prior_mat
 
-    loss_lambda_at_start = 1#0.99
-    loss_lambda_at_end = 1#0.99
+    loss_lambda_at_start = 0.99
+    loss_lambda_at_end = 0.99
 
     loss_lambda = loss_lambda_at_start 
     
@@ -559,7 +559,7 @@ if __name__ == "__main__":
             
             print("Saving best intermediate val model..")
             interm_model_file_name = 'trained_model_epoch_' + str(epoch)
-            save_model(odenet, interm_models_save_dir , interm_model_file_name)
+            #save_model(odenet, interm_models_save_dir , interm_model_file_name)
                 
             
             #else:
