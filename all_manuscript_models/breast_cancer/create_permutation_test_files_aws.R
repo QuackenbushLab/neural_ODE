@@ -37,7 +37,7 @@ get_path_dot_product <- function(path_binaries, phoenix_influence_scores){
 }
 
 
-analysis_type <- "go_mf"
+analysis_type <- "go_bp"
 pathway_binary_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/",
                               analysis_type,
                               "_pathway_binary_wide.csv")
