@@ -26,6 +26,12 @@ from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
 
+def soft_sign_mod(this_x):
+    shift = 0.5
+    shifted_input =(this_x- shift) #500*
+    abs_shifted_input = torch.abs(shifted_input)
+    return(shifted_input/(1+abs_shifted_input))   #
+
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir):
     
     # Create two subplots, one for the main MSE loss plot and one for the prior loss plot.
@@ -189,9 +195,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_breast.cfg')
-clean_name =  "desmedt_11165genes_1sample_178T" 
+clean_name =  "desmedt_500genes_1sample_178T" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
-test_data_name = "desmedt_11165genes_1TESTsample_8T" 
+test_data_name = "desmedt_500genes_1TESTsample_8middleT" 
 parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
@@ -252,8 +258,8 @@ if __name__ == "__main__":
     abs_prior = True
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
-    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
+    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_500.csv'
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
     
     if abs_prior:
         prior_mat = torch.abs(prior_mat)
@@ -261,12 +267,17 @@ if __name__ == "__main__":
     K = 10000
     batch_for_prior = (torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)- 0.5)*1
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
-    
+
     del prior_mat
 
-    loss_lambda_at_start = 1#0.999 #curriculum learning
-    loss_lambda_at_end =0.9995
-    curriculum_epochs = 7
+    #curriculum learning
+    loss_lambda_at_start =  1
+    loss_lambda_at_middle = 1
+    loss_lambda_at_end = 1
+
+    curriculum_epochs_1 = 7
+    curriculum_epochs_2 = 20
+    
     
     
     # Initialization
@@ -278,7 +289,7 @@ if __name__ == "__main__":
     print("Using a NN with {} neurons per layer, with {} trainable parameters, i.e. parametrization ratio = {}".format(settings['neurons_per_layer'], param_count, param_ratio))
     
     if settings['pretrained_model']:
-        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/final_model.pt'
+        pretrained_model_file = '/home/ubuntu/neural_ODE/ode_net/code/output/_pretrained_best_model/best_val_model.pt'
         odenet.load(pretrained_model_file)
         #print("Loaded in pre-trained model!")
         
@@ -290,9 +301,14 @@ if __name__ == "__main__":
         if abs_prior:
             net_file.write('prior_mat = torch.abs(prior_mat)')
             net_file.write('\n')
-        net_file.write('lambda at start (first {} epochs) = {}'.format(curriculum_epochs, loss_lambda_at_start))
+        net_file.write('lambda at start (first {} epochs) = {}'.format(curriculum_epochs_1, loss_lambda_at_start))
+        net_file.write('\n')
+        net_file.write('lambda in middle (upto {} epochs) = {}'.format(curriculum_epochs_2, loss_lambda_at_middle))
         net_file.write('\n')
         net_file.write('and then lambda = {}'.format(loss_lambda_at_end))
+        net_file.write('\n')
+        #net_file.write('SPECIAL SOFTSIGN-transformed inputs to prior!')
+        
         
 
     #quit()
@@ -357,7 +373,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [1, 5, 7, 10, 15, 20, 30, 50, 75, 90, 100, 120, 150, 180, 200, tot_epochs]
+    rep_epochs = [1, 5, 7, 10, 15, 20, 30, 40, 50, 75, 90, 100, 120, 150, 180, 200, tot_epochs]
     viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
@@ -385,8 +401,10 @@ if __name__ == "__main__":
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
 
         
-        if epoch < curriculum_epochs:
+        if epoch < curriculum_epochs_1:
             loss_lambda = loss_lambda_at_start 
+        elif epoch >= curriculum_epochs_1 and epoch < curriculum_epochs_2:
+            loss_lambda = loss_lambda_at_middle
         else:
             loss_lambda = loss_lambda_at_end    
         print("current loss_lambda =", loss_lambda)
