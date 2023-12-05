@@ -138,9 +138,9 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name =  "desmedt_4000genes_1TESTsample_8middleT" 
+clean_name =  "desmedt_500genes_1TESTsample_8middleT" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
-test_data_name = "desmedt_4000genes_1TESTsample_8middleT" 
+test_data_name = "desmedt_500genes_1TESTsample_8middleT" 
 parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
 
 
@@ -207,17 +207,17 @@ if __name__ == "__main__":
     print("Loaded in pre-trained model!")
         
         
-    
+    my_range_tuple = (0.50, 0.60)
     # Init plot
     if settings['viz']:
-        visualizer = Visualizator1D(data_handler, odenet, settings)
+        visualizer = Visualizator1D(data_handler, odenet, settings, my_range_tuple)
         with torch.no_grad():
             visualizer.visualize()
             visualizer.plot()
             visualizer.save(img_save_dir, 0)
     
     #val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    N_list = [50, 100, 500, 1000, 2000, 4000]
+    N_list = [30, 50, 100, 250, 500]
         
     loss_calcs = get_true_val_set_r2(odenet, data_handler, settings['method'], img_save_dir, N_list)
     

@@ -195,9 +195,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_breast.cfg')
-clean_name =  "desmedt_11165genes_1sample_178T" 
+clean_name =  "desmedt_500genes_1sample_178T" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
-test_data_name = "desmedt_11165genes_1TESTsample_8T" 
+test_data_name = "desmedt_500genes_1TESTsample_8middleT" 
 parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
@@ -258,8 +258,8 @@ if __name__ == "__main__":
     abs_prior = True
     
     #Read in the prior matrix
-    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv'
-    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
+    prior_mat_loc = '/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_500.csv'
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
     
     if abs_prior:
         prior_mat = torch.abs(prior_mat)
@@ -268,17 +268,15 @@ if __name__ == "__main__":
     batch_for_prior = (torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)- 0.5)*1
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
 
-    #batch_for_prior = torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)
-    #prior_grad = torch.matmul(soft_sign_mod(batch_for_prior),prior_mat) #can be any model here that predicts the derivative
-    
     del prior_mat
 
-    loss_lambda_at_start = 0.999 #curriculum learning
-    loss_lambda_at_middle = 0.9995
-    loss_lambda_at_end = 0.99995
+    #curriculum learning
+    loss_lambda_at_start =  1
+    loss_lambda_at_middle = 1
+    loss_lambda_at_end = 1
 
     curriculum_epochs_1 = 7
-    curriculum_epochs_2 = 15
+    curriculum_epochs_2 = 20
     
     
     
