@@ -277,7 +277,13 @@ class DataHandler:
                     all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         else:
             n_test_samples = len(self.data_pt_0noise_test) * (self.data_pt_0noise_test[0].shape[0] - 1)
+<<<<<<< HEAD
+            #print("Number of test set points: ", n_test_samples)
+            all_indx = [self.indx[x] for x in np.arange(n_test_samples)]
+            
+=======
             all_indx = [self.indx[x] for x in np.arange( n_test_samples)]
+>>>>>>> d875771f42d450384cf80758dedff46523630111
         mean_data = []
         mean_target = []
         mean_t = []
