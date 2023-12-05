@@ -18,7 +18,7 @@ import random
 
 class DataHandler:
 
-    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test, data_np_0noise_test = None, data_pt_0noise_test = None):
+    def __init__(self, data_np, data_pt, time_np, time_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test = None, data_np_0noise_test = None, data_pt_0noise_test = None):
         self.data_np = data_np
         self.data_pt = data_pt
         self.data_np_0noise = data_np_0noise
@@ -67,7 +67,9 @@ class DataHandler:
         if fp_test is not None:
             print("separate test set provided!")
             _, _, _, _, _, _, data_np_0noise_test, data_pt_0noise_test = readcsv(fp_test, device, noise_to_add = 0, scale_expression = scale_expression, log_scale = log_scale)
-        return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test, data_np_0noise_test, data_pt_0noise_test )
+            return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y, fp_test, data_np_0noise_test, data_pt_0noise_test )
+        else:
+            return DataHandler(data_np, data_pt, t_np, t_pt, dim, ntraj, val_split, device, normalize, batch_type, batch_time, batch_time_frac, data_np_0noise, data_pt_0noise, img_save_dir, init_bias_y )
 
     @classmethod
     def fromgenerator(cls, generator, val_split, device, normalize=False):
@@ -318,7 +320,7 @@ class DataHandler:
         times = torch.stack(self.time_pt)
         return times
 
-    def calculate_trajectory(self, odenet, method, num_val_trajs, fixed_traj_idx = None, yeast = False, breast = False):
+    def calculate_trajectory(self, odenet, method, num_val_trajs, time_span, fixed_traj_idx = None, yeast = False, breast = False):
         #print(self.val_set_indx)
         #print(num_val_trajs)
         extrap_time_points = np.arange(0,15,0.05) 
@@ -327,8 +329,11 @@ class DataHandler:
             extrap_time_points = np.arange(0,300,0.5) 
         if breast:
             print("Calculating BREAST trajectories!\n")
-            #extrap_time_points = np.arange(0,2,0.05) 
-            extrap_time_points = np.arange(0.50,0.60,0.05) 
+            #extrap_time_points = np.arange(0,2,0.05)
+            if time_span is None:  
+                extrap_time_points = np.arange(0,1.50,0.005) 
+            else:
+                extrap_time_points = np.arange(time_span[0],time_span[1],0.005)     
             
         extrap_time_points_pt = torch.from_numpy(extrap_time_points)
         trajectories = []

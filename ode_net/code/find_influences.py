@@ -21,7 +21,6 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-from solve_eq import solve_eq
 from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
@@ -62,7 +61,7 @@ if __name__ == "__main__":
     print(odenet)
 
     time_pts_to_project = torch.from_numpy(np.arange(0,1,0.1))
-    n_random_inputs_per_gene = 60
+    n_random_inputs_per_gene = 200
     all_scores = []
     #Read in the prior matrix
     for this_gene in range(data_handler.dim):
@@ -77,5 +76,5 @@ if __name__ == "__main__":
         print(this_gene)
 
     print("done, saving now!")
-    np.savetxt('/home/ubuntu/neural_ODE/ode_net/code/model_inspect/inferred_influence_11165.csv', 
+    np.savetxt('/home/ubuntu/neural_ODE/ode_net/code/model_inspect/inferred_influence_{}.csv'.format(data_handler.dim), 
                     all_scores, delimiter=',') 
