@@ -43,7 +43,7 @@ pathway_binary_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/bre
                               "_pathway_binary_wide.csv")
 path_DB <- fread(pathway_binary_file)
 
-all_num_genes <- c(500, 2000, 4000, 11165)
+all_num_genes <- c(500) #2000, 4000, 11165
 for(num_genes in all_num_genes){
   
   phnx_inf_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/inferred_influences/inferred_influence_", # nolint
