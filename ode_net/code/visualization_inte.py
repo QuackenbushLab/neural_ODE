@@ -50,10 +50,6 @@ class Visualizator1D(Visualizator):
                 self.sample_plot_val_cutoff = min(self.data_handler.n_val, 7)
 
         
-<<<<<<< HEAD
-        #breast cancer genes 
-        #self.genes_to_viz = [3106,7007, 556, 3072, 831, 1031, 1032, 5012, 6093, 198, 1419, 1571, 4013, 5242, 5783,6526, 6652, 8095, 8784] + sorted(random.sample(range(self.data_handler.dim),11)) #desmedt genes
-=======
         if self.data_handler.dim == 4000:
             self.genes_to_viz = [ 776,  886, 1086,  633, 3176, 1170, 2895, 3175, 1133, 2783, 3109,  326, 757, 2535, 2904,  439, 1489,   97, 1869, 1871, 3862, 2217,  690,  100, 2564,  708, 3853, 3792,  355, 3133]
         elif self.data_handler.dim == 11165:
@@ -62,7 +58,6 @@ class Visualizator1D(Visualizator):
             self.genes_to_viz = [ 398, 1565, 1604,  552, 1417,  325,  461, 1464,  391, 1473, 1603, 1929, 171,  581,  958,  601,  956,  187, 1139,  227,   63, 1904,  351,  532, 360, 1005,  346,   62, 1902,   53]
         else:
             self.genes_to_viz = sorted(random.sample(range(self.data_handler.dim),30)) #only plot 30 genes
->>>>>>> d875771f42d450384cf80758dedff46523630111
         
 
         self.axes_traj_split = self.fig_traj_split.subplots(nrows=self.TOT_ROWS, ncols=self.TOT_COLS, sharex=False, sharey=True, subplot_kw={'frameon':True})
@@ -95,14 +90,10 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
-<<<<<<< HEAD
-        self.time_span = (0.0, 15)
-=======
         if self.my_range_tuple is not None:
             self.time_span = self.my_range_tuple 
         else:    
             self.time_span = (0, 1.50)
->>>>>>> d875771f42d450384cf80758dedff46523630111
         self.time_width = self.time_span[1] - self.time_span[0]
 
     

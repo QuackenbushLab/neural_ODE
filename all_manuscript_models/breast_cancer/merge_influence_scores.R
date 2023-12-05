@@ -2,7 +2,7 @@ library(data.table)
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
-num_tops <- 11165
+num_tops <- 16
 all_genes <- c(500, 2000, 4000, 11165)
 all_top_genes <- c()
 
