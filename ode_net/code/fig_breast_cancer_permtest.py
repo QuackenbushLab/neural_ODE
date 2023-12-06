@@ -59,7 +59,7 @@ if __name__ == "__main__":
     analysis_type = "reactome"
     
     print("making heatmap")
-    wide_file = "C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide_20230410.csv"
+    wide_file = "/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide.csv"
     z = np.loadtxt(open(wide_file, "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         if this_gene not in perf_info:
             perf_info[this_gene] = {this_metric: 0 for this_metric in metrics}
 
-    perf_csv = csv.DictReader(open('C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/bc_model_perfs.csv', 'r'))
+    perf_csv = csv.DictReader(open('/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/bc_model_perfs.csv', 'r'))
     for line in perf_csv: 
         for this_metric in metrics:
             perf_info[float(line['num_gene'])][this_metric] = float(line[this_metric])
@@ -143,9 +143,10 @@ if __name__ == "__main__":
             this_val = this_perf_vals[this_idx]
             this_text = this_val
             this_height = this_val
+            this_text = "{:.2f}".format(this_val)
             if this_metric == "runtime_cost":
-                this_text = "${:,.2f}".format(this_val)
                 this_height = this_val/cost_shrinker
+            
             ax1.text(this_idx + 0.5 + width*this_delta, this_height + 0.1 , this_text, 
                      ha="center", va="bottom", color="black",size = 20, rotation = 90)
     
@@ -174,5 +175,5 @@ if __name__ == "__main__":
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
-    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_20230410.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
+    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_permtest_{}_rebuttal.png'.format(output_root_dir, analysis_type),  bbox_inches='tight') #
 

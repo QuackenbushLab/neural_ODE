@@ -9,7 +9,7 @@ all_top_paths <- c()
 analysis_type <- "reactome"
 
 if (analysis_type == "reactome"){
-  reactome_filter <- fread("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/reactome_child_to_parent.csv")
+  reactome_filter <- fread("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/reactome_child_to_parent.csv")
   reactome_filter[, child_descriptor := tolower(gsub("-"," ",child_descriptor))]
   reactome_filter[, child_descriptor := tolower(gsub(",","",child_descriptor))]
 }
@@ -18,7 +18,7 @@ if (analysis_type == "reactome"){
 
 print(paste0("collecting top ", num_tops," pathways from each set"))
 for(this_gene in all_genes){
-  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/",
+  this_gene_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/",
                            analysis_type,
                            "_permtests/permtest_",
                            this_gene,".csv")
@@ -38,7 +38,7 @@ print(paste0("Collected ", length(all_top_paths), " paths!"))
 
 #print("Check if the union exits in all gene sets")
 #for(this_gene in all_genes){
-#  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/harm_cents_",
+#  this_gene_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/harm_cents_",
 #                           this_gene,".csv")
   
 #  D <- fread(this_gene_file)
@@ -53,7 +53,7 @@ all_permtest_merged <- data.table(pathway = character(),
                                sd_0 = numeric(),
                                num_gene = numeric())
 for(this_gene in all_genes){
-  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/",
+  this_gene_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/",
                            analysis_type,
                            "_permtests/permtest_",
                            this_gene,".csv")
@@ -64,7 +64,7 @@ for(this_gene in all_genes){
                  .(pathway = trimws(pathway),
                    z = round(phnx_z_score, 3),
                    mu_0 = round(mean_path_score,3),
-                   sd_0 = round(sd_path_score,3))]
+                   sd_0 = round(sd_path_score,4))]
   D_to_take[, num_gene := paste0("scl2_", this_gene)]
   #D_to_take[, fold_permtest:= fold_permtest/this_gene] #.I
   #D_to_take[, fold_permtest:= range01(fold_permtest)] #.I
@@ -100,11 +100,13 @@ setcolorder(all_permtest_wide,
 )
 
 #all_permtest_wide <- all_permtest_wide[order(pathway)]
+merged_perm_tests <- fread(paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_", analysis_type,"_wide.csv"))
+all_permtest_wide$pathway  <- merged_perm_tests$pathway
 
 print(all_permtest_wide)
 
 write.table(all_permtest_wide,
-          paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_",
+          paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_",
                  analysis_type,
                  "_supplement.txt"),
           sep = " & ",

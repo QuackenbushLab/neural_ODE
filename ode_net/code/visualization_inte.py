@@ -127,7 +127,7 @@ class Visualizator1D(Visualizator):
                                                                                                                      num_val_trajs = self.sample_plot_val_cutoff,
                                                                                                                      time_span = self.time_span, 
                                                                                                                      yeast = False,
-                                                                                                                     breast = True)
+                                                                                                                     breast = False)
         self._visualize_trajectories_split()
         #self._visualize_dynamics()
         self._set_ax_limits()
