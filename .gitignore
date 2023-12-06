@@ -365,3 +365,4 @@ ode_net/code/output/_prescient_data/experiments/sim690/regular_noise0.1-softplus
 ode_net/code/output/_prescient_data/experiments/sim690/regular_noise0.1-softplus_1_300-1e-06/seed_2/train.epoch_002400.pt
 ode_net/code/output/_prescient_data/experiments/sim690/regular_noise0.1-softplus_1_300-1e-06/seed_2/train.epoch_002600.pt
 ode_net/code/output/_prescient_data/experiments/sim690/regular_noise0.1-softplus_1_300-1e-06/seed_2/train.log
+all_manuscript_models/breast_cancer/go_bp_pathway_binary_wide.csv

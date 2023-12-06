@@ -90,7 +90,14 @@ class Visualizator1D(Visualizator):
 
         #self.time_span = (np.min([np.min(time[:]) for time in times]),
         #                  np.max([np.max(time[:]) for time in times]))
+<<<<<<< HEAD
         self.time_span = (0.0, 15)
+=======
+        if self.my_range_tuple is not None:
+            self.time_span = self.my_range_tuple 
+        else:    
+            self.time_span = (0, 1.50)
+>>>>>>> cad46251d25287f5761025740df328fad5661f76
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
