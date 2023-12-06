@@ -93,11 +93,7 @@ class Visualizator1D(Visualizator):
         if self.my_range_tuple is not None:
             self.time_span = self.my_range_tuple 
         else:    
-<<<<<<< HEAD
             self.time_span = (0, 15)
-=======
-            self.time_span = (0, 1.50)
->>>>>>> cad46251d25287f5761025740df328fad5661f76
         self.time_width = self.time_span[1] - self.time_span[0]
 
     
