@@ -39,8 +39,8 @@ simseeds = sample.int(1E7, 1000)
 
 #----simulation parameters----
 #simulation parameters
-nsamp = 150 #number of samples
-netSize = 350 #network size of sampled networks
+nsamp = 10 #number of samples
+netSize = 690 #network size of sampled networks
 minTFs = 15 #minimum number of TFs enforced on sampled networks
 expnoise = 0 #experimental noise standard deviation (normal)
 bionoise = 0 #biological noise standard deviation (superimposed log-normal)
@@ -55,8 +55,8 @@ simseed = simseeds[102]
 
 #----1: sample network and create simulation----
 set.seed(simseed)
-grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
-#grnSmall = grnFull
+#grnSmall = sampleGraph(grnFull, netSize, minTFs, seed = simseed)
+grnSmall = grnFull
 
 
 
@@ -131,8 +131,8 @@ bimgenes = unlist(lapply(simSmall$inputModels, function(x) length(x$prop)))
 bimgenes = names(bimgenes)[bimgenes == 2]
   
   #simulate dataset
-time_stamps <- 0:9 #c(0,2,3,7,9) #0:9
-simu_list = simulateDataset(simSmall, nsamp, 
+time_stamps <- c(0,2,3,7,9) #0:9
+simu_list = simulateDataset(simSmall, nsamp,
                             timeStamps = time_stamps,
                             cor.strength = 0,
                             inputGeneVar  = 1,
@@ -165,14 +165,14 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_150samples_earlyT_0bimod_1initvar_DERIVATIVES.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_5samples_earlyT_0bimod_1initvar_newtest.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
 
 write.csv(edgepropmat, 
-          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties_chalmers_350_target.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties_chalmers_690_test.csv", 
           row.names = F)
 
 write.csv(ode_system_function, 
