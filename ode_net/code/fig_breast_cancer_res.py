@@ -57,7 +57,7 @@ if __name__ == "__main__":
     ax.cla()
     
     print("making heatmap")
-    z = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_inferred_influences_wide.csv", "rb"), 
+    z = np.loadtxt(open("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/all_inferred_influences_wide_FULL.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (1,2,3,4))
     num_tops = z.shape[0]
     print("The analysis contains", num_tops, "genes.")
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     ax.set_xlim(0,num_models)
     ax.set_ylim(0,num_tops)
 
-    gene_names = np.loadtxt(open("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_inferred_influences_wide.csv", "rb"), 
+    gene_names = np.loadtxt(open("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/all_inferred_influences_wide_FULL.csv", "rb"), 
         dtype = "str",delimiter=",", skiprows=1, usecols = (0))
     gene_names = np.char.strip(gene_names, '"')
 
@@ -207,4 +207,4 @@ if __name__ == "__main__":
     cbar.outline.set_linewidth(2)
     #plt.subplots_adjust(wspace=0, hspace=0)
 
-    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer.png'.format(output_root_dir), bbox_inches='tight')
+    fig_breast_cancer.savefig('{}/manuscript_fig_breast_cancer_influence_rebuttal.png'.format(output_root_dir), bbox_inches='tight')

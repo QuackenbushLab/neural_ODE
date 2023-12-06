@@ -9,7 +9,7 @@ all_top_paths <- c()
 analysis_type <- "reactome"
 
 if (analysis_type == "reactome"){
-  reactome_filter <- fread("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/reactome_child_to_parent.csv")
+  reactome_filter <- fread("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/reactome_child_to_parent.csv")
   reactome_filter[, child_descriptor := tolower(gsub("-"," ",child_descriptor))]
   reactome_filter[, child_descriptor := tolower(gsub(",","",child_descriptor))]
 }
@@ -18,7 +18,7 @@ if (analysis_type == "reactome"){
 
 print(paste0("collecting top ", num_tops," pathways from each set"))
 for(this_gene in all_genes){
-  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/",
+  this_gene_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/",
                            analysis_type,
                            "_permtests/permtest_",
                            this_gene,".csv")
@@ -51,7 +51,7 @@ all_permtest_merged <- data.table(pathway = character(),
                                z_score = numeric(),
                                num_gene = numeric())
 for(this_gene in all_genes){
-  this_gene_file <- paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/",
+  this_gene_file <- paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/",
                            analysis_type,
                            "_permtests/permtest_",
                            this_gene,".csv")
@@ -90,8 +90,8 @@ all_permtest_wide <- all_permtest_wide[order(-scale_to_500,
 print(all_permtest_wide)
 
 write.csv(all_permtest_wide,
-          paste0("C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_",
+          paste0("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_",
                  analysis_type,
-                 "_wide_20230216.csv"),
+                 "_wide.csv"),
           row.names = F,
           na = "")
