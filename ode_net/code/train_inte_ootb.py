@@ -153,9 +153,9 @@ def save_model(odenet, folder, filename):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_350genes_150samples_earlyT_0bimod_1initvar" 
+clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-test_data_name = "chalmers_350genes_10samples_for_testing" 
+test_data_name = "chalmers_690genes_10samples_for_testing" 
 parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()

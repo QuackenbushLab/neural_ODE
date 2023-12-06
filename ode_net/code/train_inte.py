@@ -21,7 +21,7 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-from solve_eq import solve_eq
+#from solve_eq import solve_eq
 from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
@@ -248,7 +248,7 @@ if __name__ == "__main__":
                                         fp_test = args.test_data)
     
     #Read in the prior matrix
-    abs_prior = True
+    abs_prior = False
     random_prior_signs = False
 
     if abs_prior and random_prior_signs:
@@ -270,13 +270,8 @@ if __name__ == "__main__":
     
     #del prior_mat
 
-<<<<<<< HEAD
     loss_lambda_at_start = 0.99
     loss_lambda_at_end = 0.99
-=======
-    loss_lambda_at_start = 1
-    loss_lambda_at_end = 1
->>>>>>> 140b35a81a62973742fc6157d2a30845a2542990
 
     loss_lambda = loss_lambda_at_start 
     
