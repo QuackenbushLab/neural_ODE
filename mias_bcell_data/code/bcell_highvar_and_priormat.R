@@ -99,9 +99,10 @@ edges[,
       by= .(from, to)]
 
 #rm(edges)
-write.table(edges,
+write.table(edges[,.(from, to, activation)],
             "C:/STUDIES/RESEARCH/neural_ODE/mias_bcell_data/clean_data/edge_prior_matrix_mias_14691.csv", 
-            row.names = F, 
+            sep = ",",
+             row.names = F, 
           col.names = F)
 
 #library(Matrix)
