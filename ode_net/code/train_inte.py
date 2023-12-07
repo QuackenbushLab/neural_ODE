@@ -21,7 +21,7 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-from solve_eq import solve_eq
+#from solve_eq import solve_eq
 from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
