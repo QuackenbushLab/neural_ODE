@@ -165,7 +165,7 @@ datamat <- rbind(top_row, datamat)
 
 
 write.table( datamat,
-             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_5samples_earlyT_0bimod_1initvar_newtest.csv", 
+             "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_10samples_for_testing.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
@@ -176,11 +176,11 @@ write.csv(edgepropmat,
           row.names = F)
 
 write.csv(ode_system_function, 
-          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/ode_system_functions_chalmers_350_target.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/ode_system_functions_chalmers_690_test.csv", 
           row.names = F)
 
 write.csv(gene_names, 
-          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/gene_names_chalmers_350_target.csv", 
+          "C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/gene_names_chalmers_690_test.csv", 
           row.names = F)
 
 
