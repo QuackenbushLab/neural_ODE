@@ -193,8 +193,8 @@ class DataHandler:
         self.n_val = int((self.datasize - self.ntraj) * val_split)
         all_indx = np.arange(len(self.indx))
         val_indx = np.random.choice(all_indx, size=self.n_val, replace=False)
-        print("picking FIXED yeast val set for 1Traj")
-        val_indx = np.array([9, 10, 11]) #for yeast 1Traj
+        #print("picking FIXED yeast val set for 1Traj")
+        #val_indx = np.array([9, 10, 11]) #for yeast 1Traj
         train_indx = np.setdiff1d(all_indx, val_indx, assume_unique=True)
         self.n_val = len(val_indx)
 
