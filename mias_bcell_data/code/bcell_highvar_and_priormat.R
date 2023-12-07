@@ -14,7 +14,8 @@ setnames(full_data,
          old = c("time", "expression"),
          new = c("time_point", "exprs"))
 
-full_data[, hist(exprs)] #we will normalize somehow
+full_data[, exprs := log(1 + exprs)]
+full_data[, hist(exprs, col = "salmon")] #we will normalize somehow
 num_genes <-  length(all_prior_affiliated_genes) #basically all that the prior has
 print(num_genes)
 full_data <- full_data[gene %in% all_prior_affiliated_genes]
@@ -97,10 +98,16 @@ edges[,
       update_edge_mat(edge_mat,from, to, activation), 
       by= .(from, to)]
 
-rm(edges)
-library(Matrix)
-B <- Matrix(edge_mat, sparse = TRUE)
-writeMM(B, "C:/STUDIES/RESEARCH/neural_ODE/mias_bcell_data/clean_data/edge_prior_matrix_mias_14691.csv")
+#rm(edges)
+write.table(edges[,.(from, to, activation)],
+            "C:/STUDIES/RESEARCH/neural_ODE/mias_bcell_data/clean_data/edge_prior_matrix_mias_14691.csv", 
+            sep = ",",
+             row.names = F, 
+          col.names = F)
+
+#library(Matrix)
+#B <- Matrix(edge_mat, sparse = TRUE)
+#writeMM(B, "C:/STUDIES/RESEARCH/neural_ODE/mias_bcell_data/clean_data/edge_prior_matrix_mias_14691.csv")
 #write.table(edge_mat,
 #            "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/edge_prior_matrix_desmedt_11165.csv",
 #            sep = ",",
