@@ -193,8 +193,8 @@ class DataHandler:
         self.n_val = int((self.datasize - self.ntraj) * val_split)
         all_indx = np.arange(len(self.indx))
         val_indx = np.random.choice(all_indx, size=self.n_val, replace=False)
-        #print("picking FIXED yeast val set for 1Traj")
-        #val_indx = np.array([9, 10, 11]) #for yeast 1Traj
+        print("picking FIXED yeast val set for 1Traj")
+        val_indx = np.array([9, 10, 11]) #for yeast 1Traj
         train_indx = np.setdiff1d(all_indx, val_indx, assume_unique=True)
         self.n_val = len(val_indx)
 
@@ -264,6 +264,7 @@ class DataHandler:
     
     def get_true_mu_set_pairwise(self, val_only = False, batch_type = "trajectory"):
         if self.fp_test is None:
+            noiseless_data_to_care_about = self.data_pt_0noise
             if batch_type == "trajectory":
                 if val_only:
                     all_indx = [self.indx[x] for x in np.arange(len(self.indx)) if self.indx[x][0] in  self.val_set_indx]
@@ -276,16 +277,18 @@ class DataHandler:
                 else:
                     all_indx = [self.indx[x] for x in np.arange(len(self.indx))]
         else:
-            n_test_samples = len(self.data_pt_0noise_test) * (self.data_pt_0noise_test[0].shape[0] - 1)
-            #print("Number of test set points: ", n_test_samples)
+            noiseless_data_to_care_about = self.data_pt_0noise_test
+            n_test_samples = len(noiseless_data_to_care_about) * (noiseless_data_to_care_about[0].shape[0] - 1)
+            print("Number of test set points: ", n_test_samples)
             all_indx = [self.indx[x] for x in np.arange(n_test_samples)]
             
         mean_data = []
         mean_target = []
         mean_t = []
+
         for i in all_indx:
-            mean_data.append(self.data_pt_0noise_test[i[0]][i[1]])
-            mean_target.append(self.data_pt_0noise_test[i[0]][i[1] + 1])
+            mean_data.append(noiseless_data_to_care_about[i[0]][i[1]])
+            mean_target.append(noiseless_data_to_care_about[i[0]][i[1] + 1])
             mean_t.append(torch.stack([self.time_pt[i[0]][i[1] + ii] for ii in range(2)]))
         mean_data = torch.stack(mean_data).to(self.device)
         mean_target = torch.stack(mean_target).to(self.device)
