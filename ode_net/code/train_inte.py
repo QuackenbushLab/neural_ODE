@@ -270,8 +270,8 @@ if __name__ == "__main__":
     
     #del prior_mat
 
-    loss_lambda_at_start = 1
-    loss_lambda_at_end = 1
+    loss_lambda_at_start = 1#0.99
+    loss_lambda_at_end = 1#0.99
 
     loss_lambda = loss_lambda_at_start 
     
