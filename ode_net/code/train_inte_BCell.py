@@ -193,7 +193,7 @@ def save_model(odenet, folder, filename):
     odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='config_breast.cfg')
+parser.add_argument('--settings', type=str, default='config_BCell.cfg')
 clean_name =  "mias_control_14691genes_2samples_6T" 
 parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/mias_bcell_data/clean_data/{}.csv'.format(clean_name))
 test_data_name = "mias_control_14691genes_2samples_6T" 
@@ -269,8 +269,8 @@ if __name__ == "__main__":
     del prior_mat
 
     #curriculum learning
-    loss_lambda_at_start =  1
-    loss_lambda_at_middle = 1
+    loss_lambda_at_start =  0.25
+    loss_lambda_at_middle = 0.75
     loss_lambda_at_end = 1
 
     curriculum_epochs_1 = 7

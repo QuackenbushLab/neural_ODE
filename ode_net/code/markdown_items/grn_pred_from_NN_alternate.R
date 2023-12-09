@@ -4,9 +4,11 @@ library(stringr)
 
 print("reading in files")
 effects_mat <- fread("/home/ubuntu/neural_ODE/ode_net/code/model_inspect/effects_mat.csv")
-gene_eff <- as.data.table(effects_mat)
 num_genes <- dim(effects_mat)[1]
 print(dim(effects_mat))
+gene_eff <- as.data.table(effects_mat)
+rm(effects_mat)
+gc()
 gene_eff[,reg:= .I]
 
 print("melting and merging names")
@@ -16,14 +18,14 @@ gene_eff <- melt(gene_eff,
                  variable.name = "aff", value.name = "effect")
 gene_eff[,aff := gsub("V","",aff)]
 
-cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/pramila_gene_names.csv",
+cell_names <- data.table(read.delim("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/mias_gene_names_14691.csv",
                          sep = ",",
                          header = T))
 cell_names[,x:= gsub("_input","", x)]
 setnames(cell_names, old = "x", new = "gene")
 
 
-print(dim(effects_mat)[1] ==nrow(cell_names))
+print(num_genes ==nrow(cell_names))
 gene_eff[,reg := cell_names[as.numeric(reg),gene]]
 gene_eff[,aff := cell_names[as.numeric(aff),gene]]
 
@@ -33,10 +35,10 @@ gene_eff[is.na(prop_effect), prop_effect :=0 ]
 gene_eff[, effect := NULL]
 
 print("getting true edges")
-true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/harbison_chip_orf.csv")
+true_edges <- fread("/home/ubuntu/neural_ODE/ode_net/code/markdown_items/otter_chip_val_clean.csv")
 
-true_edges <- true_edges[p_val < 0.001,]
-true_edges[, num_edges_for_this_TF := .N, by = from]
+#true_edges <- true_edges[p_val < 0.001,]
+#true_edges[, num_edges_for_this_TF := .N, by = from]
 
 setnames(true_edges, 
          old = c("from","to"),
@@ -74,6 +76,7 @@ colnames(curve_to_write) <- c("fpr", "tpr", "cutoff")
 write.csv(curve_to_write, 
           "/home/ubuntu/neural_ODE/ode_net/code/markdown_items/auc_curve.csv",
           row.names = F)
+
 
 
 #

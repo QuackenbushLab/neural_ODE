@@ -111,8 +111,8 @@ class Visualizator1D(Visualizator):
             upper_lim = 1.3
             lower_lim = 0.4
         else: #i.e. linear 
-            upper_lim = 3
-            lower_lim = -3 
+            upper_lim = 1.1
+            lower_lim = -0.1 
 
         for row_num,this_row_plots in enumerate(self.axes_traj_split):
             for col_num, ax in enumerate(this_row_plots):
@@ -126,7 +126,7 @@ class Visualizator1D(Visualizator):
         self.trajectories, self.all_plotted_samples, self.extrap_timepoints = self.data_handler.calculate_trajectory(self.odenet, self.settings['method'], 
                                                                                                                      num_val_trajs = self.sample_plot_val_cutoff,
                                                                                                                      time_span = self.time_span, 
-                                                                                                                     yeast = True,
+                                                                                                                     yeast = False,
                                                                                                                      breast = False)
         self._visualize_trajectories_split()
         #self._visualize_dynamics()
