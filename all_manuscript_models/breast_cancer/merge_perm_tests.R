@@ -2,11 +2,11 @@ library(data.table)
 
 range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 
-num_tops <- 11#basically all
+num_tops <- 13#basically all
 all_genes <- c(500, 2000, 4000, 11165)
 all_top_paths <- c()
 
-analysis_type <- "reactome"
+analysis_type <- "go_bp"
 
 if (analysis_type == "reactome"){
   reactome_filter <- fread("/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/reactome_child_to_parent.csv")

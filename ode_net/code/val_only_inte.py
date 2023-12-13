@@ -20,7 +20,6 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-from solve_eq import solve_eq
 from visualization_inte import *
 
 torch.set_num_threads(8) #since we are on c5.2xlarge
@@ -138,10 +137,10 @@ def _build_save_file_name(save_path, epochs):
 
 parser = argparse.ArgumentParser('Testing')
 parser.add_argument('--settings', type=str, default='val_config_inte.cfg')
-clean_name =  "desmedt_500genes_1TESTsample_8middleT" 
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(clean_name))
-test_data_name = "desmedt_500genes_1TESTsample_8middleT" 
-parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/breast_cancer_data/clean_data/{}.csv'.format(test_data_name))
+clean_name =  "pramila_3551genes_1VALsample_24T" 
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(clean_name))
+test_data_name = "pramila_3551genes_1VALsample_24T" 
+parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/pramila_yeast_data/clean_data/{}.csv'.format(test_data_name))
 
 
 args = parser.parse_args()
@@ -207,7 +206,7 @@ if __name__ == "__main__":
     print("Loaded in pre-trained model!")
         
         
-    my_range_tuple = (0.50, 0.60)
+    my_range_tuple = (0, 150)
     # Init plot
     if settings['viz']:
         visualizer = Visualizator1D(data_handler, odenet, settings, my_range_tuple)
@@ -217,7 +216,7 @@ if __name__ == "__main__":
             visualizer.save(img_save_dir, 0)
     
     #val_loss_list = validation(odenet, data_handler, settings['method'], settings['explicit_time'])
-    N_list = [30, 50, 100, 250, 500]
+    N_list = [30, 50, 100, 250, 500, 1000, 2000, 3551]
         
     loss_calcs = get_true_val_set_r2(odenet, data_handler, settings['method'], img_save_dir, N_list)
     

@@ -21,7 +21,6 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-from solve_eq import solve_eq
 from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
@@ -270,8 +269,8 @@ if __name__ == "__main__":
     
     del prior_mat
 
-    loss_lambda_at_start = 0.90
-    loss_lambda_at_end = 0.90
+    loss_lambda_at_start = 0.80
+    loss_lambda_at_end = 0.80
 
     loss_lambda = loss_lambda_at_start 
     
@@ -329,7 +328,7 @@ if __name__ == "__main__":
     
     # Init plot
     if settings['viz']:
-        visualizer = Visualizator1D(data_handler, odenet, settings)
+        visualizer = Visualizator1D(data_handler, odenet, settings, my_range_tuple = (0, 150))
 
     # Training loop
     #batch_times = [] 

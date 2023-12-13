@@ -56,7 +56,7 @@ if __name__ == "__main__":
     ax.spines['right'].set_linewidth(border_width)
     ax.cla()
 
-    analysis_type = "reactome"
+    analysis_type = "go_bp"
     
     print("making heatmap")
     wide_file = "/home/ubuntu/neural_ODE/all_manuscript_models/breast_cancer/all_permtests_" + analysis_type +"_wide.csv"
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     width= 0.17  # the width of the bars
     deltas = [-0.5,0.5]
     cost_shrinker = 1.8
-    
+    '''
     for this_metric in metrics:
         this_delta = deltas[metrics.index(this_metric)] 
         this_perf_vals = [perf_info[this_gene][this_metric]/cost_shrinker if this_metric == "runtime_cost" else perf_info[this_gene][this_metric] for this_gene in all_genes ]
@@ -156,7 +156,8 @@ if __name__ == "__main__":
 
     print("......")
 
-    
+    '''
+
     ax.set_yticks(np.arange(num_tops)+0.5)    
     ax.set_yticklabels(path_names)
     ax.tick_params(axis='y', labelsize= tick_lab_size+3, rotation = 0)

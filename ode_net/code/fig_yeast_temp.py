@@ -33,7 +33,8 @@ def my_corr(output, target):
     return(my_corr)
 
 def get_preds_and_targets(odenet, data_handler, method):
-    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type = "single")
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(batch_type = "single")
+    print(target_pw.shape)
     #odenet.eval()
     with torch.no_grad():
         predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     pretrained_model_file = '/home/ubuntu/neural_ODE/all_manuscript_models/{}/{}/best_val_model.pt'.format(this_data, this_model)
     this_odenet.load(pretrained_model_file)
         
-    trajectories, all_plotted_samples, extrap_timepoints = this_data_handler.calculate_trajectory(this_odenet, 'dopri5', num_val_trajs = 1, yeast = True)
+    trajectories, all_plotted_samples, extrap_timepoints = this_data_handler.calculate_trajectory(this_odenet, 'dopri5', num_val_trajs = 1, yeast = True, time_span = (0, 200))
     times = this_data_handler.time_np
     data_np_to_plot = [this_data_handler.data_np[i] for i in all_plotted_samples]
     data_np_0noise_to_plot = [this_data_handler.data_np_0noise[i] for i in all_plotted_samples]
@@ -193,10 +194,12 @@ if __name__ == "__main__":
     ax2.spines['right'].set_linewidth(border_width)
     ax2.cla()
     
-    lambdas = [0.95, 1]
-    auc_cols = {0.95: "dodgerblue", 1: "red"}
+    lambdas = [ 0.2, 0.8, 0.95, 1]
+    auc_cols = {0.95: "dodgerblue", 1: "red", 0.2: "navy", 0.8: "skyblue"}
     auc_labs = {
-                0.95: r"$\lambda_{prior}$" + r"= 0.05 ($\bf{AUC}$ $\bf{0.93}$)", 
+                0.95: r"$\bf{\lambda_{prior}}$" + r"= $\bf{0.05}$ ($\bf{AUC}$ $\bf{0.93}$)", 
+                0.80:  r"$\lambda_{prior}$" +"= 0.20 (AUC 0.91)",
+                0.20:  r"$\lambda_{prior}$" +"= 0.80 (AUC 0.79)",
                 1:  "no prior (AUC 0.54)"}
     
     

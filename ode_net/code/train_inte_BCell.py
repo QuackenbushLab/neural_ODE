@@ -21,21 +21,15 @@ except ImportError:
 from datahandler import DataHandler
 from odenet import ODENet
 from read_config import read_arguments_from_file
-#from solve_eq import solve_eq
 from visualization_inte import *
 
 #torch.set_num_threads(16) #CHANGE THIS!
 
-def plot_LR_range_test(all_lrs_used, training_loss, img_save_dir):
-    plt.figure()
-    plt.plot(all_lrs_used, training_loss, color = "blue", label = "Training loss")
-    plt.plot(all_lrs_used, true_mean_losses, color = "green", label = r'True $\mu$ loss')
-    #plt.yscale('log')
-    plt.xscale('log')
-    plt.xlabel("Learning rate")
-    plt.ylabel("Error (MSE)")
-    plt.legend(loc='upper right')
-    plt.savefig("{}/LR_range_test.png".format(img_save_dir))
+def soft_sign_mod(this_x):
+    shift = 0.5
+    shifted_input =(this_x- shift) #500*
+    abs_shifted_input = torch.abs(shifted_input)
+    return(shifted_input/(1+abs_shifted_input))   #
 
 def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based, prior_losses, img_save_dir):
     
@@ -66,7 +60,6 @@ def plot_MSE(epoch_so_far, training_loss, validation_loss, true_mean_losses, tru
     plt.savefig("{}/MSE_loss.png".format(img_save_dir))
     np.savetxt('{}full_loss_info.csv'.format(output_root_dir), np.c_[training_loss, validation_loss, true_mean_losses, true_mean_losses_init_val_based], delimiter=',')
 
-
 def my_r_squared(output, target):
     x = output
     y = target
@@ -76,7 +69,7 @@ def my_r_squared(output, target):
     return(my_corr**2)
 
 def get_true_val_set_r2(odenet, data_handler, method, batch_type):
-    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  batch_type)
+    data_pw, t_pw, target_pw = data_handler.get_true_mu_set_pairwise(val_only = True, batch_type =  "single")
     with torch.no_grad():
         predictions_pw = torch.zeros(data_pw.shape).to(data_handler.device)
         for index, (time, batch_point) in enumerate(zip(t_pw, data_pw)):
@@ -141,6 +134,20 @@ def validation(odenet, data_handler, method, explicit_time):
         #print("gene_mult_mean =", torch.mean(torch.relu(odenet.gene_multipliers) + 0.1))        
     return [loss, n_val]
 
+def true_loss(odenet, data_handler, method):
+    return [0,0]
+    data, t, target = data_handler.get_true_mu_set() #tru_mu_prop = 1 (incorporate later)
+    init_bias_y = data_handler.init_bias_y
+    #odenet.eval()
+    with torch.no_grad():
+        predictions = torch.zeros(data.shape).to(data_handler.device)
+        for index, (time, batch_point) in enumerate(zip(t, data)):
+            predictions[index, :, :] = odeint(odenet, batch_point, time, method=method)[1] + init_bias_y #IH comment
+        
+        # Calculate true mean loss
+        loss =  [torch.mean(torch.abs((predictions - target)/target)),torch.mean((predictions - target) ** 2)] #regulated_loss(predictions, target, t)
+    return loss
+
 
 def decrease_lr(opt, verbose, tot_epochs, epoch, lower_lr,  dec_lr_factor ):
     dir_string = "Decreasing"
@@ -186,11 +193,11 @@ def save_model(odenet, folder, filename):
     odenet.save('{}{}.pt'.format(folder, filename))
 
 parser = argparse.ArgumentParser('Testing')
-parser.add_argument('--settings', type=str, default='config_inte.cfg')
-clean_name =  "chalmers_690genes_150samples_earlyT_0bimod_1initvar" 
-parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(clean_name))
-test_data_name = "chalmers_690genes_10samples_for_testing" 
-parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/{}.csv'.format(test_data_name))
+parser.add_argument('--settings', type=str, default='config_BCell.cfg')
+clean_name =  "mias_control_14691genes_2samples_6T" 
+parser.add_argument('--data', type=str, default='/home/ubuntu/neural_ODE/mias_bcell_data/clean_data/{}.csv'.format(clean_name))
+test_data_name = "mias_control_14691genes_2samples_6T" 
+parser.add_argument('--test_data', type=str, default='/home/ubuntu/neural_ODE/mias_bcell_data/clean_data/{}.csv'.format(test_data_name))
 
 args = parser.parse_args()
 
@@ -244,36 +251,32 @@ if __name__ == "__main__":
                                         img_save_dir = img_save_dir,
                                         scale_expression = settings['scale_expression'],
                                         log_scale = settings['log_scale'],
-                                        init_bias_y = settings['init_bias_y'],
-                                        fp_test = args.test_data)
+                                        init_bias_y = settings['init_bias_y'], fp_test = None) #,fp_test = args.test_data)
+    
+    abs_prior = True
     
     #Read in the prior matrix
-    abs_prior = False
-    random_prior_signs = False
-
-    if abs_prior and random_prior_signs:
-        sys.exit('You are asking for two opposite things. At most ONE of abs_prior and random_prior_signs can be True.')
-
-    prior_mat_loc = '/home/ubuntu/neural_ODE/ground_truth_simulator/clean_data/edge_prior_matrix_chalmers_690_noise_{}.csv'.format(settings['noise'])
-    prior_mat = read_prior_matrix(prior_mat_loc, sparse = False, num_genes = data_handler.dim)
-    
-    if random_prior_signs:
-        matrix_of_pm_1 = 2 * (torch.randint(low = 0, high=2, size =prior_mat.shape)-0.5)
-        prior_mat = prior_mat * matrix_of_pm_1
+    prior_mat_loc = '/home/ubuntu/neural_ODE/mias_bcell_data/clean_data/edge_prior_matrix_mias_14691.csv'
+    prior_mat = read_prior_matrix(prior_mat_loc, sparse = True, num_genes = data_handler.dim)
     
     if abs_prior:
         prior_mat = torch.abs(prior_mat)
 
     K = 10000
-    batch_for_prior = (torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)- 0.5)*2
+    batch_for_prior = (torch.rand(K,1,prior_mat.shape[0], device = data_handler.device)- 0.5)*1
     prior_grad = torch.matmul(batch_for_prior,prior_mat) #can be any model here that predicts the derivative
+
+    del prior_mat
+
+    #curriculum learning
+    loss_lambda_at_start =  0.25
+    loss_lambda_at_middle = 0.75
+    loss_lambda_at_end = 1
+
+    curriculum_epochs_1 = 7
+    curriculum_epochs_2 = 20
     
-    #del prior_mat
-
-    loss_lambda_at_start = 1#0.99
-    loss_lambda_at_end = 1#0.99
-
-    loss_lambda = loss_lambda_at_start 
+    
     
     # Initialization
     odenet = ODENet(device, data_handler.dim, explicit_time=settings['explicit_time'], neurons = settings['neurons_per_layer'], 
@@ -296,13 +299,14 @@ if __name__ == "__main__":
         if abs_prior:
             net_file.write('prior_mat = torch.abs(prior_mat)')
             net_file.write('\n')
-        if random_prior_signs:
-            net_file.write('matrix_of_pm_1 = 2 * (torch.randint(low = 0, high=2, size =prior_mat.shape)-0.5)\n')
-            net_file.write('prior_mat = prior_mat * matrix_of_pm_1')
-            net_file.write('\n')    
-        net_file.write('lambda at start (first 5 epochs) = {}'.format(loss_lambda_at_start))
+        net_file.write('lambda at start (first {} epochs) = {}'.format(curriculum_epochs_1, loss_lambda_at_start))
+        net_file.write('\n')
+        net_file.write('lambda in middle (upto {} epochs) = {}'.format(curriculum_epochs_2, loss_lambda_at_middle))
         net_file.write('\n')
         net_file.write('and then lambda = {}'.format(loss_lambda_at_end))
+        net_file.write('\n')
+        #net_file.write('SPECIAL SOFTSIGN-transformed inputs to prior!')
+        
         
 
     #quit()
@@ -330,13 +334,13 @@ if __name__ == "__main__":
 
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, mode='min', 
-    factor=0.9, patience=3, threshold=1e-09, 
+    factor=0.9, patience=6, threshold=1e-07, 
     threshold_mode='abs', cooldown=0, min_lr=0, eps=1e-09, verbose=True)
 
     
     # Init plot
     if settings['viz']:
-        visualizer = Visualizator1D(data_handler, odenet, settings)
+        visualizer = Visualizator1D(data_handler, odenet, settings, my_range_tuple = (0, 20))
 
     # Training loop
     #batch_times = [] 
@@ -367,7 +371,7 @@ if __name__ == "__main__":
     
     tot_epochs = settings['epochs']
     #viz_epochs = [round(tot_epochs*1/5), round(tot_epochs*2/5), round(tot_epochs*3/5), round(tot_epochs*4/5),tot_epochs]
-    rep_epochs = [1, 5, 7, 10, 15, 25, 30, 40, 50, 60, 70, 80, 100, 120, 150, 180, 200,220, 240, 300, 350, tot_epochs]
+    rep_epochs = [1, 5, 7, 10, 15, 20, 30, 40, 50, 75, 90, 100, 120, 150, 180, 200, tot_epochs]
     viz_epochs = rep_epochs
     zeroth_drop_done = False
     first_drop_done = False 
@@ -394,7 +398,13 @@ if __name__ == "__main__":
         print()
         print("[Running epoch {}/{}]".format(epoch, settings['epochs']))
 
-
+        
+        if epoch < curriculum_epochs_1:
+            loss_lambda = loss_lambda_at_start 
+        elif epoch >= curriculum_epochs_1 and epoch < curriculum_epochs_2:
+            loss_lambda = loss_lambda_at_middle
+        else:
+            loss_lambda = loss_lambda_at_end    
         print("current loss_lambda =", loss_lambda)
         
         
@@ -478,8 +488,8 @@ if __name__ == "__main__":
 
         print("Overall training loss {:.5E}".format(train_loss))
 
-        print("Noiseless test traj (pairwise) MSE: {:.5E}".format(mu_loss[1]))
-        print("Noiseless test traj (pairwise) R^2: {:.2%}".format(mu_loss[0]))
+        print("True MSE of val traj (pairwise): {:.5E}".format(mu_loss[1]))
+        print("True R^2 of val traj (pairwise): {:.2%}".format(mu_loss[0]))
 
             
         if (settings['viz'] and epoch in viz_epochs) or (settings['viz'] and epoch in rep_epochs) or (consec_epochs_failed == epochs_to_fail_to_terminate):
@@ -545,7 +555,7 @@ if __name__ == "__main__":
             
             print("Saving best intermediate val model..")
             interm_model_file_name = 'trained_model_epoch_' + str(epoch)
-            #save_model(odenet, interm_models_save_dir , interm_model_file_name)
+            save_model(odenet, interm_models_save_dir , interm_model_file_name)
                 
             
             #else:
