@@ -57,6 +57,9 @@ write.table( full_data,
              col.names = FALSE,
              na = "")
 
-
-
-
+#Now store gene names 
+full_names <- fread("C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/pramila3551_gene_names.csv")
+full_names <- full_names[high_var_genes, ]
+write.csv(full_names, 
+          "C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/pramila500_gene_names.csv", 
+          row.names = F)
