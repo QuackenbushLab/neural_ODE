@@ -1,5 +1,5 @@
 library(data.table)
-D <- fread("C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/clean_data/pramila_500genes_1sample_24T.csv")
+D <- fread("C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/clean_data/pramila_3551genes_1sample_24T.csv")
 
 top_row <- D[1, ]
 time_row <- D[.N, ]
@@ -34,7 +34,7 @@ derivs <- data.table(derivs)
 derivs <- rbind(top_row, derivs, time_row)
 
 write.table(derivs,
-            "C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/clean_data/pramila_500genes_1sample_24T_DERIVATIVES.csv", 
+            "C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/clean_data/pramila_3551genes_1sample_24T_DERIVATIVES.csv", 
             sep=",",
             row.names = FALSE,
             col.names = FALSE,

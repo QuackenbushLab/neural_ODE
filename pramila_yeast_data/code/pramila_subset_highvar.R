@@ -50,12 +50,14 @@ write.table( full_data,
 full_prior <- as.matrix(fread("C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/clean_data/edge_prior_matrix_pramila_3551.csv"))
 full_prior <- full_prior[high_var_genes, ]
 full_prior <- full_prior[, high_var_genes]
-write.table( full_data,
+write.table( full_prior,
              "C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/clean_data/edge_prior_matrix_pramila_500.csv", 
              sep=",",
              row.names = FALSE,
              col.names = FALSE,
              na = "")
+
+
 
 #Now store gene names 
 full_names <- fread("C:/STUDIES/RESEARCH/neural_ODE/pramila_yeast_data/pramila3551_gene_names.csv")
