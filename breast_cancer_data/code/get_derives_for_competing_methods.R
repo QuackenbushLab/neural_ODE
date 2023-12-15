@@ -1,5 +1,5 @@
 library(data.table)
-D <- fread("C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_500genes_1sample_186T.csv")
+D <- fread("C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_11165genes_1sample_186T.csv")
 top_row <- D[1, ]
 time_row <- D[.N, ]
 D <- D[-c(1, .N), ]
@@ -34,7 +34,7 @@ derivs <- rbind(top_row, derivs, time_row)
 
 
 write.table(derivs,
-            "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_500genes_1sample_186T_DERIVATIVES.csv", 
+            "C:/STUDIES/RESEARCH/neural_ODE/breast_cancer_data/clean_data/desmedt_11165genes_1sample_186T_DERIVATIVES.csv", 
             sep=",",
             row.names = FALSE,
             col.names = FALSE,
