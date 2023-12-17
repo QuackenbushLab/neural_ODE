@@ -18,13 +18,16 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 import numpy as np
 import torch
+import random
+
+
 
 import warnings
 from torch.serialization import SourceChangeWarning
 warnings.filterwarnings("ignore", category=SourceChangeWarning)
 
 if __name__ == "__main__":
-
+    
     sys.setrecursionlimit(3000)
     print('Loading settings from file {}'.format('val_config_inte.cfg'))
     settings = read_arguments_from_file('val_config_inte.cfg')
@@ -37,7 +40,7 @@ if __name__ == "__main__":
     neuron_dict = {"sim350": 40, "sim690": 50}
     data_letters = {"sim350": "A", "sim690": "B"}
     models = ["phoenix"]
-    datasets = ["sim350", "sim690"]
+    datasets = ["sim690", "sim690"] # 
     noises = [0, 0.025, 0.05, 0.1]
     perf_info = {}
     for this_data in datasets:
@@ -52,14 +55,14 @@ if __name__ == "__main__":
     
     perf_csv = csv.DictReader(open('C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/perf_plotting.csv', 'r'))
     for line in perf_csv: 
-        if line['model'] in models and float(line['noise']) in noises:
+        if line['model'] in models and float(line['noise']) in noises and line['dataset'].lower() in datasets:
             perf_info[line['dataset'].lower()][line['model']][float(line['noise'])]['true_val_MSE_1'] = float(line['true_val_MSE_1'])
 
     
-    gene_name_350 = csv.DictReader(open('C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/gene_names_350.csv', 'r'))
-    gene_name_list_350 = []
-    for line in gene_name_350:
-        gene_name_list_350.append(line)
+    gene_name_690 = csv.DictReader(open('C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/gene_names_690.csv', 'r'))
+    gene_name_list_690 = []
+    for line in gene_name_690:
+        gene_name_list_690.append(line)
     
     dir_350 = 'C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_350genes_150samples_earlyT_0bimod_1initvar.csv'
     dir_690 = 'C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/chalmers_690genes_150samples_earlyT_0bimod_1initvar.csv'
@@ -91,10 +94,10 @@ if __name__ == "__main__":
     border_width = 1.5
     tick_lab_size = 11
     ax_lab_size = 15
-    gene_to_plot_dict = {"sim350": [4, 136, 200,  213], "sim690": [20, 100, 275, 301]} #[] 
+    gene_to_plot_dict = {"sim350": [9, 45, 33, 49], "sim690": [9, 45, 33, 49]} #, 46, 47,
     colors = ['darkorange','deeppink','darkorchid', 'limegreen']
     leg_350 = [Patch(facecolor=this_col, edgecolor='black',
-                         label= gene_name_list_350[this_gene]['x'].replace("_input","",1)) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim350'])]
+                         label= gene_name_list_690[this_gene]['x'].replace("_input","",1)) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim350'])]
     leg_690 = [Patch(facecolor=this_col, edgecolor='black',
                          label= this_gene) for this_col,this_gene in zip(colors, gene_to_plot_dict['sim690'])]
     
@@ -106,8 +109,9 @@ if __name__ == "__main__":
     #plt.margins(x = 0.0, y = 0.0)
     
     print("......")
-    
+    row_num = -1
     for this_data in datasets:
+        row_num +=1 
         this_data_handler = datahandler_dict[this_data]
         this_neurons = neuron_dict[this_data]
         genes = gene_to_plot_dict[this_data]
@@ -123,14 +127,18 @@ if __name__ == "__main__":
                 pretrained_model_file = 'C:/STUDIES/RESEARCH/neural_ODE/all_manuscript_models/{}/{}/{}/best_val_model.pt'.format(this_data, this_model, noise_string)
                 this_odenet.load(pretrained_model_file)
 
+                if row_num ==2:
+                    print(this_odenet.gene_multipliers)
+
+                
                 trajectories, all_plotted_samples, extrap_timepoints = this_data_handler.calculate_trajectory(this_odenet, 'dopri5', num_val_trajs = 1, 
-                                                                                                              fixed_traj_idx = [5], time_span = (0, 10))
+                                                                                                              fixed_traj_idx = [1], time_span = (0, 10))
 
                 times = this_data_handler.time_np
                 data_np_to_plot = [this_data_handler.data_np[i] for i in all_plotted_samples]
                 data_np_0noise_to_plot = [this_data_handler.data_np_0noise[i] for i in all_plotted_samples]
                 
-                row_num = datasets.index(this_data)
+                #row_num = datasets.index(this_data)
                 this_row_plots = axes_traj_split[row_num]
                 col_num = noises.index(this_noise)
                 ax = this_row_plots[col_num]
@@ -152,6 +160,7 @@ if __name__ == "__main__":
                              color = this_col, linestyle = "--", lw=2, label = "prediction") #times[sample_idx].flatten()[0:] 
                             
                             noisy_traj =  traj[:,:,gene].flatten()
+                            np.random.seed(10)
                             noisy_traj[1:5] += np.random.normal(0,this_noise,4)
                             observed_times = times[sample_idx].flatten()
                             ax.plot(observed_times, noisy_traj,    
@@ -176,5 +185,5 @@ if __name__ == "__main__":
     #fig_traj_split.legend(handles = leg_690, loc='lower right', prop={'size': 15})
     #fig_traj_split.add_artist(temp_leg)
     #fig_traj_split.tight_layout()
-    fig_traj_split.savefig('{}/manuscript_fig_temp_perf_rebuttal.png'.format(output_root_dir), bbox_inches='tight')
+    fig_traj_split.savefig('{}/manuscript_fig_multiplier_1_rebuttal.png'.format(output_root_dir), bbox_inches='tight')
     

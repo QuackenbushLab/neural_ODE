@@ -47,15 +47,13 @@ if __name__ == "__main__":
     neuron_dict = {"sim350": 40, "sim690": 50}
     models = ["phoenix_noprior", "phoenix"]
     datasets = ["sim350"]
-    noises = [0,0.025, 0.05, 0.1]
+    noises = [0,0.025, 0.1, 0.4]
     
     
     datahandler_dim = {"sim350": 350}
     model_labels = {"phoenix":"PHOENIX", 
                     "phoenix_noprior" :"Unregularized PHOENIX (no prior)"} 
-    model_mults = {"phoenix":0.30, 
-                    "phoenix_noprior" :0.30}
-
+    
     SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")    
     #Plotting setup
     #plt.xticks(fontsize=10)
@@ -68,6 +66,7 @@ if __name__ == "__main__":
     border_width = 1.5
     tick_lab_size = 12
     ax_lab_size = 15
+    color_mult = 0.26 #0.25
     
     plt.grid(True)
     
@@ -102,13 +101,10 @@ if __name__ == "__main__":
 
                 y, x = np.meshgrid(np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]), np.linspace(1, datahandler_dim[this_data], datahandler_dim[this_data]))
                 z = np.matmul(Wo_sums, alpha_comb[0:this_neurons,]) + np.matmul(Wo_prods, alpha_comb[this_neurons:(2*this_neurons),])    
-                #z = z* gene_mult.reshape(1, -1) 
-                #make_mask(z)
-                #print(np.diag(z))
+                z = z* gene_mult.reshape(1, -1) 
                 row_sums =  np.abs(z).sum(axis=1)
                 z = z / row_sums[:, np.newaxis]
 
-                color_mult = model_mults[this_model] #0.25
                 z_min, z_max = color_mult*-np.abs(z).max(), color_mult*np.abs(z).max()
                 c = ax.pcolormesh(x, y, z, cmap='RdBu', vmin=z_min, vmax=z_max) 
                 ax.axis([x.min(), x.max(), y.min(), y.max()]) 
@@ -132,12 +128,12 @@ if __name__ == "__main__":
                  
     cbar =  fig_heat_sparse.colorbar(c, ax=axes_heat_sparse.ravel().tolist(), 
                                         shrink=0.95, orientation = "horizontal", pad = 0.05)
-    cbar.set_ticks([0, 0.03, -0.03])
+    cbar.set_ticks([0, 0.006, -0.006])
     cbar.set_ticklabels(['None', 'Activating', 'Repressive'])
     cbar.ax.tick_params(labelsize = tick_lab_size+3) 
     cbar.set_label(r'$\widetilde{D_{ij}}$= '+'Estimated effect of '+ r'$g_j$'+ ' on ' +r"$\frac{dg_i}{dt}$" +' in SIM350', size = ax_lab_size)
     cbar.outline.set_linewidth(2)
 
     
-    fig_heat_sparse.savefig('{}/manuscript_fig_heat_sparse.png'.format(output_root_dir), bbox_inches='tight')
+    fig_heat_sparse.savefig('{}/manuscript_fig_heat_sparse_rebuttal.png'.format(output_root_dir), bbox_inches='tight')
     

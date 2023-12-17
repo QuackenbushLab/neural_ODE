@@ -20,10 +20,11 @@ if __name__ == "__main__":
         os.makedirs(output_root_dir, exist_ok=True)
     
     neuron_dict = {"sim350": 40, "sim690": 50}
+    data_letters = {"sim350": "A", "sim690": "B"}
     num_gene_dict = {"sim350": 350, "sim690": 690}
     models = ["phoenix", "phoenix_noprior", "ootb_tanh"]
     datasets = ["sim350", "sim690"]
-    noises = [0, 0.025, 0.05, 0.1]
+    noises = [0, 0.025, 0.05, 0.1] #
     perf_info = {}
     metrics = ['opt_TP', 'causal_AUC','opt_TN', 'sparse_out_deg_cor', 'opt_avg_degree' ]
     metric_labels = {'opt_TP':r'$\rm{TPR}_{\max}$', 'causal_AUC':'AUC','opt_TN':r'$\rm{TNR}_{\max}$',
@@ -96,12 +97,13 @@ if __name__ == "__main__":
                 ax.fill(label_loc, radar_data, facecolor= model_colors[this_model], alpha=model_alphas[this_model])
                 ax.set_thetagrids(angles = np.degrees(label_loc), 
                                     labels=[metric_labels[this_metric] for this_metric in plot_metrics])
+                data_letter = data_letters[this_data]
                 if col_num == 0:
-                    ax.set_ylabel('{}'.format(this_data.upper()), fontsize=ax_lab_size + 5)
+                    ax.set_ylabel('({}) {}'.format(data_letter, this_data.upper()), fontsize=ax_lab_size + 5)
                 if row_num == 0:
                     this_title = "Noise level = {:.0%}".format(this_noise/0.5) 
                     ax.set_title(this_title, fontsize = ax_lab_size, pad = 15)    
     
     fig_auc_perfs.legend(handles = leg_general_info, loc='lower center', prop={'size': 15}, ncol = 4)
-    fig_auc_perfs.savefig('{}/manuscript_fig_auc_perf.png'.format(output_root_dir), bbox_inches='tight')
+    fig_auc_perfs.savefig('{}/manuscript_fig_auc_perf_rebuttal.png'.format(output_root_dir), bbox_inches='tight')
     

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     models = ["phoenix","phoenix_noprior", "ootb_tanh",
                 "ootb_relu","ootb_sigmoid"]
     datasets = ["sim350", "sim690"]
-    noises = [0, 0.1]
+    noises = [0, 0.1, 0.4]
     perf_info = {}
     metrics = ['true_val_MSE_1', 'true_val_MSE_2', 'true_val_MSE_3', 'true_val_MSE_4','true_val_MSE_5']
     model_colors = {"phoenix":"dodgerblue", "phoenix_noprior" :"red", 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                 perf_info[line['dataset'].lower()][line['model']][float(line['noise'])][this_metric] = float(line[this_metric])
 
     #Plotting setup
-    fig_ootb_mse = plt.figure(figsize=(13,7.7))
+    fig_ootb_mse = plt.figure(figsize=(18,11))
     #plt.grid(visible = True)
     axes_ootb_mse = fig_ootb_mse.subplots(ncols= len(datasets),nrows = 1,  
     sharex=False, sharey=False, 
@@ -77,9 +77,9 @@ if __name__ == "__main__":
             ax.spines['left'].set_linewidth(border_width)
             ax.spines['top'].set_linewidth(border_width)
             ax.spines['right'].set_linewidth(border_width)
-            ax.set_xlim((6*10**-4,5*10**-3))
+            ax.set_xlim((6.5*10**-4,6.2*10**-3))
             ax.set_yticks(ind)
-            ax.set_yticklabels(['No noise', 'High (20%) noise'], rotation=90, va = "center")
+            ax.set_yticklabels(['0% noise', '20% noise', '80% noise'], rotation=90, va = "center")
             ax.tick_params(axis='x', labelsize= tick_lab_size)
             ax.tick_params(axis='y', labelsize= 17)
             
@@ -102,5 +102,5 @@ if __name__ == "__main__":
     
     fig_ootb_mse.legend(handles = leg_general_info, loc='upper center', prop={'size': 16}, 
                         ncol = 3,  handleheight=1.5, frameon = False)
-    fig_ootb_mse.savefig('{}/manuscript_fig_ootb_mse.png'.format(output_root_dir), bbox_inches='tight')
+    fig_ootb_mse.savefig('{}/manuscript_fig_ootb_mse_rebuttal.png'.format(output_root_dir), bbox_inches='tight')
     
