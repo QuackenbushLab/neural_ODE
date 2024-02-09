@@ -4,7 +4,7 @@ library(PRROC)
 edges <- fread("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties_350.csv")
 edges <- edges[, .(from, to, activation, EC50, n)]
 
-withhold_perc <- 0.50
+withhold_perc <- 0.75
 num_rows_to_change <- round(nrow(edges) * withhold_perc)
 rows_to_change <- sample(1:nrow(edges), num_rows_to_change)
 # Update the selected rows in the to_withhold column to FALSE
