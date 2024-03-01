@@ -1,10 +1,10 @@
 library(data.table)
 library(PRROC)
 
-edges <- fread("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties_350.csv")
+edges <- fread("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/edge_properties_690.csv")
 edges <- edges[, .(from, to, activation, EC50, n)]
 
-withhold_perc <- 0.75
+withhold_perc <- 0.05
 num_rows_to_change <- round(nrow(edges) * withhold_perc)
 rows_to_change <- sample(1:nrow(edges), num_rows_to_change)
 # Update the selected rows in the to_withhold column to FALSE
@@ -13,13 +13,13 @@ edges[rows_to_change, to_withhold := TRUE]
 
 
 write.csv(edges[to_withhold == TRUE],
-          paste0("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/prior_edges_350_withheld_", withhold_perc, ".csv"),
+          paste0("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/prior_edges_690_withheld_", withhold_perc, ".csv"),
           row.names = F)
 
 edges <- edges[to_withhold == FALSE, ]
 edges[, to_withhold := NULL]
 
-genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/gene_names_350.csv")
+genes <- fread("C:/STUDIES/RESEARCH/neural_ODE/ground_truth_simulator/clean_data/gene_names_690.csv")
 genes[ ,x:= gsub("_input","",x)]
 genes[, gene_sl := .I]
 
@@ -95,7 +95,7 @@ edges[,
       update_edge_mat(edge_mat,from, to, activation, EC50, n), 
       by= .(from, to)]
 
-prior_name <- paste0("edge_prior_matrix_chalmers_350_noise_",
+prior_name <- paste0("edge_prior_matrix_chalmers_690_noise_",
                      noise,
                      "_withhold_",
                      withhold_perc,
